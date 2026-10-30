@@ -492,7 +492,7 @@ function copyText(text,btn){
 
 /* ============ DESENHO ============ */
 function renderChrome(){
-  var showDays=(state.tab==="hoje"||state.tab==="gravar");
+  var showDays=(state.tab==="gravar"||(state.tab==="hoje"&&state.hmode==="plano"));
   $("#days").hidden=!showDays;
   if(showDays)$("#days").innerHTML=DAYS.map(function(d){
     var p=dayProgress(d),full=p.n===p.t&&!isRest(d);
@@ -510,6 +510,7 @@ function ringSvg(p){var c=2*Math.PI*34,off=c*(1-p/100);return '<div class="ring"
 function chk(id,text){return '<div class="row'+(state.checks[id]?' chkd':'')+'"><input type="checkbox" id="c-'+id+'" data-chk="'+id+'"'+(state.checks[id]?' checked':'')+'><label for="c-'+id+'">'+esc(text)+'</label></div>'}
 
 function renderHoje(){
+  if((state.hmode||"meu")==="meu"){renderMeuDia();return}
   var d=dayById(state.sel),p=dayProgress(d),pc=Math.round(p.n/p.t*100);
   var needsDone=d.needs.filter(function(_,k){return state.checks[d.id+"-n"+k]}).length;
   var h='<div class="stack">';
@@ -739,7 +740,8 @@ function render(){
 
 function addSeg(){
   var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
-  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-tab="hoje" aria-pressed="'+(t==="hoje")+'">O dia</button><button data-tab="gravar" aria-pressed="'+(t==="gravar")+'">Gravar agora</button></div>');
+  var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
+  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm==="meu")+'">Meu dia</button><button data-hm="plano" aria-pressed="'+pr(t==="hoje"&&hm==="plano")+'">Plano</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button></div>');
 }
 function addHero(){
   var t=state.tab,H=null;
@@ -1732,6 +1734,116 @@ document.addEventListener("change",async function(e){
 
 
 
+
+/* ============ MEU DIA ============ */
+var MD={items:[]},MDUI={date:"",edit:null,add:false,msg:"",f:{t:"",tipo:"gravar",quem:"Mari",parc:"",ini:"",fim:"",d:""}};
+var MDT=[["assessoria","A assessoria precisa de você"],["gravar","Gravar"],["postar","Postar"],["enviar","Enviar ou aprovar"]],MDQ=["Mari","Assessoria","Editora","Marca"];
+var MDET={e2:["enviar","Abra o roteiro no painel da parceria e confira o que está em [PREENCHER].","Envie à marca e marque “Enviado à marca” no painel."],e4:["gravar","Releia o roteiro e separe cenário, luz e o que vai aparecer na tela.","Mande os arquivos brutos para a editora com o guia de captação."],e5:["enviar","Veja se o vídeo segue o roteiro aprovado.","Envie à marca e anote a data do envio."],e7:["postar","Confira selo de parceria paga, #publi, cupom e link.","Poste e salve os prints do resultado."],e8:["enviar","Junte os prints de alcance, interações e cliques.","Envie o relatório à marca."],e9:["enviar","Reúna os dados da nota do modelo de documento.","Emita a nota e envie à marca."]};
+function mdLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-tasks")||"[]");MD.items=Array.isArray(j)?j:[]}catch(e){MD.items=[]}}
+function mdLocal(){try{localStorage.setItem("hoje-tasks",JSON.stringify(MD.items))}catch(e){}}
+function mdPut(it){it.at=Date.now();mdLocal();if(C.tasks)C.tasks.doc(it.id).set({json:JSON.stringify(it),at:it.at}).then(function(){setSync("Dia salvo para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function mdGet(id){return MD.items.filter(function(x){return x.id===id})[0]}
+function mdNew(o){var it={id:"t"+Date.now()+Math.floor(Math.random()*10000),t:"",tipo:"gravar",d:"",hora:"",parc:"",quem:"Mari",ini:"",fim:"",nota:"",st:"pendente",at:Date.now()};for(var k in o)it[k]=o[k];return it}
+function mdSeed(){
+  try{if(localStorage.getItem("hoje-tasks-seeded"))return;localStorage.setItem("hoje-tasks-seeded","1")}catch(e){return}
+  if(MD.items.length)return;var t0=isoToday();
+  DAYS.forEach(function(d){
+    if(d.date<t0||isRest(d))return;
+    (d.needs||[]).forEach(function(n,k){MD.items.push(mdNew({id:"tks-"+d.id+"-n"+k,t:n,tipo:"assessoria",d:d.date}))});
+    if(d.feed&&d.feed.title)MD.items.push(mdNew({id:"tks-"+d.id+"-f",t:(d.feed.kind?d.feed.kind+": ":"")+d.feed.title,tipo:"postar",d:d.date,ini:d.start||"",fim:d.finish||""}));
+  });
+  mdLocal();
+}
+function mdFmt(iso){return new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}
+function mdItem(it){
+  var p=it.parc?parcGet(it.parc):null,done=it.st==="feito",tl=(MDT.filter(function(x){return x[0]===it.tipo})[0]||[0,"Tarefa"])[1];
+  var h='<div class="item'+(done?' done':'')+'" data-mdid="'+it.id+'"><div class="row"><div class="txt"><span class="tag">'+esc(it.tipo==="assessoria"?"Pedido":tl)+'</span>'+(it.quem!=="Mari"?'<span class="tag m">'+esc(it.quem)+'</span>':'')+(p?'<span class="tag l">'+esc(p.marca)+'</span>':'')+'<br><b>'+esc(it.t)+'</b>'+(it.hora?' · '+esc(it.hora):'')+'</div></div>';
+  if(!done){if(it.ini)h+='<p class="note" style="margin:6px 14px"><b>Começar:</b> '+esc(it.ini)+'</p>';if(it.fim)h+='<p class="note" style="margin:6px 14px"><b>Terminar:</b> '+esc(it.fim)+'</p>';if(it.nota)h+='<p class="note" style="margin:6px 14px">'+esc(it.nota)+'</p>'}
+  h+='<div class="meta" style="flex-wrap:wrap;gap:6px">';
+  if(!it.d)h+='<button class="btn small" data-mdb="hoje">Fazer hoje</button><button class="btn small ghost" data-mdb="amanha">Amanhã</button>';
+  else h+=done?'<button class="btn small ghost" data-mdb="undo">Desfazer</button>':'<button class="btn small" data-mdb="done">Feito</button><button class="btn small ghost" data-mdb="amanha">Adiar para amanhã</button>';
+  h+='<button class="btn small ghost" data-mdb="edit">'+(MDUI.edit===it.id?'Fechar':'Editar')+'</button>'+(p?'<button class="btn small ghost" data-mdb="painel">Abrir parceria</button>':'')+'</div>';
+  if(MDUI.edit===it.id){
+    h+='<div class="card" style="background:var(--bg)"><label class="lab">O que é<input type="text" data-mdf="t" value="'+esc(it.t)+'"></label>'
+     +'<div class="fields"><label>Tipo<select data-mdf="tipo">'+MDT.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===it.tipo?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label><label>Quem faz<select data-mdf="quem">'+MDQ.map(function(x){return '<option'+(x===it.quem?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
+     +'<div class="fields"><label>Dia (vazio = Entrada)<input type="date" data-mdf="d" value="'+esc(it.d)+'"></label><label>Horário<input type="text" data-mdf="hora" value="'+esc(it.hora)+'" placeholder="Ex.: 18h"></label></div>'
+     +'<label class="lab">Parceria<select data-mdf="parc"><option value="">Nenhuma</option>'+PARC.items.map(function(x){return '<option value="'+x.id+'"'+(x.id===it.parc?' selected':'')+'>'+esc(parcTitle(x))+'</option>'}).join('')+'</select></label>'
+     +'<label class="lab">Como começar<textarea data-mdf="ini" style="min-height:60px">'+esc(it.ini)+'</textarea></label><label class="lab">Como terminar<textarea data-mdf="fim" style="min-height:60px">'+esc(it.fim)+'</textarea></label><label class="lab">Anotação<textarea data-mdf="nota" style="min-height:60px">'+esc(it.nota)+'</textarea></label>'
+     +'<div class="btns"><button class="btn ghost small" data-mdb="cancel">Cancelar tarefa</button><button class="btn ghost small" data-mdb="del">Apagar</button></div></div>';
+  }
+  return h+'</div>';
+}
+function mdHtml(){
+  var today=isoToday();if(!MDUI.date)MDUI.date=today;var D=MDUI.date;
+  var live=MD.items.filter(function(x){return x.st!=="cancelado"});
+  var dia=live.filter(function(x){return x.d===D}),ent=live.filter(function(x){return !x.d&&x.st==="pendente"});
+  var atr=D===today?live.filter(function(x){return x.d&&x.d<today&&x.st==="pendente"}):[];
+  var mine=dia.filter(function(x){return x.quem==="Mari"}),oth=dia.filter(function(x){return x.quem!=="Mari"});
+  var h='<div class="btns" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,-1)+'" aria-label="Dia anterior">‹</button><div style="text-align:center"><h2 style="margin:0">'+esc(mdFmt(D).replace(/^./,function(c){return c.toUpperCase()}).replace("-feira","-feira"))+'</h2>'+(D!==today?'<button class="btn ghost small" data-mdb="dia" data-d="'+today+'">Voltar para hoje</button>':'<span class="note">Hoje</span>')+'</div><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,1)+'" aria-label="Próximo dia">›</button></div>';
+  h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
+  if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
+  var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
+  if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
+  if(pend>3)h+='<div class="alert"><b>Dia cheio</b>São '+pend+' coisas para você. O combinado é no máximo 3: use “Adiar para amanhã” no que puder esperar.</div>';
+  if(ent.length)h+='<div class="block"><h3>Entrada ('+ent.length+')</h3><p class="note">Chegou e ainda não tem dia. Escolha quando fazer.</p>'+ent.map(mdItem).join('')+'</div>';
+  if(atr.length)h+='<div class="block"><h3>Atrasado ('+atr.length+')</h3>'+atr.map(mdItem).join('')+'</div>';
+  MDT.forEach(function(t){var l=mine.filter(function(x){return x.tipo===t[0]});if(l.length)h+='<div class="block"><h3>'+t[1]+'</h3>'+l.map(mdItem).join('')+'</div>'});
+  if(oth.length)h+='<div class="block"><h3>Aguardando outras pessoas</h3>'+oth.map(mdItem).join('')+'</div>';
+  if(!dia.length&&!atr.length&&!ent.length)h+='<div class="card"><p class="sub">Nada marcado para este dia. Adicione abaixo ou escolha outro dia.</p></div>';
+  var f=MDUI.f;
+  h+=MDUI.add?'<div class="card"><h3>Nova tarefa</h3><label class="lab">O que é<input type="text" id="md-t" value="'+esc(f.t)+'" placeholder="Ex.: gravar o reels da Bling"></label>'
+    +'<div class="fields"><label>Tipo<select id="md-tipo">'+MDT.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===f.tipo?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label><label>Quem faz<select id="md-quem">'+MDQ.map(function(x){return '<option'+(x===f.quem?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
+    +'<div class="fields"><label>Dia (vazio = Entrada)<input type="date" id="md-d" value="'+esc(f.d||D)+'"></label><label>Parceria<select id="md-parc"><option value="">Nenhuma</option>'+PARC.items.map(function(x){return '<option value="'+x.id+'">'+esc(parcTitle(x))+'</option>'}).join('')+'</select></label></div>'
+    +'<label class="lab">Como começar<textarea id="md-ini" style="min-height:56px">'+esc(f.ini)+'</textarea></label><label class="lab">Como terminar<textarea id="md-fim" style="min-height:56px">'+esc(f.fim)+'</textarea></label>'
+    +'<div class="btns"><button class="btn" data-mdb="add">Adicionar</button><button class="btn ghost small" data-mdb="addclose">Fechar</button></div></div>'
+   :'<div class="btns"><button class="btn" data-mdb="addopen">Nova tarefa</button></div>';
+  return h;
+}
+function renderMeuDia(){$("#view").innerHTML='<div class="stack">'+mdHtml()+'</div>'}
+document.addEventListener("click",function(e){
+  var hm=e.target.closest&&e.target.closest("[data-hm]");
+  if(hm){state.hmode=hm.dataset.hm;state.tab="hoje";render();window.scrollTo(0,0);return}
+  var b=e.target.closest&&e.target.closest("[data-mdb]");if(!b)return;
+  var a=b.dataset.mdb,row=b.closest("[data-mdid]"),it=row?mdGet(row.dataset.mdid):null,today=isoToday();
+  MDUI.msg="";
+  if(a==="dia"){MDUI.date=b.dataset.d;render();return}
+  if(a==="addopen"){MDUI.add=true;render();return}
+  if(a==="addclose"){MDUI.add=false;render();return}
+  if(a==="add"){
+    var t=$("#md-t").value.trim();if(!t){MDUI.msg="Escreva o que é.";render();return}
+    var n=mdNew({t:t,tipo:$("#md-tipo").value,quem:$("#md-quem").value,d:$("#md-d").value,parc:$("#md-parc").value,ini:$("#md-ini").value.trim(),fim:$("#md-fim").value.trim()});
+    MD.items.push(n);mdPut(n);MDUI.f={t:"",tipo:"gravar",quem:"Mari",parc:"",ini:"",fim:"",d:""};MDUI.add=false;MDUI.msg=n.d?"Adicionada em "+n.d.split("-").reverse().slice(0,2).join("/")+".":"Foi para a Entrada.";render();return;
+  }
+  if(!it)return;
+  if(a==="done"){it.st="feito";mdPut(it);render()}
+  else if(a==="undo"){it.st="pendente";mdPut(it);render()}
+  else if(a==="hoje"){it.d=today;mdPut(it);MDUI.date=today;render()}
+  else if(a==="amanha"){var base=it.d&&it.d>today?it.d:today;it.d=addDays(base,1);it.st="pendente";mdPut(it);MDUI.msg="Movida para "+it.d.split("-").reverse().slice(0,2).join("/")+".";render()}
+  else if(a==="edit"){MDUI.edit=MDUI.edit===it.id?null:it.id;render()}
+  else if(a==="cancel"){it.st="cancelado";mdPut(it);MDUI.edit=null;render()}
+  else if(a==="del"){MD.items=MD.items.filter(function(x){return x.id!==it.id});mdLocal();if(C.tasks)C.tasks.doc(it.id).set({del:true,at:Date.now()});MDUI.edit=null;render()}
+  else if(a==="painel"){if(parcGet(it.parc)){PCUI.open=it.parc;state.tab="pub";state.pub="parc";render();window.scrollTo(0,0)}}
+});
+document.addEventListener("change",function(e){
+  var el=e.target;if(!el.dataset||!el.dataset.mdf)return;
+  var row=el.closest("[data-mdid]"),it=row?mdGet(row.dataset.mdid):null;if(!it)return;
+  var f=el.dataset.mdf;it[f]=el.value;mdPut(it);
+  if(f==="d"||f==="tipo"||f==="quem"||f==="parc")render();
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-pcb=plan]");if(!b)return;
+  var p=PCUI.open?parcGet(PCUI.open):null;if(!p)return;
+  if(!p.post){PCUI.msg="Escolha a data de postagem prevista para criar as tarefas.";render();return}
+  var dts=etapaDates({d:p.post}),n=0,ex={};
+  MD.items.forEach(function(x){if(x.src)ex[x.src]=1});
+  cfg().etapas.forEach(function(et){
+    if(et.quem!=="Mari"||!dts[et.id])return;var src="pc:"+p.id+":"+et.id;if(ex[src])return;
+    var m=MDET[et.id]||["enviar","",""];
+    var it=mdNew({t:parcTitle(p)+" · "+et.label,tipo:m[0],d:dts[et.id],parc:p.id,ini:m[1],fim:m[2],src:src});MD.items.push(it);mdPut(it);n++;
+  });
+  PCUI.msg=n?n+" tarefa(s) criadas em “Meu dia”, nas datas combinadas.":"As tarefas desta parceria já estão criadas.";render();
+});
+
 /* ============ PAINEL DA PARCERIA ============ */
 var PARC={items:[]},PCUI={open:null,confDel:false,busy:"",msg:"",bt:"",bx:"",nm:"",mc:""};
 var PCST=["Prospecção","Negociando","Fechada","Em produção","Entregue","Encerrada"],PCROS=["Rascunho","Enviado à marca","Aprovado","Postado"];
@@ -1773,7 +1885,7 @@ function pubParc(){
   if(PCUI.msg)h+='<div class="draft">'+esc(PCUI.msg)+'</div>';
   h+='<div class="card"><h3>Dados</h3><div class="fields"><label>Nome<input type="text" data-pcf="nome" value="'+esc(p.nome)+'"></label><label>Status<select data-pcf="status">'+PCST.map(function(x){return '<option'+(x===p.status?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields"><label>Postagem prevista<input type="date" data-pcf="post" value="'+esc(p.post)+'"></label><label>Contato na marca<input type="text" data-pcf="contato" value="'+esc(p.contato)+'" placeholder="Nome e canal"></label></div>'
-   +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'</div>';
+   +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'<div class="btns"><button class="btn small" data-pcb="plan">Criar tarefas nos dias</button></div><p class="note">Cria em “Meu dia” cada passo seu, nas datas combinadas a partir da data de postagem.</p></div>';
   h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais na hora de escrever. Não cole briefing que a marca pediu para manter em sigilo.</p>'
    +'<label class="lab">Título<input type="text" id="pc-bt" value="'+esc(PCUI.bt)+'" placeholder="Ex.: Briefing inicial, ajuste de 05/11"></label>'
    +'<label class="lab">Texto do briefing<textarea id="pc-bx" style="min-height:120px" placeholder="Cole aqui...">'+esc(PCUI.bx)+'</textarea></label><div class="btns"><button class="btn small" data-pcb="addbrief">Guardar briefing</button></div>';
@@ -1969,7 +2081,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-loadLocal();brLoad();brSeed();parcLoad();state.sel=pickDay();render();
+loadLocal();brLoad();brSeed();parcLoad();mdLoad();mdSeed();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
@@ -1978,7 +2090,7 @@ function listen(name,apply){
   try{
     if(!window.claude||!window.claude.use)return;
     var db=await window.claude.use("db");if(!db)return;
-    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts","brain","parc"].forEach(function(n){C[n]=db.collection(n)});
+    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts","brain","parc","tasks"].forEach(function(n){C[n]=db.collection(n)});
     listen("checks",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.done)o[d.id]=true});state.checks=o});
     listen("st",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.s)o[d.id]=x.s});state.st=o});
     listen("notes",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.text)o[d.id]=x.text});state.notes=o});
@@ -1989,6 +2101,7 @@ function listen(name,apply){
     listen("cfg",function(s){s.docs.forEach(function(d){if(d.id==="main"){try{var j=JSON.parse(d.data().json);CF=cfgMerge(j);try{localStorage.setItem("hoje-cfg",JSON.stringify(CF))}catch(e){}}catch(e){}}});applyRegras()});
     listen("drafts",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=state.drafts.filter(function(d){return !ids[d.id]});loc.forEach(draftSync);a=a.concat(loc);a.sort(function(p,q){return (q.at||0)-(p.at||0)});state.drafts=a.slice(0,50);saveDrafts()});
     listen("brain",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,cat:x.cat||"outro",text:x.text,pin:!!x.pin,seed:!!x.seed,at:x.at||0})});var loc=BR.items.filter(function(x){return !ids[x.id]});loc.forEach(brPut);BR.items=a.concat(loc);brLocal()});
+    listen("tasks",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=MD.items.filter(function(x){return !ids[x.id]});loc.forEach(mdPut);MD.items=a.concat(loc);mdLocal()});
     listen("parc",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=PARC.items.filter(function(x){return !ids[x.id]});loc.forEach(parcPut);PARC.items=a.concat(loc);parcLocal()});
     listen("ideas",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,text:x.text,at:x.at||0})});state.ideas=a});
   }catch(e){}
