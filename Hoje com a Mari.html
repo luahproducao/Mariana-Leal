@@ -25,7 +25,6 @@
       --hero: #17111b;
       --hero-ink: #ffffff;
       --hero-muted: #d9c6dd;
-      --shadow: rgba(17, 12, 17, 0.06);
     }
 
     * { box-sizing: border-box; }
@@ -37,208 +36,41 @@
       line-height: 1.5;
       padding: 16px 16px 104px;
     }
-    .wrap {
-      max-width: 680px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-    .kicker {
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .brand {
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .sync {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: right;
-    }
-    .days {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: thin;
-    }
-    .day {
-      flex: 0 0 auto;
-      min-width: 64px;
-      border: 1px solid var(--line);
-      background: var(--surface);
-      color: var(--ink);
-      border-radius: 14px;
-      padding: 8px 10px;
-      text-align: center;
-      cursor: pointer;
-      font: inherit;
-      box-shadow: 0 6px 18px var(--shadow);
-    }
-    .day .w {
-      font-size: 11px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .day .n {
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.1;
-    }
-    .day .p {
-      font-size: 11px;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-    .day[aria-pressed="true"] {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: var(--accent-ink);
-    }
-    .day[aria-pressed="true"] .w,
-    .day[aria-pressed="true"] .p {
-      color: var(--accent-ink);
-      opacity: .85;
-    }
+    .wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .brand { font-size: 20px; font-weight: 700; }
+    .sync { font-size: 12px; color: var(--muted); text-align: right; }
+    .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+    .day { flex: 0 0 auto; min-width: 64px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 14px; padding: 8px 10px; text-align: center; cursor: pointer; font: inherit; }
+    .day .w { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .day .n { font-size: 20px; font-weight: 700; line-height: 1.1; }
+    .day .p { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .day[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .day[aria-pressed="true"] .w, .day[aria-pressed="true"] .p { color: var(--accent-ink); opacity: .85; }
     .day.full .p { color: var(--ok); font-weight: 700; }
     .day[aria-pressed="true"].full .p { color: var(--accent-ink); }
-
-    .bottom {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 20;
-      background: var(--surface);
-      border-top: 1px solid var(--line);
-      display: flex;
-      justify-content: center;
-      padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
-    }
-    .bottom .in {
-      display: flex;
-      width: 100%;
-      max-width: 680px;
-      gap: 2px;
-    }
-    .nb {
-      flex: 1;
-      background: none;
-      border: 0;
-      color: var(--muted);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      padding: 6px 2px;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .nb svg {
-      width: 24px;
-      height: 24px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    .nb[aria-current="page"] {
-      color: var(--accent);
-      background: var(--accent-soft);
-    }
-
+    .bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); display: flex; justify-content: center; padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); }
+    .bottom .in { display: flex; width: 100%; max-width: 680px; gap: 2px; }
+    .nb { flex: 1; background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border-radius: 12px; cursor: pointer; }
+    .nb svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .nb[aria-current="page"] { color: var(--accent); background: var(--accent-soft); }
     .stack { display: flex; flex-direction: column; gap: 14px; }
     .sub { color: var(--muted); margin: 0; }
-    .hero {
-      background: var(--hero);
-      color: var(--hero-ink);
-      border-radius: 20px;
-      padding: 18px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .hero { background: var(--hero); color: var(--hero-ink); border-radius: 20px; padding: 18px; display: flex; gap: 16px; align-items: center; justify-content: space-between; }
     .hero .kicker { color: var(--hero-muted); }
     .hero h2 { color: var(--hero-ink); margin: 0; }
     .hero p { margin: 4px 0 0; color: var(--hero-muted); font-size: 15px; }
-    .alert {
-      background: var(--accent-soft);
-      border-radius: 14px;
-      padding: 12px 14px;
-    }
-    .alert b {
-      color: var(--accent);
-      font-size: 12px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      display: block;
-    }
-    .card, .item, .rest, .need, .out, .page, .rec {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-    }
-    .need {
-      background: var(--warn-soft);
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .need > b {
-      color: var(--warn);
-      font-size: 12px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 12px 14px;
-    }
-    .row input[type="checkbox"] {
-      flex: 0 0 auto;
-      width: 24px;
-      height: 24px;
-      margin: 1px 0 0;
-      accent-color: var(--ok);
-      cursor: pointer;
-    }
+    .alert { background: var(--accent-soft); border-radius: 14px; padding: 12px 14px; }
+    .alert b { color: var(--accent); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; display: block; }
+    .card, .item, .rest, .need, .out, .rec { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+    .need { background: var(--warn-soft); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .need > b { color: var(--warn); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+    .row { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; }
+    .row input[type="checkbox"] { flex: 0 0 auto; width: 24px; height: 24px; margin: 1px 0 0; accent-color: var(--ok); cursor: pointer; }
     .row .txt { flex: 1; min-width: 0; }
     .chkd .txt { text-decoration: line-through; color: var(--muted); }
-    .tag {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      margin-right: 6px;
-    }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-right: 6px; }
     .tag.m { background: var(--info-soft); color: var(--info); }
     .tag.l { background: var(--ok-soft); color: var(--ok); }
     .tag.t { background: var(--warn-soft); color: var(--warn); }
@@ -246,123 +78,26 @@
     .meta { display: flex; gap: 8px; align-items: center; padding: 0 14px 12px; flex-wrap: wrap; }
     .note { font-size: 13px; color: var(--muted); }
     .block { display: flex; flex-direction: column; gap: 8px; }
-    .block > h3 {
-      font-size: 13px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 700;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin: 0;
-    }
+    .block > h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; }
     .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .fields label, .lab {
-      font-size: 13px;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    textarea, input[type="text"], select {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--ink);
-      font: inherit;
-      padding: 10px 12px;
-    }
+    .fields label, .lab { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+    textarea, input[type="text"], select { width: 100%; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; padding: 10px 12px; }
     textarea { min-height: 84px; resize: vertical; }
-    select {
-      padding: 6px 8px;
-      border-radius: 8px;
-      background: var(--surface);
-    }
-    .btn {
-      font: inherit;
-      font-weight: 700;
-      border: 0;
-      border-radius: 12px;
-      padding: 10px 16px;
-      background: var(--accent);
-      color: var(--accent-ink);
-      cursor: pointer;
-    }
-    .btn.ghost {
-      background: none;
-      border: 1px solid var(--line);
-      color: var(--ink);
-    }
+    select { padding: 6px 8px; border-radius: 8px; }
+    .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 10px 16px; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+    .btn.ghost { background: none; border: 1px solid var(--line); color: var(--ink); }
     .btn.small { padding: 7px 12px; font-size: 14px; }
     .btn.big { padding: 16px 20px; font-size: 18px; width: 100%; }
     .btn:disabled { opacity: .45; cursor: default; }
     .btns { display: flex; gap: 8px; flex-wrap: wrap; }
     .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
     .toggle input { width: 20px; height: 20px; accent-color: var(--accent); }
-    details { border-top: 1px solid var(--line); }
-    summary { padding: 10px 14px; cursor: pointer; color: var(--accent); font-size: 14px; font-weight: 700; }
-    details .in { padding: 0 14px 12px; display: flex; flex-direction: column; gap: 8px; }
-    .good { color: var(--ok); font-weight: 700; }
-    .badc { color: var(--bad); font-weight: 700; }
-    .out {
-      background: var(--ok-soft);
-      border-radius: 14px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .out .big {
-      font-size: 34px;
-      font-weight: 700;
-      color: var(--ok);
-      line-height: 1.1;
-    }
-    .out.bad { background: var(--bad-soft); }
-    .out.bad .big { color: var(--bad); }
-    .rec {
-      background: var(--surface);
-      border: 2px solid var(--accent);
-      border-radius: 18px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .rec .big-text {
-      font-size: 24px;
-      line-height: 1.3;
-      font-weight: 700;
-    }
-    .tip {
-      background: var(--accent-soft);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 15px;
-    }
-    .draft {
-      background: var(--warn-soft);
-      color: var(--warn);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-    .rest {
-      background: var(--info-soft);
-      border-radius: 14px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    @media (max-width: 440px) {
-      .fields { grid-template-columns: 1fr; }
-      .hero { padding: 14px; }
-    }
+    .draft { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 500; }
+    .rest { background: var(--info-soft); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .rec { background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .rec .big-text { font-size: 24px; line-height: 1.3; font-weight: 700; }
+    .tip { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
+    @media (max-width: 440px) { .fields { grid-template-columns: 1fr; } .hero { padding: 14px; } }
   </style>
 </head>
 <body>
@@ -386,29 +121,9 @@
     (function () {
       const STORAGE_KEY = 'hoje-mari-2';
       const DAYS = [
-        { id: 'd1105', date: '2026-11-05', w: 'Qui', n: '05', title: 'Quinta 05/11', theme: 'Preparação da operação + Tray', phase: 'Black: preparação · faltam 22 dias', start: 'Comece com o look do dia.', finish: 'Termine com a contagem regressiva.', urgent: 'Hoje vence a aprovação da copy do carrossel da Bling.', needs: ['Aprovar a copy do carrossel da Bling', 'Gravar 1 spoiler da coleção', 'Deixar o link da Tray salvo'], stories: [
-          ['L', 'Bom dia + look do dia (com link).', 'c'],
-          ['L', 'Lembrete da ação da Black na Loyall.', 'c'],
-          ['M', 'Black para lojistas: “O que eu confiro antes da Black”.', ''],
-          ['M', 'Tray · Missão 4 (+7), caixinha de perguntas.', 'ct'],
-          ['L', 'Spoiler da coleção de fim de ano.', ''],
-          ['-','Contagem regressiva: “Faltam 22 dias para a Black”.', 'c']
-        ], ma: 'Bastidor da preparação da coleção e da operação.', ass: 'Continuação da série “Esquenta de Black para lojistas”.' },
-        { id: 'd1104', date: '2026-11-04', w: 'Qua', n: '04', title: 'Quarta 04/11', theme: 'Respostas da comunidade', phase: 'Black: preparação · faltam 23 dias', start: 'Comece com o look do dia.', finish: 'Termine com a pergunta ou CTA.', needs: ['Escolher a dúvida real do dia', 'Testar o funil da assinatura', 'Enviar referências da Bling'], stories: [
-          ['L', 'Bom dia + look do dia (com link).', 'c'],
-          ['M', 'Responda uma dúvida real recebida.', ''],
-          ['M', 'Compartilhe o Reel de resposta.', ''],
-          ['M', 'Enquete de próximo tema: Fornecedores / Gestão de estoque.', ''],
-          ['M', 'CTA para o direct com a palavra-chave.', 'c']
-        ], ma: 'Bastidor da semana da Black na loja.', ass: 'Aprofundamento sobre fornecedores.' },
-        { id: 'd1103', date: '2026-11-03', w: 'Ter', n: '03', title: 'Terça 03/11', theme: 'Estoque inteligente', phase: 'Black: preparação · faltam 24 dias', start: 'Comece com o look do dia.', finish: 'Termine com a pergunta da caixinha.', needs: ['Repor / observar / não comprar agora', 'Foto ou vídeo das peças da ação'], stories: [
-          ['L', 'Bom dia + look do dia (com link).', 'c'],
-          ['L', 'Ação da Black na Loyall: mostre as peças que entram.', 'c'],
-          ['M', 'Lista fictícia: repor, observar, não comprar agora.', ''],
-          ['M', 'Enquete: “Você acompanha o que está parado no estoque?”', ''],
-          ['M', 'Compartilhe o carrossel.', ''],
-          ['M', 'Pergunta: “Qual parte da gestão de estoque mais te trava?”', 'c']
-        ], ma: 'Uma decisão de reposição para a Black.', ass: 'Exercício das 3 listas do estoque.' }
+        { id: 'd1105', date: '2026-11-05', w: 'Qui', n: '05', title: 'Quinta 05/11', theme: 'Preparação da operação + Tray', phase: 'Black: preparação · faltam 22 dias', start: 'Comece com o look do dia.', finish: 'Termine com a contagem regressiva.', urgent: 'Hoje vence a aprovação da copy do carrossel da Bling.', needs: ['Aprovar a copy do carrossel da Bling', 'Gravar 1 spoiler da coleção', 'Deixar o link da Tray salvo'], stories: [['L', 'Bom dia + look do dia (com link).', 'c'], ['L', 'Lembrete da ação da Black na Loyall.', 'c'], ['M', 'Black para lojistas: “O que eu confiro antes da Black”.', ''], ['M', 'Tray · Missão 4 (+7), caixinha de perguntas.', 'ct'], ['L', 'Spoiler da coleção de fim de ano.', ''], ['-', 'Contagem regressiva: “Faltam 22 dias para a Black”.', 'c']], ma: 'Bastidor da preparação da coleção e da operação.', ass: 'Continuação da série “Esquenta de Black para lojistas”.' },
+        { id: 'd1104', date: '2026-11-04', w: 'Qua', n: '04', title: 'Quarta 04/11', theme: 'Respostas da comunidade', phase: 'Black: preparação · faltam 23 dias', start: 'Comece com o look do dia.', finish: 'Termine com a pergunta ou CTA.', needs: ['Escolher a dúvida real do dia', 'Testar o funil da assinatura', 'Enviar referências da Bling'], stories: [['L', 'Bom dia + look do dia (com link).', 'c'], ['M', 'Responda uma dúvida real recebida.', ''], ['M', 'Compartilhe o Reel de resposta.', ''], ['M', 'Enquete de próximo tema: Fornecedores / Gestão de estoque.', ''], ['M', 'CTA para o direct com a palavra-chave.', 'c']], ma: 'Bastidor da semana da Black na loja.', ass: 'Aprofundamento sobre fornecedores.' },
+        { id: 'd1103', date: '2026-11-03', w: 'Ter', n: '03', title: 'Terça 03/11', theme: 'Estoque inteligente', phase: 'Black: preparação · faltam 24 dias', start: 'Comece com o look do dia.', finish: 'Termine com a pergunta da caixinha.', needs: ['Repor / observar / não comprar agora', 'Foto ou vídeo das peças da ação'], stories: [['L', 'Bom dia + look do dia (com link).', 'c'], ['L', 'Ação da Black na Loyall: mostre as peças que entram.', 'c'], ['M', 'Lista fictícia: repor, observar, não comprar agora.', ''], ['M', 'Enquete: “Você acompanha o que está parado no estoque?”', ''], ['M', 'Compartilhe o carrossel.', ''], ['M', 'Pergunta: “Qual parte da gestão de estoque mais te trava?”', 'c']], ma: 'Uma decisão de reposição para a Black.', ass: 'Exercício das 3 listas do estoque.' }
       ];
 
       const NAV = [
@@ -418,16 +133,11 @@
         ['canais', 'Canais', '<path d="M4 6h16M4 12h16M4 18h10"/>'],
         ['mais', 'Mais', '<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>' ]
       ];
-
       const ST = [['todo','A gravar'],['rec','Gravado'],['sent','Enviado à Laila'],['edit','Editado'],['posted','Postado']];
       const state = loadState();
 
-      function safeString(value) {
-        return value == null ? '' : String(value);
-      }
-
       function escapeHtml(value) {
-        return safeString(value)
+        return String(value == null ? '' : value)
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
@@ -438,7 +148,7 @@
       function loadState() {
         try {
           const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          const normalized = {
+          return {
             tab: saved.tab || 'hoje',
             more: saved.more || 'prazos',
             sel: saved.sel || DAYS[0].id,
@@ -451,21 +161,8 @@
             prod: saved.prod || {},
             ideas: Array.isArray(saved.ideas) ? saved.ideas : []
           };
-          return normalized;
         } catch (error) {
-          return {
-            tab: 'hoje',
-            more: 'prazos',
-            sel: DAYS[0].id,
-            core: false,
-            rec: 0,
-            checks: {},
-            st: {},
-            notes: {},
-            results: {},
-            prod: {},
-            ideas: []
-          };
+          return { tab: 'hoje', more: 'prazos', sel: DAYS[0].id, core: false, rec: 0, checks: {}, st: {}, notes: {}, results: {}, prod: {}, ideas: [] };
         }
       }
 
@@ -492,22 +189,34 @@
         if (node) node.textContent = text;
       }
 
+      function copyText(text) {
+        const fallback = () => {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try { document.execCommand('copy'); } catch (error) {}
+          ta.remove();
+        };
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText(text).catch(fallback);
+        } else {
+          fallback();
+        }
+      }
+
       function dayById(id) {
         return DAYS.find(day => day.id === id) || DAYS[0];
       }
 
       function trackItems(day) {
-        const out = [{ id: day.id + '-f', label: 'Feed', n: 1, text: day.theme, aud: 'M', tray: false }];
+        const out = [{ id: day.id + '-f', label: 'Feed', n: 1, text: day.theme, aud: 'M', tray: false, core: true }];
         day.stories.forEach((story, index) => {
-          out.push({
-            id: day.id + '-s' + (index + 1),
-            label: 'Story ' + (index + 1),
-            n: index + 1,
-            text: story[1],
-            aud: story[0],
-            tray: (story[2] || '').includes('t'),
-            core: (story[2] || '').includes('c')
-          });
+          out.push({ id: day.id + '-s' + (index + 1), label: 'Story ' + (index + 1), n: index + 1, text: story[1], aud: story[0], tray: (story[2] || '').includes('t'), core: (story[2] || '').includes('c') });
         });
         out.push({ id: day.id + '-ma', label: 'Melhores Amigos', n: null, text: day.ma, aud: 'M', tray: false, core: true });
         out.push({ id: day.id + '-as', label: 'Assinatura', n: null, text: day.ass, aud: 'M', tray: false, core: true });
@@ -534,9 +243,8 @@
       function renderChrome() {
         const showDays = state.tab === 'hoje' || state.tab === 'gravar';
         const dayList = document.getElementById('days');
-        if (dayList) {
-          dayList.hidden = !showDays;
-        }
+        const bottom = document.getElementById('bottomin');
+        if (dayList) dayList.hidden = !showDays;
 
         if (showDays && dayList) {
           dayList.innerHTML = DAYS.map(day => {
@@ -547,7 +255,6 @@
           }).join('');
         }
 
-        const bottom = document.getElementById('bottomin');
         if (bottom) {
           bottom.innerHTML = NAV.map(n => '<button class="nb" data-tab="' + n[0] + '"' + (state.tab === n[0] ? ' aria-current="page"' : '') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + n[2] + '</svg><span>' + escapeHtml(n[1]) + '</span></button>').join('');
         }
@@ -565,28 +272,24 @@
       }
 
       function renderHoje() {
+        const view = document.getElementById('view');
+        if (!view) return;
         const day = dayById(state.sel);
         const progress = dayProgress(day);
         let html = '<div class="stack">';
 
         if (isRest(day)) {
-          html += '<div class="hero"><div class="txt"><div class="kicker">' + escapeHtml(day.phase) + '</div><h2>' + escapeHtml(day.title) + '</h2><p>Dia de pausa</p></div></div>' +
-            '<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar. Descansar também faz parte do plano.</p><div class="btns"><button class="btn" data-rest="0">Voltar para o calendário</button></div></div>';
-          document.getElementById('view').innerHTML = html + '</div>';
+          html += '<div class="hero"><div class="txt"><div class="kicker">' + escapeHtml(day.phase) + '</div><h2>' + escapeHtml(day.title) + '</h2><p>Dia de pausa</p></div></div>' + '<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar. Descansar também faz parte do plano.</p><div class="btns"><button class="btn" data-rest="0">Voltar para o calendário</button></div></div>';
+          view.innerHTML = html + '</div>';
           return;
         }
 
         html += '<div class="hero"><div class="txt"><div class="kicker">' + escapeHtml(day.phase) + '</div><h2>' + escapeHtml(day.title) + '</h2><p>' + escapeHtml(day.theme) + '</p><p>' + (progress.n === progress.t ? 'Dia completo' : 'Faltam ' + (progress.t - progress.n) + ' entregas') + '</p></div></div>';
-
-        if (day.urgent) {
-          html += '<div class="alert"><b>Atenção</b>' + escapeHtml(day.urgent) + '</div>';
-        }
-
+        if (day.urgent) html += '<div class="alert"><b>Atenção</b>' + escapeHtml(day.urgent) + '</div>';
         html += '<div class="need"><b>Preciso de você</b>' + day.needs.map((task, index) => {
           const checked = !!state.checks[day.id + '-n' + index];
           return '<div class="row' + (checked ? ' chkd' : '') + '"><input type="checkbox" id="c-' + day.id + '-n' + index + '" data-chk="' + day.id + '-n' + index + '"' + (checked ? ' checked' : '') + '><div class="txt"><label for="c-' + day.id + '-n' + index + '">' + escapeHtml(task) + '</label></div></div>';
         }).join('') + '</div>';
-
         html += '<div class="card"><p><b>Começar:</b> ' + escapeHtml(day.start) + '</p><p><b>Terminar:</b> ' + escapeHtml(day.finish) + '</p></div>';
 
         const feed = day.id + '-f';
@@ -606,16 +309,16 @@
 
         const results = state.results[day.id] || {};
         html += '<div class="block"><h3>Depois de postar · 30 segundos</h3><div class="fields"><label>Alcance<input type="text" id="r-alc" value="' + escapeHtml(results.alc || '') + '"/></label><label>Curtidas<input type="text" id="r-cur" value="' + escapeHtml(results.cur || '') + '"/></label><label>Respostas nos stories<input type="text" id="r-res" value="' + escapeHtml(results.res || '') + '"/></label><label>Salvamentos<input type="text" id="r-sal" value="' + escapeHtml(results.sal || '') + '"/></label></div><label class="lab">O que eu aprendi hoje<textarea id="r-apr" placeholder="O que funcionou, o que não funcionou...">' + escapeHtml(results.apr || '') + '</textarea></label><div class="btns"><button class="btn small" id="saveres">Salvar resultado</button></div></div>';
-
-        html += '<div class="block"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia..." aria-label="Recado para a equipe">' + escapeHtml(state.notes[day.id] || '') + '</textarea><div class="btns"><button class="btn small" id="savenote">Salvar recado</button></div></div>';
-
-        document.getElementById('view').innerHTML = html + '</div>';
+        html += '<div class="block"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia...">' + escapeHtml(state.notes[day.id] || '') + '</textarea><div class="btns"><button class="btn small" id="savenote">Salvar recado</button></div></div>';
+        view.innerHTML = html + '</div>';
       }
 
       function renderGravar() {
+        const view = document.getElementById('view');
+        if (!view) return;
         const day = dayById(state.sel);
         if (isRest(day)) {
-          document.getElementById('view').innerHTML = '<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar.</p></div>';
+          view.innerHTML = '<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar.</p></div>';
           return;
         }
 
@@ -626,44 +329,40 @@
         const item = list[index] || list[0];
         const last = index === list.length - 1;
         const tip = index === 0 ? 'Como começar: ' + day.start : (last ? 'Como terminar: ' + day.finish : 'Leia o story em voz alta e grave de uma vez só.');
-
-        document.getElementById('view').innerHTML =
-          '<div class="stack"><div><div class="kicker">' + escapeHtml(day.title) + '</div><h2>Gravar agora</h2></div>' +
-          '<label class="toggle"><input type="checkbox" id="core"' + (state.core ? ' checked' : '') + '> Só o essencial do dia</label>' +
-          '<div class="rec"><div class="kicker">Story ' + escapeHtml(item.n) + ' · ' + (index + 1) + ' de ' + list.length + '</div><div>' + audTag(item.aud) + (item.tray ? '<span class="tag t">Tray</span>' : '') + '</div>' +
-          '<div class="big-text">' + escapeHtml(item.text).replace(/\n/g, '<br>') + '</div>' +
-          (item.tray ? '<div class="tip">Link exclusivo da Tray e “Parceria paga” neste story.</div>' : '') +
-          '<div class="tip">' + escapeHtml(tip) + '</div>' +
-          '<button class="btn big" data-recdone="' + item.id + '">' + (last ? 'Gravei, terminar' : 'Gravei, próximo') + '</button>' +
-          '<div class="btns"><button class="btn ghost small" data-recnav="-1"' + (index === 0 ? ' disabled' : '') + '>Anterior</button><button class="btn ghost small" data-recnav="1"' + (last ? ' disabled' : '') + '>Próximo</button></div>' +
-          '<p class="note">Terminou? Volte em Hoje e copie o aviso para a Laila.</p></div></div>';
+        view.innerHTML = '<div class="stack"><div><div class="kicker">' + escapeHtml(day.title) + '</div><h2>Gravar agora</h2></div><label class="toggle"><input type="checkbox" id="core"' + (state.core ? ' checked' : '') + '> Só o essencial do dia</label><div class="rec"><div class="kicker">Story ' + escapeHtml(item.n) + ' · ' + (index + 1) + ' de ' + list.length + '</div><div>' + audTag(item.aud) + (item.tray ? '<span class="tag t">Tray</span>' : '') + '</div><div class="big-text">' + escapeHtml(item.text).replace(/\n/g, '<br>') + '</div>' + (item.tray ? '<div class="tip">Link exclusivo da Tray e “Parceria paga” neste story.</div>' : '') + '<div class="tip">' + escapeHtml(tip) + '</div><button class="btn big" data-recdone="' + item.id + '">' + (last ? 'Gravei, terminar' : 'Gravei, próximo') + '</button><div class="btns"><button class="btn ghost small" data-recnav="-1"' + (index === 0 ? ' disabled' : '') + '>Anterior</button><button class="btn ghost small" data-recnav="1"' + (last ? ' disabled' : '') + '>Próximo</button></div><p class="note">Terminou? Volte em Hoje e copie o aviso para a Laila.</p></div></div>';
       }
 
       function renderProdutos() {
-        document.getElementById('view').innerHTML = '<div class="stack"><div><h2>Mini produtos</h2><p class="sub">Seis produtos prontos para revisar.</p></div><div class="card"><div class="tag">Novo</div><h3>Criar um material com a sua ideia</h3><p class="sub">Escreva a ideia e gere um material em poucos passos.</p></div><div class="card"><div class="tag">eBook</div><h3>Preço mínimo antes da Black</h3><p class="sub">Entenda sua conta em 10 minutos e pare de dar desconto no escuro.</p></div><div class="card"><div class="tag">Checklist</div><h3>Checklist da operação da Black</h3><p class="sub">Nada esquecido no estoque, na embalagem, no envio e no atendimento.</p></div></div>';
+        const view = document.getElementById('view');
+        if (!view) return;
+        view.innerHTML = '<div class="stack"><div><h2>Mini produtos</h2><p class="sub">Seis produtos prontos para revisar.</p></div><div class="card"><div class="tag">Novo</div><h3>Criar um material com a sua ideia</h3><p class="sub">Escreva a ideia e gere um material em poucos passos.</p></div><div class="card"><div class="tag">eBook</div><h3>Preço mínimo antes da Black</h3><p class="sub">Entenda sua conta em 10 minutos e pare de dar desconto no escuro.</p></div><div class="card"><div class="tag">Checklist</div><h3>Checklist da operação da Black</h3><p class="sub">Nada esquecido no estoque, na embalagem, no envio e no atendimento.</p></div></div>';
       }
 
       function renderCanais() {
-        document.getElementById('view').innerHTML = '<div class="stack"><div><h2>Melhores Amigos e assinatura</h2><p class="sub">O feed atrai. Estes canais constroem confiança e geram a primeira compra.</p></div><div class="card"><h3>Melhores Amigos</h3><p class="note">Proximidade, bastidor real, votação e aviso antes de todo mundo.</p></div><div class="card"><h3>Assinatura</h3><p class="note">Aula, aprofundamento e materiais prontos para a lojista.</p></div></div>';
+        const view = document.getElementById('view');
+        if (!view) return;
+        view.innerHTML = '<div class="stack"><div><h2>Melhores Amigos e assinatura</h2><p class="sub">O feed atrai. Estes canais constroem confiança e geram a primeira compra.</p></div><div class="card"><h3>Melhores Amigos</h3><p class="note">Proximidade, bastidor real, votação e aviso antes de todo mundo.</p></div><div class="card"><h3>Assinatura</h3><p class="note">Aula, aprofundamento e materiais prontos para a lojista.</p></div></div>';
       }
 
       function renderMais() {
+        const view = document.getElementById('view');
+        if (!view) return;
+        const pills = '<div class="btns"><button class="btn small ghost" data-more="prazos">Prazos</button><button class="btn small ghost" data-more="equipe">Equipe</button><button class="btn small ghost" data-more="ideias">Ideias</button></div>';
         if (state.more === 'prazos') {
-          document.getElementById('view').innerHTML = '<div class="stack"><div class="pills"><button class="btn small ghost" data-more="prazos">Prazos</button><button class="btn small ghost" data-more="equipe">Equipe</button><button class="btn small ghost" data-more="ideias">Ideias</button></div><div><h2>Prazos que não podem passar</h2><p class="sub">Só o que tem data e depende de você ou de uma marca.</p></div><div class="card"><span class="tag l">Tray</span><b>Semana 3 da corrida</b><p class="note">A corrida vai de 20/10 a 10/11.</p></div><div class="card"><span class="tag">Bling</span><b>Aprovar a copy do carrossel</b><p class="note">Sem esse ok a equipe não entrega a tempo.</p></div></div>';
+          view.innerHTML = '<div class="stack">' + pills + '<div><h2>Prazos que não podem passar</h2><p class="sub">Só o que tem data e depende de você ou de uma marca.</p></div><div class="card"><span class="tag l">Tray</span><b>Semana 3 da corrida</b><p class="note">A corrida vai de 20/10 a 10/11.</p></div><div class="card"><span class="tag">Bling</span><b>Aprovar a copy do carrossel</b><p class="note">Sem esse ok a equipe não entrega a tempo.</p></div></div>';
         } else if (state.more === 'equipe') {
-          document.getElementById('view').innerHTML = '<div class="stack"><div class="pills"><button class="btn small ghost" data-more="prazos">Prazos</button><button class="btn small ghost" data-more="equipe">Equipe</button><button class="btn small ghost" data-more="ideias">Ideias</button></div><div><h2>Visão da equipe</h2><p class="sub">Onde cada entrega está, os resultados e os recados.</p></div><div class="card"><p class="note">Acompanhe o progresso por dia na aba Hoje.</p></div></div>';
+          view.innerHTML = '<div class="stack">' + pills + '<div><h2>Visão da equipe</h2><p class="sub">Onde cada entrega está, os resultados e os recados.</p></div><div class="card"><p class="note">Acompanhe o progresso por dia na aba Hoje.</p></div></div>';
         } else {
-          document.getElementById('view').innerHTML = '<div class="stack"><div class="pills"><button class="btn small ghost" data-more="prazos">Prazos</button><button class="btn small ghost" data-more="equipe">Equipe</button><button class="btn small ghost" data-more="ideias">Ideias</button></div><div><h2>Caixa de ideias</h2><p class="sub">Anote a trend ou o assunto na hora.</p></div><textarea id="idea" placeholder="Ex.: trend do áudio X, mostrando a embalagem do pedido..."></textarea><div class="btns"><button class="btn" id="addidea">Guardar ideia</button></div></div>';
+          view.innerHTML = '<div class="stack">' + pills + '<div><h2>Caixa de ideias</h2><p class="sub">Anote a trend ou o assunto na hora.</p></div><textarea id="idea" placeholder="Ex.: trend do áudio X, mostrando a embalagem do pedido..."></textarea><div class="btns"><button class="btn" id="addidea">Guardar ideia</button></div></div>';
         }
       }
 
       function render() {
         renderChrome();
-        const tab = state.tab;
-        if (tab === 'hoje') renderHoje();
-        else if (tab === 'gravar') renderGravar();
-        else if (tab === 'produtos') renderProdutos();
-        else if (tab === 'canais') renderCanais();
+        if (state.tab === 'hoje') renderHoje();
+        else if (state.tab === 'gravar') renderGravar();
+        else if (state.tab === 'produtos') renderProdutos();
+        else if (state.tab === 'canais') renderCanais();
         else renderMais();
       }
 
@@ -679,13 +378,12 @@
 
       document.addEventListener('click', function (event) {
         const target = event.target;
-
         const tabButton = target.closest('[data-tab]');
         if (tabButton) {
           state.tab = tabButton.dataset.tab;
+          persistState();
           render();
           window.scrollTo(0, 0);
-          persistState();
           return;
         }
 
@@ -708,9 +406,8 @@
 
         const rest = target.closest('[data-rest]');
         if (rest) {
-          const k = 'rest-' + state.sel;
-          const on = rest.dataset.rest === '1';
-          if (on) state.checks[k] = true; else delete state.checks[k];
+          const key = 'rest-' + state.sel;
+          if (rest.dataset.rest === '1') state.checks[key] = true; else delete state.checks[key];
           persistState();
           render();
           return;
@@ -719,9 +416,7 @@
         const recDone = target.closest('[data-recdone]');
         if (recDone) {
           const id = recDone.dataset.recdone;
-          if (stOf(id) === 'todo') {
-            state.st[id] = 'rec';
-          }
+          if (stOf(id) === 'todo') state.st[id] = 'rec';
           state.rec += 1;
           persistState();
           render();
@@ -738,11 +433,9 @@
 
         if (target.id === 'savenote') {
           const note = document.getElementById('note');
-          if (note) {
-            state.notes[state.sel] = note.value;
-            persistState();
-            setSync('Recado salvo');
-          }
+          if (note) state.notes[state.sel] = note.value;
+          persistState();
+          setSync('Recado salvo');
           return;
         }
 
@@ -771,28 +464,25 @@
         }
 
         if (target.id === 'avisar') {
-          navigator.clipboard?.writeText(avisoTexto()).then(() => setSync('Aviso copiado')).catch(() => setSync('Copiar manualmente'));
+          copyText(avisoTexto());
+          setSync('Aviso copiado');
         }
       });
 
       document.addEventListener('change', function (event) {
         const target = event.target;
-
         if (target.dataset && target.dataset.chk) {
-          const key = target.dataset.chk;
-          state.checks[key] = !!target.checked;
+          state.checks[target.dataset.chk] = !!target.checked;
           persistState();
           render();
           return;
         }
-
         if (target.dataset && target.dataset.st) {
           state.st[target.dataset.st] = target.value;
           persistState();
           render();
           return;
         }
-
         if (target.id === 'core') {
           state.core = !!target.checked;
           state.rec = 0;
@@ -802,9 +492,7 @@
       });
 
       function init() {
-        if (!state.sel || !dayById(state.sel)) {
-          state.sel = DAYS[0].id;
-        }
+        if (!state.sel || !DAYS.some(day => day.id === state.sel)) state.sel = DAYS[0].id;
         render();
         setSync('Salvando neste aparelho');
       }
