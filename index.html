@@ -215,6 +215,7 @@ summary{color:var(--accent)}
 .bottom .in{max-width:640px;gap:2px}
 .nb{display:flex;flex-direction:column;align-items:center;gap:3px}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}}
+.stickbar{position:sticky;bottom:98px;z-index:4;display:flex;gap:8px;padding:8px;background:var(--surface);border:1px solid var(--gold);border-radius:18px;box-shadow:0 8px 24px rgba(43,32,36,.14)}.stickbar .btn{flex:1}
 </style>
 
 <div class="wrap">
@@ -382,7 +383,7 @@ var NAV=[
  ["produtos","Produtos",'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>'],
  ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
 ];
-var MORE=[["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["ideias","Ideias"],["ajustes","Ajustes"]];
+var MORE=[["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["cerebro","Cérebro"],["ajustes","Ajustes"]];
 
 /* ============ PRODUTOS ============ */
 var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
@@ -454,7 +455,7 @@ var IDEIAS_AS=[
 /* ============ ESTADO ============ */
 var $=function(s,r){return (r||document).querySelector(s)};
 var esc=function(s){var d=document.createElement('div');d.textContent=s==null?"":String(s);return d.innerHTML};
-var state={checks:{},st:{},notes:{},results:{},prod:{},ideas:[],tool:{},tab:"criar",hub:"inicio",more:"prazos",sel:null,core:false,rec:0,pOpen:null,chap:0,cr:null};
+var state={checks:{},st:{},notes:{},results:{},prod:{},ideas:[],tool:{},tab:"hoje",hub:"inicio",more:"prazos",sel:null,core:false,rec:0,pOpen:null,chap:0,cr:null};
 var C={};
 function loadLocal(){try{var j=JSON.parse(localStorage.getItem("hoje-mari-2")||"{}");["checks","st","notes","results","prod"].forEach(function(k){state[k]=j[k]||{}});state.ideas=j.ideas||[];state.tool=JSON.parse(localStorage.getItem("hoje-tools")||"{}");state.cr=JSON.parse(localStorage.getItem("hoje-cr")||"null");state.voz=localStorage.getItem("hoje-voz")||""}catch(e){}if(!state.cr)state.cr=crNew();loadHub();loadPub();cfgLoad()}
 function saveLocal(){try{localStorage.setItem("hoje-mari-2",JSON.stringify({checks:state.checks,st:state.st,notes:state.notes,results:state.results,prod:state.prod,ideas:state.ideas}))}catch(e){}}
@@ -513,7 +514,7 @@ function renderHoje(){
   if((state.hmode||"meu")==="meu"){renderMeuDia();return}
   var d=dayById(state.sel),p=dayProgress(d),pc=Math.round(p.n/p.t*100);
   var needsDone=d.needs.filter(function(_,k){return state.checks[d.id+"-n"+k]}).length;
-  var h='<div class="stack">';
+  var h='<div class="stack"><div class="btns"><button class="btn ghost small" data-hm="meu">← Meu dia</button></div>';
   if(isRest(d)){
     h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>Dia de pausa</p></div></div>'
       +'<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar. Descansar também faz parte do plano. Se mudar de ideia, é só voltar.</p><div class="btns"><button class="btn" data-rest="0">Voltar ao dia</button></div></div></div>';
@@ -521,7 +522,6 @@ function renderHoje(){
   }
   h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>'+esc(d.theme)+'</p><p>'+(p.n===p.t?'Dia completo':'Faltam '+(p.t-p.n)+' entregas')+' · pedidos para você: '+needsDone+'/'+d.needs.length+'</p></div>'+ringSvg(pc)+'</div>';
   if(d.urgent)h+='<div class="alert"><b>Atenção</b>'+esc(d.urgent)+'</div>';
-  h+='<div class="need"><b>Preciso de você</b>'+d.needs.map(function(t,k){return chk(d.id+"-n"+k,t)}).join("")+'</div>';
   h+='<div class="card"><p><b>Começar:</b> '+esc(d.start)+'</p><p><b>Terminar:</b> '+esc(d.finish)+'</p></div>';
   var fid=d.id+"-f";
   h+='<div class="block"><h3>Feed principal</h3><div class="item'+(stOf(fid)==="posted"?' done':'')+'"><div class="row"><div class="txt"><span class="tag">'+esc(d.feed.kind)+'</span><br>'+esc(d.feed.title)+'</div></div><div class="meta">'+stSelect(fid)+'</div>'
@@ -691,6 +691,7 @@ function renderCanais(){
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
   var inner="";
+  if(state.more==="cerebro"){$("#view").innerHTML='<div class="stack">'+pillsMais()+brHtml()+'</div>';return}
   if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlIdeias();
@@ -741,7 +742,7 @@ function render(){
 function addSeg(){
   var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
   var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
-  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm==="meu")+'">Meu dia</button><button data-hm="plano" aria-pressed="'+pr(t==="hoje"&&hm==="plano")+'">Plano</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button></div>');
+  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button></div>');
 }
 function addHero(){
   var t=state.tab,H=null;
@@ -752,7 +753,7 @@ function addHero(){
 }
 /* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
 var S=null,D=null;
-var NOAI="Para criar com inteligência artificial fora do Claude, coloque a sua chave em Mais → Ajustes → Inteligência artificial. O resto do app funciona normalmente.";
+var NOAI="A IA ainda não está ligada neste aparelho. Peça à assessoria o link de configuração (ele liga a IA e a sincronização) ou abra o app pelo Claude. O resto do app funciona normalmente.";
 var TIPOS=[["ebook","eBook"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
 var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
 function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}
@@ -846,9 +847,9 @@ function crAction(a,el){
       }
     });return;
   }
-  if(a==="back"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub="camp";else state.cr=crNew();saveCr();render();return}
+  if(a==="back"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub=state.pubBack||"parc";else state.cr=crNew();saveCr();render();return}
   if(a==="back"){c.step=c.tipo==="guia"?0:Math.max(0,c.step-1);c.err="";saveCr();render();return}
-  if(a==="reset"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub="camp";state.cr=crNew();saveCr();render();return}
+  if(a==="reset"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub=state.pubBack||"parc";state.cr=crNew();saveCr();render();return}
   if(a==="reset"){state.cr=crNew(c.tipo==="guia"?"guia":undefined);saveCr();render();return}
   if(a==="addsec"){c.outline.secoes.push({titulo:"",itens:[]});saveCr();render();return}
   if(a.indexOf("delsec")===0){c.outline.secoes.splice(parseInt(a.slice(6),10),1);saveCr();render();return}
@@ -977,10 +978,9 @@ function renderHub(){
   if(hb==="inicio"){
     var np=Object.keys(state.plano||{}).length;
     $("#view").innerHTML='<div class="tiles">'
-     +hubCard("cerebro","Meu cérebro",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo").replace('class="card click tile"','class="card click tile" style="grid-column:1/-1"')
+     +hubCard("cerebro","Meu cérebro",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo")
      +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
-     +hubCard("roteiro","Roteiro","Transforme uma ideia em roteiro de Reels, Story ou Carrossel, na sua voz.")
-     +hubCard("calendario","Calendário de ações",np?np+" ação(ões) planejada(s).":"Organize o que vai gravar e postar, dia a dia.")
+     +hubCard("roteiro","Roteiro de conteúdo","Para o seu conteúdo, sem marca: Reels, Story ou Carrossel na sua voz.")
      +hubCard("guia","Guia de captação e edição","Monte o direcionamento para a editora com suas referências e envie em PDF junto com os arquivos.","Novo")
      +hubCard("material","Material digital","eBook, checklist, ficha ou exercício, com a identidade da Mari e PDF.")
      +hubCard("rascunhos","Rascunhos",state.drafts.length?state.drafts.length+" salvo(s).":"Seus trabalhos salvos aparecem aqui.")+'</div>';
@@ -992,7 +992,7 @@ function renderHub(){
 }
 /* ---- Roteiro ---- */
 function hubRoteiro(){
-  var r=state.rot,h='<div><h2>Roteiro</h2><p class="sub">Escreva a ideia. O app monta o roteiro e você edita e coloca no seu jeito.</p></div>';
+  var r=state.rot,h='<div><h2>Roteiro de conteúdo</h2><p class="sub">Para o seu conteúdo, sem marca. Para parceria paga, use o painel em Publis.</p><div class="btns"><button class="btn ghost small" data-gopub="parc">Ir para Parcerias</button></div></div>';
   if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
@@ -1154,7 +1154,7 @@ var D_PCK=["Briefing salvo com entregáveis, datas, termos obrigatórios e o que
 var D_FITC=[["aud","Combina com a audiência dela (lojista iniciante)?"],["vida","Combina com a vida e a loja da Mari?"],["nar","Dá para contar uma história real com a marca?"],["cred","Ela consegue falar com credibilidade?"],["pos","Ajuda ou prejudica o posicionamento? (5 = ajuda muito)"],["conf","Sem conflito com Bling, Tray, Melhor Envio e Ton? (5 = nenhum conflito)"],["rec","Tem potencial de recorrência?"],["val","O valor financeiro compensa? (não entra na média de fit)"]];
 function clone(o){return JSON.parse(JSON.stringify(o))}
 var CF=null,cfT=null;
-function cfgDef(){return {marcas:mxFill(clone(D_GUIA)),etapas:clone(D_ETAPAS),pck:D_PCK.slice(),fit:clone(D_FITC),lim:{contratos:7,meta:20000,recusa:"emagrecedor, gummy"},tray:clone(D_TRAY),doc:null,regras:""}}
+function cfgDef(){return {marcas:mxFill(clone(D_GUIA)),etapas:clone(D_ETAPAS),pck:D_PCK.slice(),fit:clone(D_FITC),lim:{contratos:7,meta:20000,recusa:"emagrecedor, gummy"},tray:clone(D_TRAY),doc:null,regras:"",kit:{seg:"cerca de 127 mil",pub:"",picos:"",valores:"",nfdados:"",marcas:"",contato:""}}}
 function cfg(){if(!CF)CF=cfgDef();return CF}
 var RULES0=null;
 function applyRegras(){if(RULES0===null)RULES0=RULES;var r=(cfg().regras||"").trim();RULES=RULES0+(r?"\nREGRAS EXTRAS DA MARI (siga sempre): "+r:"")}
@@ -1229,39 +1229,23 @@ function etapasEditor(){
   return h+'<div class="btns"><button class="btn ghost small" data-cfx="etapa-add">Adicionar etapa</button><button class="btn ghost small" data-cfx="etapa-reset">Voltar ao padrão</button></div></div>';
 }
 function pubCamp(){
-  var ids=Object.keys(state.camp).sort(function(a,b){return (state.camp[a].d||"").localeCompare(state.camp[b].d||"")});
-  var h='<div><h2>Campanhas</h2><p class="sub">Cada publi com as etapas e as datas calculadas a partir do dia da postagem.</p></div>'+pubResumo();
-  h+='<div class="card"><h3>Nova campanha</h3><div class="fields"><label>Marca<select id="cp-m">'+marcaList().map(function(m){return '<option>'+esc(m)+'</option>'}).join('')+'</select></label><label>Data da postagem<input type="date" id="cp-d" value="'+addDays(isoToday(),10)+'"></label></div>'
-   +'<label class="lab">Nome da campanha<input type="text" id="cp-t" placeholder="Ex.: Reels Black Friday"></label>'
-   +'<div class="btns"><button class="btn" data-campx="add">Criar campanha</button>'+(ids.length?'':'<button class="btn ghost" data-campx="seed">Começar pela Bling · Black Friday (09/11)</button>')+'</div></div>';
-  if(!ids.length)h+='<p class="note">Nenhuma campanha ainda.</p>';
-  ids.forEach(function(id){
-    var c=state.camp[id],nx=nextEtapa(c),open=state.campOpen===id,ds=etapaDates(c);
-    h+='<div class="card"><button class="card click" style="border:0;padding:0;box-shadow:none" data-campopen="'+id+'"><div><span class="tag m">'+esc(c.m)+'</span> <span class="date">posta em '+fd(c.d)+'</span></div><h3>'+esc(c.t||"Campanha")+'</h3>'
-     +'<p class="sub">'+(nx?'Próximo: '+esc(nx[1])+' · '+fd(ds[nx[0]])+' '+stBadge(ds[nx[0]],false):'Tudo concluído')+'</p></button>';
-    if(open){
-      h+='<label class="lab">Nome<input type="text" data-cf="'+id+'|t" value="'+esc(c.t||"")+'"></label><div class="fields"><label>Marca<input type="text" data-cf="'+id+'|m" value="'+esc(c.m)+'"></label><label>Valor (R$)<input type="text" inputmode="decimal" data-cf="'+id+'|v" value="'+esc(c.v||"")+'"></label><label>Postagem<input type="date" data-cf="'+id+'|d" value="'+esc(c.d)+'"></label><label>Envio p/ aprovação (se a marca definiu)<input type="date" data-cf="'+id+'|env" value="'+esc(c.env||"")+'"></label><label>NF emitida em<input type="date" data-cf="'+id+'|nf" value="'+esc(c.nf||"")+'"></label></div>';
-      cfg().etapas.forEach(function(e){var dn=(c.done||{})[e.id],dt=ds[e.id];
-        h+='<div class="row'+(dn?' chkd':'')+'"><input type="checkbox" id="cd-'+id+e.id+'" data-cdone="'+id+'|'+e.id+'"'+(dn?' checked':'')+'><label for="cd-'+id+e.id+'">'+esc(e.label)+' <span class="note">('+esc(e.quem)+' · '+fd(dt)+')</span> '+stBadge(dt,dn)+'</label></div>';
-      });
-      h+='<label class="lab">Anotações da campanha (briefing, cupom, link, combinados)<textarea data-cf="'+id+'|nota">'+esc(c.nota||"")+'</textarea></label>';
-      var r=c.rep||{};
-      h+='<h3>Resultado</h3><div class="fields"><label>Alcance<input type="text" data-cf="'+id+'|rep.alc" value="'+esc(r.alc||"")+'"></label><label>Visualizações<input type="text" data-cf="'+id+'|rep.vis" value="'+esc(r.vis||"")+'"></label><label>Interações<input type="text" data-cf="'+id+'|rep.int" value="'+esc(r.int||"")+'"></label><label>Cliques no link<input type="text" data-cf="'+id+'|rep.cli" value="'+esc(r.cli||"")+'"></label></div>'
-       +'<label class="lab">O que funcionou e o que aprendeu<textarea data-cf="'+id+'|rep.apr">'+esc(r.apr||"")+'</textarea></label>'
-       +'<div class="btns"><button class="btn small" data-campx="rel|'+id+'">Montar relatório (PDF)</button><button class="btn ghost small" data-campx="roteiro|'+id+'">Escrever roteiro</button><button class="btn ghost small" data-campx="del|'+id+'">Remover campanha</button></div>'
-       +'<p class="note">Os números são só os que você digitar. O que ficar vazio sai como [PREENCHER] no relatório.</p>';
-    }
-    h+='</div>';
-  });
+  parcAdopt();
+  var h='<div><h2>Prazos e dinheiro</h2><p class="sub">A visão geral de todas as parcerias. Para mexer em uma, abra o painel dela.</p></div>'+pubResumo();
+  var rows=[];
+  Object.keys(state.camp).forEach(function(id){var c=state.camp[id];if(!c||c.del||!c.d)return;var ds=etapaDates(c);cfg().etapas.forEach(function(e){if(!(c.done||{})[e.id])rows.push({id:id,c:c,e:e,d:ds[e.id]})})});
+  rows.sort(function(a,b){return String(a.d).localeCompare(String(b.d))});
+  var first={};rows=rows.filter(function(r){var k=r.id;first[k]=(first[k]||0)+1;return first[k]<=2});
+  h+='<div class="card"><h3>Próximos prazos</h3>'+(rows.length?rows.map(function(r){return '<button class="card click" data-pcgo="'+r.id+'" style="text-align:left;width:100%;margin:6px 0"><span class="tag m">'+esc(r.c.m)+'</span> '+stBadge(r.d,false)+'<p class="sub"><b>'+fd(r.d)+'</b> · '+esc(r.e.label)+' <span class="note">('+esc(r.e.quem)+')</span></p></button>'}).join(''):'<p class="sub">Nada pendente. Defina a data de postagem no painel de cada parceria para calcular os prazos.</p>')+'</div>';
   h+='<div class="btns"><button class="btn ghost small" data-tg="edEtapas">'+(state.edEtapas?'Fechar ajuste de etapas':'Ajustar etapas e prazos')+'</button></div>';
   if(state.edEtapas)h+=etapasEditor();
   return h;
 }
+document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-pcgo]");if(!g)return;parcAdopt();var p=PARC.items.filter(function(x){return x.campId===g.dataset.pcgo})[0];if(p){PCUI.open=p.id;state.pub="parc";render();window.scrollTo(0,0)}});
 function campAdd(m,t,d,env){var id="c"+Date.now(),o={m:m,t:t,d:d,env:env||"",v:"",nf:"",done:{},rep:{}};state.camp[id]=o;campSave(id);return id}
 /* ---- roteiro de publi ---- */
 function guiaTxt(m){var g=cfg().marcas[m];if(!g)return "(sem guia desta marca: siga só o briefing)";return "Ângulo: "+g.ang+"\nUsar: "+(g.usar.join("; ")||"-")+"\nEvitar: "+(g.evitar.join("; ")||"-")+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+(g.temas.join("; ")||"-")}
 function pubRoteiro(){
-  var r=state.pr,h='<div class="btns"><button class="btn ghost small" data-pcb="back2">← '+(r.parcId&&parcGet(r.parcId)?'Painel da parceria':'Parcerias')+'</button></div><div><h2>Roteiro de publi</h2><p class="sub">Cole o briefing da marca. O app escreve nos 5 blocos de publi, na sua voz, e você edita.</p></div>';
+  var r=state.pr,h='<div class="btns"><button class="btn ghost small" data-pcb="back2">← '+(r.parcId&&parcGet(r.parcId)?'Painel da parceria':'Parcerias')+'</button></div><div><h2>Roteiro de publi</h2><p class="sub">Escolha o formato e o app escreve com o perfil da marca, o briefing e a sua voz. Você edita.</p></div>';
   if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
@@ -1280,6 +1264,7 @@ function pubRoteiro(){
      +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button><button class="btn ghost small" data-pra="ganchos">Variações de gancho</button><button class="btn ghost small" data-pra="checar">Checar com a marca</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
      +'';
   }
+  if(r.res)h+='<div class="stickbar">'+(r.parcId&&parcGet(r.parcId)?'<button class="btn" data-pcb="saveros">Guardar no painel</button>':'<button class="btn" data-pra="draft">Salvar rascunho</button>')+'<button class="btn ghost" data-pra="pdf">Salvar PDF</button></div>'+(r.parcId?'<p class="note">Este roteiro é guardado sozinho no painel da parceria.</p>':'');
   h+=prExtras(r);
   h+='<div class="card"><h3>Antes de postar</h3>'+cfg().pck.map(function(t,i){return '<div class="row'+(r.ck[i]?' chkd':'')+'"><input type="checkbox" id="pk'+i+'" data-prck="'+i+'"'+(r.ck[i]?' checked':'')+'><label for="pk'+i+'">'+esc(t)+'</label></div>'}).join('')+'<div class="btns"><button class="btn ghost small" data-tg="edPck">'+(state.edPck?'Fechar edição':'Editar checklist')+'</button></div>'+(state.edPck?'<label class="lab">Um item por linha<textarea style="min-height:200px" data-ed="pck" data-lines="1">'+esc(cfg().pck.join("\n"))+'</textarea></label>':'')+'</div>';
   {
@@ -1305,24 +1290,24 @@ function pubRoteiroAction(a,el){
     if(!r.briefing.trim()&&!r.obj.trim()){r.err="Cole o briefing ou escreva a sua ideia.";render();return}
     prRun("Escrevendo o roteiro...",async function(){
       var p=RULES+"\n\nTarefa: roteiro de Reels de publicidade (parceria paga) com a marca "+r.marca+". Estrutura obrigatória, em 5 blocos: 1. GANCHO (0-3s): frase que para o dedo, com situação, número real ou pergunta; 2. HISTÓRIA (3-15s): o que aconteceu com ela ou com a seguidora; 3. VIRADA (15-25s): o que mudou, a solução prática; 4. MARCA (25-40s): onde a ferramenta entrou, com tela real e sem dados de clientes; 5. CTA (últimos 5s): uma ação só, cupom na legenda. A marca entra numa situação real: primeiro a história, depois a ferramenta. Nunca invente valores, descontos, resultados ou condições: use [PREENCHER]. Inclua selo de parceria paga e #publi na legenda. A Mari não usa palavrão, evita lista de erros sem solução e não fala de rotina escolar do filho.\n\nGuia da marca:\n"+guiaTxt(r.marca)+"\n\nBriefing da marca:\n"+(r.briefing||"(não informado)")+"\n\nIdeia da Mari: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"blocos\":[{\"nome\":\"1. Gancho\",\"tempo\":\"0-3s\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]} com exatamente 5 blocos.";
-      r.res=normPr(await S.json(prPrompt(r),{modelTier:"default"}));r.res.fmt=r.fmt||"Reels";r.ck={};r.gan=[];r.chk=null;
+      r.res=normPr(await S.json(prPrompt(r),{modelTier:"default"}));r.res.fmt=r.fmt||"Reels";r.ck={};r.gan=[];r.chk=null;rosSave(r);
     });return;
   }
   if(a==="voz"){
     if(!(state.voz||"").trim()&&!(r.instr||"").trim()){r.err="Cole um texto seu em “Meu jeito de falar” (em Criar material) ou escreva um ajuste.";render();return}
     prRun("Reescrevendo no seu jeito...",async function(){
       var x=await S.json(RULES+"\n\n"+vozGuia(r.instr||"")+"\n\nMantenha fatos, sentido, a mesma estrutura de blocos e os trechos [PREENCHER]. Roteiro atual:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.",{modelTier:"default"});
-      r.res=normPr(x,r.res);
+      r.res=normPr(x,r.res);r.res.fmt=r.fmt||"Reels";rosSave(r);
     });return;
   }
   if(a==="copy"){var t=r.res.titulo+"\n"+r.marca+"\n\n"+r.res.blocos.map(function(b){return b.nome+" ("+b.tempo+")\nFala: "+b.fala+"\nNa tela: "+b.tela}).join("\n\n")+"\n\nLegenda: "+r.res.legenda+"\n\nConfirmar: "+(r.res.confirmar||[]).join("; ");copyText(t,el);return}
   if(a==="draft"){pushDraft({tipo:"proteiro",titulo:r.res.titulo||"Roteiro de publi",data:JSON.parse(JSON.stringify(r))});el.textContent="Salvo em Rascunhos";return}
-  if(a==="pdf"){pubOpenMat("roteiro",prMat(r));return}
+  if(a==="pdf"){rosSave(r);pubOpenMat("roteiro",prMat(r));return}
 }
 function pubOpenMat(tipo,mat){
   var c=state.cr;
   if(c.material)pushDraft({tipo:c.tipo,titulo:c.material.titulo,data:JSON.parse(JSON.stringify(c))});
-  state.cr=crNew(tipo);state.cr.material=mat;state.cr.step=3;state.cr.view="edit";state.pub="mat";saveCr();render();window.scrollTo(0,0);
+  state.pubBack=state.pub==="mat"?(state.pubBack||"parc"):state.pub;state.cr=crNew(tipo);state.cr.material=mat;state.cr.step=3;state.cr.view="edit";state.pub="mat";saveCr();render();window.scrollTo(0,0);
 }
 /* ---- fit ---- */
 function fitVerdict(){
@@ -1382,7 +1367,18 @@ function pubMarcas(){
   return h+'<p class="note">Briefings confidenciais ficam fora do app.</p>';
 }
 function docMarcas(){if(cfg().doc)return clone(cfg().doc);return docDefault()}
-function docDefault(){
+function kitFill(d){var k=cfg().kit||{};
+  d.secoes.forEach(function(x){var t=x.titulo,ph=/\n\[PREENCHER[^\]]*\]/;
+    if(t==="Quem é a Mari"&&k.seg)x.corpo=x.corpo.replace(ph,"\nSeguidores: "+k.seg+".");
+    if(t==="Quem acompanha a Mari"&&k.pub)x.corpo=x.corpo.replace(ph,"\n"+k.pub);
+    if(t==="No que ela é boa"&&k.picos)x.itens=x.itens.map(function(i){return i.replace(/ \[PREENCHER[^\]]*\]/," ("+k.picos+")")});
+    if(t==="Valores"&&k.valores)x.corpo=k.valores;
+    if(t==="Cobrança e pagamento"&&k.nfdados)x.itens=x.itens.map(function(i){return i.indexOf("[PREENCHER")===0?k.nfdados:i});
+    if(t==="Marcas com quem já trabalhou"&&k.marcas)x.corpo=k.marcas;
+    if(t==="Contato"&&k.contato)x.corpo=k.contato});
+  return d}
+function docDefault(){return kitFill(docDefaultRaw())}
+function docDefaultRaw(){
   return {titulo:"Mariana Leal · Parcerias com marcas",subtitulo:"Apresentação, público, formatos, prazos e pagamento",
    intro:"Este documento reúne como a Mari trabalha com marcas, do primeiro contato ao pagamento. Itens em [PREENCHER] precisam ser confirmados antes do envio.",
    secoes:[
@@ -1402,7 +1398,7 @@ function docDefault(){
 function relMat(id){
   var c=state.camp[id],r=c.rep||{};function v(x){return x||"[PREENCHER]"}
   return {titulo:"Relatório · "+c.m,subtitulo:(c.t||"Campanha")+" · postagem em "+fd(c.d),intro:"Resumo dos resultados da campanha, para envio à marca.",
-   secoes:[{titulo:"Resultados",corpo:"Dados do Instagram, conforme os prints anexados.",itens:["Alcance: "+v(r.alc),"Visualizações: "+v(r.vis),"Interações: "+v(r.int),"Cliques no link: "+v(r.cli)]},
+   secoes:[{titulo:"Resultados",corpo:"Dados do Instagram, conforme os prints anexados.",itens:["Alcance: "+v(r.alc),"Visualizações: "+v(r.vis),"Interações: "+v(r.int),"Cliques no link: "+v(r.cli),"Uso do cupom ou vendas: "+v(r.ven)]},
     {titulo:"O que funcionou",corpo:v(r.apr),itens:[]},
     {titulo:"Prints",corpo:"[PREENCHER: anexar prints de alcance, interações e cliques]",itens:[]},
     {titulo:"Próximos passos",corpo:"[PREENCHER: sugestão de renovação ou ajuste]",itens:[]}],
@@ -1503,6 +1499,14 @@ function htmlAjustes(){
    +'<div class="card"><h3>Minhas regras</h3><p class="note">Vale para tudo que o Claude escrever no app: o que você nunca faz, expressões que ama, limites. Exemplo: “nunca falar de rotina escolar do filho”.</p><textarea data-cfg="regras" placeholder="Escreva uma regra por linha...">'+esc(C2.regras||"")+'</textarea></div>'
    +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (legenda, roteiro, áudio transcrito). Fica neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea></div>'
    +'<div class="card"><h3>Limites das publis</h3><div class="fields"><label>Contratos por mês<input type="text" inputmode="numeric" data-ed="lim|contratos" data-num="1" value="'+esc(C2.lim.contratos)+'"></label><label>Meta por mês (R$)<input type="text" inputmode="decimal" data-ed="lim|meta" data-num="1" value="'+esc(C2.lim.meta)+'"></label></div><label class="lab">Categorias que você recusa (separe por vírgula)<input type="text" data-ed="lim|recusa" value="'+esc(C2.lim.recusa)+'"></label></div>'
+   +'<div class="card"><h3>Meu mídia kit</h3><p class="note">Preencha uma vez. O “Documento para marcas” usa estes dados em vez de pedir de novo. O que ficar vazio continua como [PREENCHER].</p>'
+   +'<label class="lab">Seguidores hoje<input type="text" data-ed="kit|seg" value="'+esc((C2.kit||{}).seg||"")+'"></label>'
+   +'<label class="lab">Quem acompanha (faixa etária, cidades, alcance mensal)<textarea data-ed="kit|pub">'+esc((C2.kit||{}).pub||"")+'</textarea></label>'
+   +'<label class="lab">Números dos vlogs que mais cresceram<input type="text" data-ed="kit|picos" value="'+esc((C2.kit||{}).picos||"")+'"></label>'
+   +'<label class="lab">Valores por formato (ou “sob consulta”)<textarea data-ed="kit|valores">'+esc((C2.kit||{}).valores||"")+'</textarea></label>'
+   +'<label class="lab">Dados para emissão da nota e forma de pagamento<textarea data-ed="kit|nfdados">'+esc((C2.kit||{}).nfdados||"")+'</textarea></label>'
+   +'<label class="lab">Marcas que autorizam ser citadas<input type="text" data-ed="kit|marcas" value="'+esc((C2.kit||{}).marcas||"")+'"></label>'
+   +'<label class="lab">Contato para propostas (e-mail ou WhatsApp)<input type="text" data-ed="kit|contato" value="'+esc((C2.kit||{}).contato||"")+'"></label></div>'
    +htmlAI()
    +'<div class="card"><h3>Voltar ao padrão</h3><p class="note">Desfaz as suas edições de marcas, etapas, critérios, checklist, Tray, regras e modelo de documento. Campanhas, ideias e calendário não são apagados.</p><div class="btns"><button class="btn ghost small" data-cfx="reset-all">'+(state.confirmReset?'Toque de novo para confirmar':'Voltar tudo ao padrão')+'</button></div></div>';
 }
@@ -1664,18 +1668,19 @@ function aiSet(o){try{localStorage.setItem("hoje-ai",JSON.stringify(o))}catch(e)
 function blobB64(b){return new Promise(function(res,rej){var f=new FileReader();f.onload=function(){res(String(f.result).split(",")[1]||"")};f.onerror=function(){rej({code:"img"})};f.readAsDataURL(b)})}
 function jsonFrom(t){t=String(t||"").replace(/```json|```/g,"");var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw {code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw {code:"parse"}}}
 function makeAI(){
-  if(!aiGet().key)return null;
+  var cf0=aiGet();if(!(cf0.key||(cf0.proxy&&cf0.code)))return null;
   return {own:true,
     limits:async function(){return {images:{maxCount:6,mediaTypes:["image/jpeg","image/png","image/webp"]}}},
     json:async function(prompt,opt){
-      opt=opt||{};var c2=aiGet();if(!c2.key)throw {code:"no_key"};
+      opt=opt||{};var c2=aiGet(),viaP=!!(c2.proxy&&c2.code);if(!viaP&&!c2.key)throw {code:"no_key"};
       var model=opt.modelTier==="quick"?(c2.quick||"claude-haiku-5-5"):(c2.model||"claude-sonnet-5-5");
       var content=[];
       if(opt.images){for(var i=0;i<opt.images.length;i++){content.push({type:"image",source:{type:"base64",media_type:opt.images[i].type||"image/jpeg",data:await blobB64(opt.images[i])}})}}
       content.push({type:"text",text:prompt});
       var r;
-      try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":c2.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:model,max_tokens:8000,messages:[{role:"user",content:content}]})})}catch(e){throw {code:"net"}}
+      try{r=await fetch(viaP?c2.proxy.replace(/\/+$/,"")+"/ai":"https://api.anthropic.com/v1/messages",{method:"POST",headers:viaP?{"content-type":"application/json","x-app-code":c2.code}:{"content-type":"application/json","x-api-key":c2.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:model,max_tokens:8000,messages:[{role:"user",content:content}]})})}catch(e){throw {code:"net"}}
       if(r.status===401||r.status===403)throw {code:"bad_key"};
+      if(r.status===413)throw {code:"api",status:413};
       if(r.status===429)throw {code:"rate_limited"};
       if(!r.ok)throw {code:"api",status:r.status};
       var j=await r.json();
@@ -1688,17 +1693,24 @@ async function aiRefresh(){
   S=wrapBrain(makeAI());LIM=null;
   if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){}}
 }
+var PAGES_URL="https://luahproducao.github.io/Mariana-Leal/";
+function aiLink(){var c=aiGet();if(!(c.proxy&&c.code))return "";var base=(location.protocol==="file:"||/claude\.ai|claudeusercontent|anthropic/.test(location.host))?PAGES_URL:location.origin+location.pathname;return base+"#ia="+btoa(unescape(encodeURIComponent(JSON.stringify({u:c.proxy,c:c.code})))).replace(/\+/g,"-").replace(/\//g,"_")}
+function aiFromHash(){var m=String(location.hash||"").match(/[#&]ia=([^&]+)/);if(!m)return false;try{var o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,"+").replace(/_/g,"/")))));var c=aiGet();if(o.u)c.proxy=String(o.u);if(o.c)c.code=String(o.c);aiSet(c);history.replaceState(null,"",location.pathname+location.search);return true}catch(e){return false}}
 function htmlAI(){
-  var cf=aiGet(),dentro=!!(S&&!S.own),tem=!!cf.key;
-  var st=dentro?"Dentro do Claude a IA já funciona, sem chave.":tem?"Chave salva neste aparelho (termina em …"+esc(String(cf.key).slice(-4))+").":"Nenhuma chave salva.";
+  var cf=aiGet(),dentro=!!(S&&!S.own),viaP=!!(cf.proxy&&cf.code),tem=!!cf.key;
+  var st=dentro?"Dentro do Claude a IA já funciona, sem configurar nada.":viaP?"Ligada pelo serviço da assessoria.":tem?"Usando uma chave própria (termina em …"+esc(String(cf.key).slice(-4))+").":"Ainda não ligada neste aparelho.";
+  var lk=aiLink();
   return '<div class="card"><h3>Inteligência artificial</h3>'
-   +'<p class="note">Para escrever roteiros, guias e sugestões quando o app é aberto fora do Claude, cole aqui a sua chave da API da Anthropic (console.anthropic.com → API Keys). A chave fica só neste aparelho e vai direto para a Anthropic; o uso é cobrado na sua conta da API. Use uma chave só para este app.</p>'
+   +'<p class="note">Fora do Claude, a IA funciona por um serviço da assessoria: a chave fica guardada lá, e aqui só vale um código de acesso. O jeito mais fácil é abrir o link de configuração que a assessoria enviar.</p>'
    +'<p class="note"><b>'+st+'</b></p>'
-   +'<label class="lab">Colar chave<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="key" placeholder="sk-ant-..."></label>'
-   +'<div class="fields"><label>Modelo principal<input type="text" data-ai="model" value="'+esc(cf.model||"claude-sonnet-5-5")+'"></label><label>Modelo rápido<input type="text" data-ai="quick" value="'+esc(cf.quick||"claude-haiku-5-5")+'"></label></div>'
-   +'<div class="btns"><button class="btn small" data-aib="test">Testar conexão</button>'+(tem?'<button class="btn ghost small" data-aib="clear">Remover chave</button>':'')+'</div>'
-   +(AIMSG?'<p class="note" id="ai-msg">'+esc(AIMSG)+'</p>':'')+'</div>'
-   +'<div class="card"><h3>Backup dos seus dados</h3><p class="note">Fora do Claude, tudo fica guardado neste navegador. Exporte um arquivo de vez em quando e use “Importar” para levar para outro aparelho ou recuperar. A chave da API não entra no backup.</p>'
+   +'<label class="lab">Endereço do serviço<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="proxy" value="'+esc(cf.proxy||"")+'" placeholder="https://hoje-mari.seu-usuario.workers.dev"></label>'
+   +'<label class="lab">Código de acesso<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="code" placeholder="'+(cf.code?"código salvo":"cole o código")+'"></label>'
+   +'<div class="btns"><button class="btn small" data-aib="test">Testar conexão</button>'+((tem||viaP)?'<button class="btn ghost small" data-aib="clear">Desligar neste aparelho</button>':'')+'</div>'
+   +(AIMSG?'<p class="note" id="ai-msg">'+esc(AIMSG)+'</p>':'')
+   +(lk?'<label class="lab">Link de configuração para outro aparelho (envie só para a Mari)<input type="text" readonly value="'+esc(lk)+'" onclick="this.select()"></label><div class="btns"><button class="btn ghost small" data-aib="copylink">Copiar link</button></div>':'')
+   +'<details><summary class="note">Avançado: usar uma chave própria da Anthropic</summary><label class="lab">Chave da API<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="key" placeholder="sk-ant-..."></label><div class="fields"><label>Modelo principal<input type="text" data-ai="model" value="'+esc(cf.model||"claude-sonnet-5-5")+'"></label><label>Modelo rápido<input type="text" data-ai="quick" value="'+esc(cf.quick||"claude-haiku-5-5")+'"></label></div></details></div>'
+   +'<div class="card"><h3>Sincronização</h3><p class="note">'+(synOn()?'Ligada. As mudanças vão para o serviço e aparecem nos outros aparelhos que abrirem o mesmo link de configuração. Se duas pessoas editarem a mesma lista ao mesmo tempo, vale a mudança mais recente.':'Desligada. Precisa do serviço configurado acima e do app aberto fora do Claude.')+'</p>'+(SYN.msg?'<p class="note">'+esc(SYN.msg)+'</p>':'')+(synOn()?'<div class="btns"><button class="btn small" data-synb="now">Sincronizar agora</button></div>':'')+'</div>'
+   +'<div class="card"><h3>Backup dos seus dados</h3><p class="note">Exporte um arquivo de vez em quando e use “Importar” para levar para outro aparelho ou recuperar. A chave e o código não entram no backup.</p>'
    +'<div class="btns"><button class="btn small" data-aib="export">Exportar backup</button><label class="btn ghost small" style="cursor:pointer">Importar backup<input type="file" accept="application/json,.json" data-ai="import" style="display:none"></label></div>'
    +(BKMSG?'<p class="note">'+esc(BKMSG)+'</p>':'')+'</div>';
 }
@@ -1706,7 +1718,8 @@ var BKMSG="";
 document.addEventListener("click",async function(e){
   var b=e.target.closest&&e.target.closest("[data-aib]");if(!b)return;
   var a=b.dataset.aib;
-  if(a==="clear"){var o=aiGet();delete o.key;aiSet(o);if(S&&S.own)S=null;LIM=null;AIMSG="Chave removida.";await aiRefresh();render();return}
+  if(a==="copylink"){var lk2=aiLink();try{await navigator.clipboard.writeText(lk2);AIMSG="Link copiado."}catch(err){AIMSG="Selecione o link acima e copie."}render();return}
+  if(a==="clear"){var o=aiGet();delete o.key;delete o.proxy;delete o.code;aiSet(o);if(S&&S.own)S=null;LIM=null;AIMSG="Desligado neste aparelho.";await aiRefresh();render();return}
   if(a==="test"){
     if(!S){AIMSG="Cole a chave primeiro.";render();return}
     AIMSG="Testando...";render();
@@ -1715,13 +1728,14 @@ document.addEventListener("click",async function(e){
   }
   if(a==="export"){
     var dump={app:"hoje-com-a-mari",v:1,at:new Date().toISOString(),data:{}};
-    try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("hoje-")===0&&k!=="hoje-ai")dump.data[k]=localStorage.getItem(k)}}catch(err){}
+    try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("hoje-")===0&&k!=="hoje-ai"&&k!=="hoje-sync-meta"&&k!=="hoje-sync-init")dump.data[k]=localStorage.getItem(k)}}catch(err){}
     try{await D.save({filename:"hoje-com-a-mari-backup-"+new Date().toISOString().slice(0,10)+".json",data:JSON.stringify(dump)});BKMSG="Backup salvo."}catch(err){BKMSG=(err&&err.code==="declined")?"Salvar cancelado.":"Não consegui salvar o backup."}
     render();
   }
 });
 document.addEventListener("change",async function(e){
   var el=e.target,k=el.dataset&&el.dataset.ai;if(!k)return;
+  if(k==="proxy"||k==="code"){var vp=el.value.trim();if(k==="code")el.value="";if(!vp)return;var op=aiGet();op[k]=vp;aiSet(op);AIMSG="Salvo. Toque em Testar conexão.";await aiRefresh();render();synNow();return}
   if(k==="key"){var v=el.value.trim();el.value="";if(!v)return;var o=aiGet();o.key=v;aiSet(o);AIMSG="Chave salva. Toque em Testar conexão.";await aiRefresh();render();return}
   if(k==="model"||k==="quick"){var o2=aiGet();o2[k]=el.value.trim();aiSet(o2);return}
   if(k==="import"){
@@ -1758,6 +1772,12 @@ function mdSeed(){
   });
   mdLocal();
 }
+function mdMigratePlano(){
+  try{if(localStorage.getItem("hoje-plano-migrated"))return;localStorage.setItem("hoje-plano-migrated","1")}catch(e){return}
+  Object.keys(state.plano||{}).forEach(function(k){var q=state.plano[k];if(q&&!q.del&&q.t&&!mdGet("pl-"+k))MD.items.push(mdNew({id:"pl-"+k,t:q.t,tipo:q.f==="Publi"?"postar":"gravar",d:q.d||"",nota:q.f?"Formato: "+q.f:""}))});
+  mdLocal();
+}
+document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-gopub]");if(!g)return;state.tab="pub";state.pub=g.dataset.gopub;PCUI.open=null;render();window.scrollTo(0,0)});
 function mdFmt(iso){return new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}
 function mdItem(it){
   var p=it.parc?parcGet(it.parc):null,done=it.st==="feito",tl=(MDT.filter(function(x){return x[0]===it.tipo})[0]||[0,"Tarefa"])[1];
@@ -1766,6 +1786,7 @@ function mdItem(it){
   h+='<div class="meta" style="flex-wrap:wrap;gap:6px">';
   if(!it.d)h+='<button class="btn small" data-mdb="hoje">Fazer hoje</button><button class="btn small ghost" data-mdb="amanha">Amanhã</button>';
   else h+=done?'<button class="btn small ghost" data-mdb="undo">Desfazer</button>':'<button class="btn small" data-mdb="done">Feito</button><button class="btn small ghost" data-mdb="amanha">Adiar para amanhã</button>';
+  if(/^tks-.+-f$/.test(it.id))h+='<button class="btn small ghost" data-mdb="roteirodia">Ver roteiro e legenda do dia</button>';
   h+='<button class="btn small ghost" data-mdb="edit">'+(MDUI.edit===it.id?'Fechar':'Editar')+'</button>'+(p?'<button class="btn small ghost" data-mdb="painel">Abrir parceria</button>':'')+'</div>';
   if(MDUI.edit===it.id){
     h+='<div class="card" style="background:var(--bg)"><label class="lab">O que é<input type="text" data-mdf="t" value="'+esc(it.t)+'"></label>'
@@ -1779,6 +1800,7 @@ function mdItem(it){
 }
 function mdHtml(){
   var today=isoToday();if(!MDUI.date)MDUI.date=today;var D=MDUI.date;
+  MD.items.forEach(function(x){var fm=x.id.match(/^tks-(.+)-f$/);if(fm&&x.st!=="feito"&&state.st[fm[1]+"-f"]==="posted")x.st="feito"});
   var live=MD.items.filter(function(x){return x.st!=="cancelado"});
   var dia=live.filter(function(x){return x.d===D}),ent=live.filter(function(x){return !x.d&&x.st==="pendente"});
   var atr=D===today?live.filter(function(x){return x.d&&x.d<today&&x.st==="pendente"}):[];
@@ -1788,7 +1810,8 @@ function mdHtml(){
   if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
   var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
   if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
-  if(pend>3)h+='<div class="alert"><b>Dia cheio</b>São '+pend+' coisas para você. O combinado é no máximo 3: use “Adiar para amanhã” no que puder esperar.</div>';
+  var tot=mine.filter(function(x){return x.st==="pendente"}).length;
+  if(pend>3||tot>5)h+='<div class="alert"><b>Dia cheio</b>São '+tot+' itens para você ('+pend+' tarefa(s) e '+(tot-pend)+' pedido(s)). Use “Adiar para amanhã” no que puder esperar.</div>';
   if(ent.length)h+='<div class="block"><h3>Entrada ('+ent.length+')</h3><p class="note">Chegou e ainda não tem dia. Escolha quando fazer.</p>'+ent.map(mdItem).join('')+'</div>';
   if(atr.length)h+='<div class="block"><h3>Atrasado ('+atr.length+')</h3>'+atr.map(mdItem).join('')+'</div>';
   MDT.forEach(function(t){var l=mine.filter(function(x){return x.tipo===t[0]});if(l.length)h+='<div class="block"><h3>'+t[1]+'</h3>'+l.map(mdItem).join('')+'</div>'});
@@ -1819,8 +1842,9 @@ document.addEventListener("click",function(e){
     MD.items.push(n);mdPut(n);MDUI.f={t:"",tipo:"gravar",quem:"Mari",parc:"",ini:"",fim:"",d:""};MDUI.add=false;MDUI.msg=n.d?"Adicionada em "+n.d.split("-").reverse().slice(0,2).join("/")+".":"Foi para a Entrada.";render();return;
   }
   if(!it)return;
-  if(a==="done"){it.st="feito";mdPut(it);render()}
-  else if(a==="undo"){it.st="pendente";mdPut(it);render()}
+  var ffm=it.id.match(/^tks-(.+)-f$/);
+  if(a==="done"||a==="undo"){it.st=a==="done"?"feito":"pendente";if(ffm){var fid=ffm[1]+"-f";state.st[fid]=a==="done"?"posted":"todo";dbSet("st",fid,{s:state.st[fid],at:Date.now()},"Salvo")}mdPut(it);render()}
+  else if(a==="roteirodia"){if(ffm){state.sel=ffm[1];state.hmode="plano";state.tab="hoje";render();window.scrollTo(0,0)}}
   else if(a==="hoje"){it.d=today;mdPut(it);MDUI.date=today;render()}
   else if(a==="amanha"){var base=it.d&&it.d>today?it.d:today;it.d=addDays(base,1);it.st="pendente";mdPut(it);MDUI.msg="Movida para "+it.d.split("-").reverse().slice(0,2).join("/")+".";render()}
   else if(a==="edit"){MDUI.edit=MDUI.edit===it.id?null:it.id;render()}
@@ -1838,7 +1862,7 @@ document.addEventListener("click",function(e){
   var b=e.target.closest&&e.target.closest("[data-pcb=plan]");if(!b)return;
   var p=PCUI.open?parcGet(PCUI.open):null;if(!p)return;
   if(!p.post){PCUI.msg="Escolha a data de postagem prevista para criar as tarefas.";render();return}
-  var dts=etapaDates({d:p.post}),n=0,ex={};
+  var cc=parcCamp(p);if(!cc){PCUI.msg="Aguarde os dados carregarem.";render();return}var dts=etapaDates(cc),n=0,ex={};
   MD.items.forEach(function(x){if(x.src)ex[x.src]=1});
   cfg().etapas.forEach(function(et){
     if(et.quem!=="Mari"||!dts[et.id])return;var src="pc:"+p.id+":"+et.id;if(ex[src])return;
@@ -1894,6 +1918,12 @@ function prPrompt(r){
   var fm=r.fmt||"Reels",nm=(PRF.filter(function(x){return x[0]===fm})[0]||[0,fm])[1];
   return RULES+"\n\nTarefa: roteiro de "+nm+" de publicidade (parceria paga) com a marca "+r.marca+". "+PRFS[fm]+" A marca entra numa situação real: primeiro a história, depois a ferramenta. Nunca invente valores, descontos, resultados ou condições: use [PREENCHER]. Inclua selo de parceria paga, #publi e tudo o que a marca exige na legenda. A Mari não usa palavrão, evita lista de erros sem solução e não fala de rotina escolar do filho.\n\nPERFIL DA MARCA:\n"+guiaFull(r.marca)+parcExemplos(r.marca)+"\n\nBriefing e painel da parceria:\n"+(r.briefing||"(não informado)")+"\n\nIdeia da Mari: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.";
 }
+function rosSave(r){
+  var p=r.parcId?parcGet(r.parcId):null;if(!p||!r.res)return false;
+  var cp=JSON.parse(JSON.stringify(r.res)),ex=r.roId?p.roteiros.filter(function(x){return x.id===r.roId})[0]:null;
+  if(ex){ex.res=cp;ex.at=Date.now()}else{var nr={id:"ro"+Date.now(),res:cp,st:"Rascunho",at:Date.now()};p.roteiros.push(nr);r.roId=nr.id;parcLog(p,"Roteiro criado")}
+  parcPut(p);savePr();return true;
+}
 function prExtras(r){
   var h="";
   if(r.gan&&r.gan.length)h+='<div class="card"><h3>Variações de gancho</h3>'+r.gan.map(function(g,i){return '<div class="card" style="background:var(--bg)"><span class="tag">'+esc(g.tipo)+'</span><p>'+esc(g.fala)+'</p>'+(g.tela?'<p class="note">Na tela: '+esc(g.tela)+'</p>':'')+'<div class="btns"><button class="btn small" data-pra="usegan" data-gi="'+i+'">Usar este gancho</button></div></div>'}).join('')+'</div>';
@@ -1910,9 +1940,27 @@ var PARC={items:[]},PCUI={open:null,confDel:false,busy:"",msg:"",bt:"",bx:"",nm:
 var PCST=["Prospecção","Negociando","Fechada","Em produção","Entregue","Encerrada"],PCROS=["Rascunho","Enviado à marca","Aprovado","Postado"];
 function parcLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-parc")||"[]");PARC.items=Array.isArray(j)?j:[]}catch(e){PARC.items=[]}}
 function parcLocal(){try{localStorage.setItem("hoje-parc",JSON.stringify(PARC.items))}catch(e){}}
-function parcPut(p){p.at=Date.now();parcLocal();if(C.parc)C.parc.doc(p.id).set({json:JSON.stringify(p),at:p.at}).then(function(){setSync("Parceria salva para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function parcPut(p){p.at=Date.now();parcLocal();if(!PCSYNC){PCSYNC=true;try{parcSync(p)}catch(e){}PCSYNC=false}if(C.parc)C.parc.doc(p.id).set({json:JSON.stringify(p),at:p.at}).then(function(){setSync("Parceria salva para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
 function parcFix(p){["valor","nf","nfData","pagoEm"].forEach(function(k){if(p[k]===undefined)p[k]=""});if(!p.m)p.m={};if(!p.rel)p.rel={};if(!p.log)p.log=[];return p}
 function parcGet(id){var p=PARC.items.filter(function(x){return x.id===id})[0];return p?parcFix(p):p}
+function parcCamp(p){
+  var c=p.campId&&state.camp[p.campId];if(c&&!c.del)return c;
+  if(p.campId)return null;
+  var id="c"+Date.now()+Math.floor(Math.random()*1000),r=p.rel||{};
+  c={m:p.marca,t:p.nome||"",d:p.post||"",env:"",v:p.valor||"",nf:p.nfData||"",done:{},rep:{alc:r.alc||"",vis:r.vis||"",int:r.int||"",cli:r.cli||"",ven:r.ven||"",apr:r.apr||""}};
+  if(p.pagoEm)c.done.e10=true;if(p.nfData)c.done.e9=true;if(p.m&&p.m.gravado)c.done.e4=true;if(p.m&&p.m.relatorio)c.done.e8=true;if(p.m&&p.m.postado)c.done.e7=true;
+  state.camp[id]=c;p.campId=id;campSave(id);return c;
+}
+function parcSync(p){
+  var c=parcCamp(p);if(!c)return;var d=c.done=c.done||{},ro=p.roteiros,any=function(a){return ro.some(function(r){return a.indexOf(r.st)>=0})};
+  if(p.briefs.length)d.e1=true;if(any(["Enviado à marca","Aprovado","Postado"]))d.e2=true;if(any(["Aprovado","Postado"]))d.e3=true;if(any(["Postado"])||p.status==="Entregue"||p.status==="Encerrada")d.e7=true;
+  c.m=p.marca;c.t=p.nome||c.t;if(p.post)c.d=p.post;campSave(p.campId);
+}
+var PCSYNC=false;
+function parcAdopt(){
+  var ref={};PARC.items.forEach(function(x){if(x.campId)ref[x.campId]=1});
+  Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(!c||c.del||ref[id]||!c.m)return;var np=parcNew(c.m,c.t||"","Em produção");np.post=c.d||"";np.campId=id;PARC.items.push(np);parcPut(np)});
+}
 function parcLog(p,t){parcFix(p);p.log.push({at:Date.now(),t:t});if(p.log.length>60)p.log.shift()}
 function brl(n){return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
 function pcNum(v){var x=parseFloat(String(v||"").replace(/[^\d,.-]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));return isNaN(x)?0:x}
@@ -1945,28 +1993,30 @@ function pcTa(f,label,v,ph,min){return '<label class="lab">'+label+'<textarea da
 function pubParc(){
   var h='',p=PCUI.open?parcGet(PCUI.open):null;
   if(!p){
-    PCUI.open=null;
+    PCUI.open=null;parcAdopt();
     h+='<div><h2>Parcerias</h2><p class="sub">Cada parceria tem um painel: do briefing ao pagamento. Aqui você vê o que precisa de atenção.</p></div>';
-    var rec=0,atr=0,prod=0;PARC.items.forEach(function(x){parcFix(x);if(x.nfData&&!x.pagoEm){rec+=pcNum(x.valor);if(daysUntil(pcVence(x))<0)atr++}if(x.status==="Em produção")prod++});
+    var rec=0,atr=0,prod=0;PARC.items.forEach(function(x){parcFix(x);var c=x.campId&&state.camp[x.campId];if(c&&c.done&&c.done.e9&&!c.done.e10){rec+=parseNum(c.v);if(c.d&&daysUntil(etapaDate(c,"e10"))<0)atr++}if(x.status==="Em produção")prod++});
     h+='<div class="card"><div class="fields"><div><div class="note">A receber</div><h3>'+brl(rec)+'</h3></div><div><div class="note">Em produção</div><h3>'+prod+'</h3></div></div>'+(atr?'<p class="note" style="color:var(--bad)">'+atr+' pagamento(s) com prazo vencido.</p>':'')+'</div>';
     h+='<div class="card"><h3>Nova parceria</h3><label class="lab">Marca<select id="pc-m">'+marcaList().map(function(m){return '<option'+(m===PCUI.mc?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
      +'<label class="lab">Nome da parceria (opcional)<input type="text" id="pc-n" value="'+esc(PCUI.nm)+'" placeholder="Ex.: Black Friday, Reels de novembro"></label>'
      +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button><button class="btn ghost small" data-pcb="avulso">Roteiro avulso</button></div></div>';
-    var l=PARC.items.slice().sort(function(a,b){var an=pcSteps(a).filter(function(x){return !(x[2])}).length?0:1,bn=pcSteps(b).filter(function(x){return !(x[2])}).length?0:1;return an-bn||(a.post||"9").localeCompare(b.post||"9")});
+    var nx0=function(x){var c=x.campId&&state.camp[x.campId];return c?nextEtapa(c):null};
+    var l=PARC.items.slice().sort(function(a,b){var an=nx0(a)?0:1,bn=nx0(b)?0:1;return an-bn||(a.post||"9").localeCompare(b.post||"9")});
     if(!l.length)h+='<div class="card"><p class="sub">Nenhum painel ainda. Crie um ou comece pelas marcas que você já tem.</p><div class="btns"><button class="btn ghost small" data-pcb="seedfix">Criar painel de cada marca fixa</button></div></div>';
-    h+=l.map(function(x){var nx=pcSteps(x).filter(function(q){return !q[2]})[0];return '<button class="card click" data-pcb="open" data-id="'+x.id+'" style="text-align:left;width:100%"><span class="tag">'+esc(x.status)+'</span><h3>'+esc(parcTitle(x))+'</h3><p class="sub">'+(nx?'Próximo passo: '+esc(nx[1]):'Tudo concluído')+(x.post?' · postagem '+fd(x.post):'')+(pcNum(x.valor)?' · '+brl(pcNum(x.valor)):'')+'</p></button>'}).join('');
+    h+=l.map(function(x){var c=x.campId&&state.camp[x.campId],nx=c?nextEtapa(c):null;return '<button class="card click" data-pcb="open" data-id="'+x.id+'" style="text-align:left;width:100%"><span class="tag">'+esc(x.status)+'</span><h3>'+esc(parcTitle(x))+'</h3><p class="sub">'+(nx&&x.post?'Próximo: '+esc(nx[1]):(x.post?'Tudo concluído':'Defina a data de postagem'))+(x.post?' · postagem '+fd(x.post):'')+(c&&parseNum(c.v)?' · '+brl(parseNum(c.v)):'')+'</p></button>'}).join('');
     return h;
   }
+  var c=parcCamp(p);
   h+='<div class="btns"><button class="btn ghost small" data-pcb="back">← Parcerias</button></div>';
   h+='<div><h2>'+esc(parcTitle(p))+'</h2></div>';
   if(PCUI.busy)h+='<div class="card"><h3>'+esc(PCUI.busy)+'</h3></div>';
   if(PCUI.msg)h+='<div class="draft">'+esc(PCUI.msg)+'</div>';
-  var st=pcSteps(p),nxt=st.filter(function(q){return !q[2]})[0],done=st.filter(function(q){return q[2]}).length;
-  h+='<div class="card"><h3>Caminho da parceria · '+done+' de '+st.length+'</h3>'+st.map(function(q){return '<div class="row'+(q[2]?' chkd':'')+'">'+(q[3]?'<input type="checkbox" data-pcm="'+q[0]+'"'+(q[2]?' checked':'')+' id="m-'+q[0]+'"><label for="m-'+q[0]+'">'+esc(q[1])+'</label>':'<span style="width:22px;display:inline-block">'+(q[2]?'✓':'○')+'</span><span>'+esc(q[1])+'</span>')+'</div>'}).join('')
-   +(nxt?'<p class="note"><b>Próximo passo:</b> '+esc(nxt[1])+'</p>':'<p class="note"><b>Tudo concluído.</b> Guarde os aprendizados no cérebro.</p>')+'</div>';
+  if(!c)return h+'<div class="card"><p class="sub">Carregando os dados desta parceria...</p></div>';
+  var cid=p.campId,ds=p.post?etapaDates(c):null,es=cfg().etapas,dn=es.filter(function(e){return (c.done||{})[e.id]}).length,nx=nextEtapa(c);
+  h+='<div class="card"><h3>Caminho da parceria · '+dn+' de '+es.length+'</h3>'+(ds?es.map(function(e){var d1=(c.done||{})[e.id],dt=ds[e.id];return '<div class="row'+(d1?' chkd':'')+'"><input type="checkbox" id="cd-'+cid+e.id+'" data-cdone="'+cid+'|'+e.id+'"'+(d1?' checked':'')+'><label for="cd-'+cid+e.id+'">'+esc(e.label)+' <span class="note">('+esc(e.quem)+' · '+fd(dt)+')</span> '+stBadge(dt,d1)+'</label></div>'}).join('')+(nx?'<p class="note"><b>Próximo passo:</b> '+esc(nx[1])+' · '+fd(ds[nx[0]])+'</p>':'<p class="note"><b>Tudo concluído.</b> Guarde o aprendizado no cérebro.</p>'):'<p class="note">Escolha a data de postagem prevista em Dados. Os prazos de cada etapa são calculados a partir dela.</p>')+'<p class="note">Briefing, roteiro e status marcam algumas etapas sozinhos.</p></div>';
   h+='<div class="card"><h3>Dados</h3><div class="fields"><label>Nome<input type="text" data-pcf="nome" value="'+esc(p.nome)+'"></label><label>Status<select data-pcf="status">'+PCST.map(function(x){return '<option'+(x===p.status?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields"><label>Postagem prevista<input type="date" data-pcf="post" value="'+esc(p.post)+'"></label><label>Contato na marca<input type="text" data-pcf="contato" value="'+esc(p.contato)+'" placeholder="Nome e canal"></label></div>'
-   +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'<div class="btns"><button class="btn small" data-pcb="plan">Criar tarefas nos dias</button></div><p class="note">Cria em “Meu dia” cada passo seu, nas datas combinadas a partir da data de postagem.</p></div>';
+   +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'<div class="btns"><button class="btn small" data-pcb="plan">Criar tarefas nos dias</button></div><p class="note">Cria em “Meu dia” cada passo seu, nas datas combinadas.</p></div>';
   h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais. Não cole briefing que a marca pediu para manter em sigilo.</p>'
    +'<label class="lab">Título<input type="text" id="pc-bt" value="'+esc(PCUI.bt)+'" placeholder="Ex.: Briefing inicial, ajuste de 05/11"></label>'
    +'<label class="lab">Texto do briefing<textarea id="pc-bx" style="min-height:120px" placeholder="Cole aqui...">'+esc(PCUI.bx)+'</textarea></label><div class="btns"><button class="btn small" data-pcb="addbrief">Guardar briefing</button></div>';
@@ -1978,17 +2028,14 @@ function pubParc(){
   h+='<div class="card"><h3>Roteiros desta parceria</h3>'
    +p.roteiros.map(function(r,i){return '<div class="card" style="background:var(--bg)"><b>'+esc((r.res&&r.res.titulo)||"Roteiro")+'</b> <span class="tag">'+esc((PRF.filter(function(f){return f[0]===((r.res&&r.res.fmt)||"Reels")})[0]||[0,"Reels"])[1])+'</span><div class="fields"><label>Situação<select data-pcrs="'+i+'">'+PCROS.map(function(x){return '<option'+(x===r.st?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><div class="btns"><button class="btn small" data-pcb="openros" data-i="'+i+'">Abrir e editar</button><button class="btn ghost small" data-pcb="delros" data-i="'+i+'">Apagar</button></div></div>'}).join('')
    +(S?'<div class="btns"><button class="btn" data-pcb="roteiro">Escrever roteiro com este painel</button></div>':'<p class="note">'+esc(NOAI)+'</p>')+'</div>';
-  var venc=pcVence(p),fin=p.pagoEm?'Pago em '+fd(p.pagoEm)+'.':(p.nfData?(daysUntil(venc)<0?'Prazo vencido em '+fd(venc)+' ('+(-daysUntil(venc))+' dia(s) de atraso).':'Vence em '+fd(venc)+' ('+daysUntil(venc)+' dia(s)).'):'Preencha a data da nota para calcular o vencimento.');
-  h+='<div class="card"><h3>Financeiro</h3><div class="fields"><label>Valor (R$)<input type="text" inputmode="decimal" data-pcf="valor" value="'+esc(p.valor)+'"></label><label>Nota fiscal (número)<input type="text" data-pcf="nf" value="'+esc(p.nf)+'"></label></div>'
-   +'<div class="fields"><label>Data da nota<input type="date" data-pcf="nfData" value="'+esc(p.nfData)+'"></label><label>Pago em<input type="date" data-pcf="pagoEm" value="'+esc(p.pagoEm)+'"></label></div><p class="note"><b>'+fin+'</b></p></div>';
-  var rl=p.rel||{};
-  h+='<div class="card"><h3>Resultados e relatório</h3><div class="fields"><label>Alcance<input type="text" inputmode="numeric" data-pcr="alc" value="'+esc(rl.alc||"")+'"></label><label>Visualizações<input type="text" inputmode="numeric" data-pcr="vis" value="'+esc(rl.vis||"")+'"></label></div>'
-   +'<div class="fields"><label>Interações<input type="text" inputmode="numeric" data-pcr="int" value="'+esc(rl.int||"")+'"></label><label>Cliques no link<input type="text" inputmode="numeric" data-pcr="cli" value="'+esc(rl.cli||"")+'"></label></div>'
-   +'<label class="lab">Cupom ou vendas<input type="text" data-pcr="ven" value="'+esc(rl.ven||"")+'"></label>'
-   +'<label class="lab">O que funcionou e o que eu aprendi<textarea data-pcr="apr" style="min-height:80px">'+esc(rl.apr||"")+'</textarea></label>'
-   +'<div class="btns"><button class="btn small" data-pcb="relpdf">Gerar relatório em PDF</button><button class="btn ghost small" data-pcb="tobrain">Guardar aprendizado no meu cérebro</button></div></div>';
-  var cs=Object.keys(state.camp||{}).map(function(k){return state.camp[k]}).filter(function(c){return c&&c.m===p.marca&&!c.del});
-  if(cs.length)h+='<div class="card"><h3>Campanhas desta marca</h3>'+cs.map(function(c){return '<p class="sub">'+esc(c.t||"Campanha")+' · postagem '+fd(c.d)+'</p>'}).join('')+'</div>';
+  var e9=ds&&c.done&&c.done.e9,e10=c.done&&c.done.e10,fin=e10?'Pago.':(e9?(daysUntil(ds.e10)<0?'Prazo vencido em '+fd(ds.e10)+' ('+(-daysUntil(ds.e10))+' dia(s) de atraso).':'A receber até '+fd(ds.e10)+'.'):'Marque “Nota fiscal emitida” no caminho para calcular o vencimento.');
+  h+='<div class="card"><h3>Financeiro</h3><div class="fields"><label>Valor (R$)<input type="text" inputmode="decimal" data-cf="'+cid+'|v" value="'+esc(c.v||"")+'"></label><label>Data da nota<input type="date" data-cf="'+cid+'|nf" value="'+esc(c.nf||"")+'"></label></div><p class="note"><b>'+fin+'</b></p></div>';
+  var rl=c.rep||{};
+  h+='<div class="card"><h3>Resultados e relatório</h3><div class="fields"><label>Alcance<input type="text" inputmode="numeric" data-cf="'+cid+'|rep.alc" value="'+esc(rl.alc||"")+'"></label><label>Visualizações<input type="text" inputmode="numeric" data-cf="'+cid+'|rep.vis" value="'+esc(rl.vis||"")+'"></label></div>'
+   +'<div class="fields"><label>Interações<input type="text" inputmode="numeric" data-cf="'+cid+'|rep.int" value="'+esc(rl.int||"")+'"></label><label>Cliques no link<input type="text" inputmode="numeric" data-cf="'+cid+'|rep.cli" value="'+esc(rl.cli||"")+'"></label></div>'
+   +'<label class="lab">Cupom ou vendas<input type="text" data-cf="'+cid+'|rep.ven" value="'+esc(rl.ven||"")+'"></label>'
+   +'<label class="lab">O que funcionou e o que eu aprendi<textarea data-cf="'+cid+'|rep.apr" style="min-height:80px">'+esc(rl.apr||"")+'</textarea></label>'
+   +'<div class="btns"><button class="btn small" data-campx="rel|'+cid+'">Gerar relatório em PDF</button><button class="btn ghost small" data-pcb="tobrain">Guardar aprendizado no meu cérebro</button></div></div>';
   if(p.log.length)h+='<details class="card"><summary><b>Histórico ('+p.log.length+')</b></summary>'+p.log.slice().reverse().map(function(x){return '<p class="note">'+new Date(x.at).toLocaleDateString("pt-BR")+' · '+esc(x.t)+'</p>'}).join('')+'</details>';
   h+='<div class="btns"><button class="btn ghost small" data-pcb="del">'+(PCUI.confDel?'Toque de novo para apagar o painel':'Apagar este painel')+'</button></div>';
   return h;
@@ -2005,12 +2052,11 @@ document.addEventListener("click",async function(e){
   if(a==="avulso"){state.pr=prNew();savePr();state.pub="roteiro";render();window.scrollTo(0,0);return}
   if(a==="back2"){var pid=state.pr.parcId;PCUI.open=pid&&parcGet(pid)?pid:null;state.pub="parc";render();window.scrollTo(0,0);return}
   if(!p)return;
-  if(a==="relpdf"){pubOpenMat("relatorio",parcRel(p));parcLog(p,"Relatório gerado");parcPut(p);return}
   if(a==="addbrief"){var x=$("#pc-bx").value.trim();if(!x){PCUI.msg="Cole o texto do briefing.";render();return}p.briefs.push({id:"bf"+Date.now(),t:$("#pc-bt").value.trim()||"Briefing",x:x,at:Date.now()});PCUI.bt="";PCUI.bx="";parcLog(p,"Briefing guardado");parcPut(p);PCUI.msg="Briefing guardado.";render();return}
   if(a==="delbrief"){p.briefs.splice(i,1);parcPut(p);render();return}
   if(a==="delros"){p.roteiros.splice(i,1);parcPut(p);render();return}
-  if(a==="tobrain"){var t=((p.rel&&p.rel.apr)||p.aprend||"").trim();if(!t){PCUI.msg="Escreva o que aprendeu primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
-  if(a==="del"){if(!PCUI.confDel){PCUI.confDel=true;render();return}PARC.items=PARC.items.filter(function(x){return x.id!==p.id});parcLocal();if(C.parc)C.parc.doc(p.id).set({del:true,at:Date.now()});PCUI.open=null;PCUI.confDel=false;render();return}
+  if(a==="tobrain"){var cc2=parcCamp(p),t=((cc2&&cc2.rep&&cc2.rep.apr)||p.aprend||"").trim();if(!t){PCUI.msg="Escreva o que aprendeu primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
+  if(a==="del"){if(!PCUI.confDel){PCUI.confDel=true;render();return}if(p.campId&&state.camp[p.campId]){delete state.camp[p.campId];savePub();dbSet("camp",p.campId,{del:true,at:Date.now()},"Removida")}PARC.items=PARC.items.filter(function(x){return x.id!==p.id});parcLocal();if(C.parc)C.parc.doc(p.id).set({del:true,at:Date.now()});PCUI.open=null;PCUI.confDel=false;render();return}
   if(a==="roteiro"||a==="openros"){
     var r=state.pr;r.marca=marcaList().indexOf(p.marca)>=0?p.marca:"Outra marca";r.parcId=p.id;r.err="";r.busy="";
     if(a==="roteiro"){r.briefing=parcCtx(p);r.obj=p.angulo.trim().split("\n")[0]||"";r.res=null;r.ck={};r.instr=""}
@@ -2022,23 +2068,23 @@ document.addEventListener("click",async function(e){
     var br=p.briefs[i];if(!br||!S){PCUI.msg=NOAI;render();return}
     PCUI.busy="Lendo o briefing...";render();
     try{
-      var res=await S.json("Leia o briefing de uma marca para a influenciadora Mari e extraia, SEM inventar nada que não esteja no texto: entregáveis, o que é obrigatório, o que evitar, prazos, cupom e link, e as dúvidas que ainda faltam para escrever o roteiro.\n\nMarca: "+p.marca+"\nBriefing:\n"+br.x+"\n\nResponda SOMENTE com JSON {\"entregaveis\":\"\",\"obrigatorio\":[\"\"],\"evitar\":[\"\"],\"prazos\":\"\",\"cupom\":\"\",\"duvidas\":[\"\"]}.",{modelTier:"default"});
-      var L=function(a2){return (a2||[]).map(String).filter(Boolean)};
+      var res=await S.json("Leia o briefing de uma marca para a influenciadora Mari e extraia, SEM inventar nada que não esteja no texto: entregáveis, o que é obrigatório, o que evitar, prazos (com datas), cupom e link, e as dúvidas que ainda faltam para escrever o roteiro. Hoje é "+isoToday()+". Converta toda data citada para AAAA-MM-DD (se faltar o ano, use o próximo que vem).\n\nMarca: "+p.marca+"\nBriefing:\n"+br.x+"\n\nResponda SOMENTE com JSON {\"entregaveis\":\"\",\"obrigatorio\":[\"\"],\"evitar\":[\"\"],\"prazos\":\"\",\"cupom\":\"\",\"duvidas\":[\"\"],\"postagem\":\"\",\"datas\":[{\"data\":\"\",\"o_que\":\"\",\"quem\":\"Mari ou Marca\"}]}.",{modelTier:"default"});
+      var L=function(a2){return (a2||[]).map(String).filter(Boolean)},isD=function(x){return /^\d{4}-\d{2}-\d{2}$/.test(String(x||""))};
       if(res.entregaveis&&!p.entregaveis.trim())p.entregaveis=String(res.entregaveis);
       var rg=[];if(L(res.obrigatorio).length)rg.push("Obrigatório: "+L(res.obrigatorio).join("; "));if(L(res.evitar).length)rg.push("Evitar: "+L(res.evitar).join("; "));if(res.prazos)rg.push("Prazos: "+res.prazos);if(res.cupom)rg.push("Cupom e link: "+res.cupom);
       if(rg.length)p.regras=(p.regras.trim()?p.regras.trim()+"\n\n":"")+"[do briefing “"+br.t+"”]\n"+rg.join("\n");
       if(L(res.duvidas).length)p.duvidas=(p.duvidas.trim()?p.duvidas.trim()+"\n":"")+L(res.duvidas).join("\n");
-      parcPut(p);PCUI.msg="Briefing lido. Confira e ajuste em Combinados e Dúvidas.";
+      if(isD(res.postagem)&&!p.post)p.post=res.postagem;
+      var nt=0,ex2={};MD.items.forEach(function(x){if(x.src)ex2[x.src]=1});
+      (res.datas||[]).forEach(function(q,qi){if(!q||!isD(q.data)||!q.o_que)return;var src="br:"+(br.id||i)+":"+qi;if(ex2[src])return;var mari=String(q.quem||"").toLowerCase().indexOf("mari")===0;var it2=mdNew({t:parcTitle(p)+" · "+String(q.o_que),tipo:"enviar",quem:mari?"Mari":"Marca",d:q.data,parc:p.id,src:src,nota:"Vindo do briefing “"+br.t+"”."});MD.items.push(it2);mdPut(it2);nt++});
+      parcLog(p,"Briefing lido com IA");parcPut(p);PCUI.msg="Briefing lido. Confira os combinados e as dúvidas."+(nt?" "+nt+" prazo(s) do briefing viraram tarefa em Meu dia.":"");
     }catch(err){PCUI.msg=crErr(err)||"Não consegui ler agora."}
     PCUI.busy="";render();return;
   }
 });
 document.addEventListener("click",function(e){
   var b=e.target.closest&&e.target.closest("[data-pcb=saveros]");if(!b)return;
-  var r=state.pr,p=r.parcId?parcGet(r.parcId):null;if(!p||!r.res)return;
-  var cp=JSON.parse(JSON.stringify(r.res)),ex=r.roId?p.roteiros.filter(function(x){return x.id===r.roId})[0]:null;
-  if(ex){ex.res=cp;ex.at=Date.now()}else{var nr={id:"ro"+Date.now(),res:cp,st:"Rascunho",at:Date.now()};p.roteiros.push(nr);r.roId=nr.id}
-  parcLog(p,"Roteiro guardado");parcPut(p);savePr();b.textContent="Guardado no painel";
+  if(rosSave(state.pr))b.textContent="Guardado";
 });
 document.addEventListener("input",function(e){var el=e.target;if(el.id==="pc-bt")PCUI.bt=el.value;else if(el.id==="pc-bx")PCUI.bx=el.value;else if(el.id==="pc-n")PCUI.nm=el.value});
 document.addEventListener("change",function(e){
@@ -2046,8 +2092,6 @@ document.addEventListener("change",function(e){
   var p=PCUI.open?parcGet(PCUI.open):null;
   if(el.id==="pc-m"){PCUI.mc=el.value;return}
   if(!p)return;
-  if(el.dataset.pcm){p.m[el.dataset.pcm]=el.checked?isoToday():"";parcLog(p,(el.checked?"Marcado: ":"Desmarcado: ")+el.dataset.pcm);parcPut(p);render();return}
-  if(el.dataset.pcr){p.rel[el.dataset.pcr]=el.value;parcPut(p);return}
   if(el.dataset.pcf){var k=el.dataset.pcf;p[k]=el.value;if(k==="status"||k==="nfData"||k==="pagoEm")parcLog(p,k==="status"?"Status: "+el.value:(k==="nfData"?"Nota emitida em ":"Pago em ")+el.value);parcPut(p);if(k==="nome"){var h2=document.querySelector("#view h2");if(h2)h2.textContent=parcTitle(p)}if(k==="status"||k==="nfData"||k==="pagoEm"||k==="valor"||k==="post")render();return}
   if(el.dataset.pcbx!==undefined&&el.dataset.pcbx!==""){var b=p.briefs[parseInt(el.dataset.pcbx,10)];if(b){b.x=el.value;parcPut(p)}return}
   if(el.dataset.pcbt!==undefined&&el.dataset.pcbt!==""){var b2=p.briefs[parseInt(el.dataset.pcbt,10)];if(b2){b2.t=el.value;parcPut(p)}return}
@@ -2055,6 +2099,36 @@ document.addEventListener("change",function(e){
 });
 
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
+
+/* ============ SINCRONIZAÇÃO (fora do Claude) ============ */
+var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools"];
+var SYN={meta:{},busy:false,timer:null,msg:"",applying:false};
+function synOn(){var c=aiGet();return !!(c.proxy&&c.code)&&!(window.claude&&window.claude.use)}
+function synLoadMeta(){try{SYN.meta=JSON.parse(localStorage.getItem("hoje-sync-meta")||"{}")}catch(e){SYN.meta={}}}
+(function(){try{var o=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){o.call(this,k,v);if(this===window.localStorage&&SYNKEYS.indexOf(k)>=0&&!SYN.applying&&synOn()){SYN.meta[k]=Date.now();o.call(this,"hoje-sync-meta",JSON.stringify(SYN.meta));synSoon()}}}catch(e){}})();
+function synSoon(){if(!synOn())return;clearTimeout(SYN.timer);SYN.timer=setTimeout(synNow,4000)}
+async function synNow(){
+  if(!synOn()||SYN.busy)return;SYN.busy=true;var c=aiGet();
+  try{
+    var base=c.proxy.replace(/\/+$/,"")+"/sync",H={"x-app-code":c.code};
+    var r=await fetch(base,{headers:H});if(!r.ok)throw 0;var rem=await r.json();rem.meta=rem.meta||{};rem.data=rem.data||{};
+    var first=!localStorage.getItem("hoje-sync-init"),applied=0,push={meta:{},data:{}},now=Date.now();
+    SYNKEYS.forEach(function(k){
+      var lt=SYN.meta[k]||0,rt=rem.meta[k]||0,lv=localStorage.getItem(k);
+      if(rt>0&&(rt>lt||first)){SYN.applying=true;try{localStorage.setItem(k,rem.data[k]);SYN.meta[k]=rt;applied++}finally{SYN.applying=false}}
+      else if(lv!==null&&(lt>rt||(first&&rt===0))){var t2=lt||now;SYN.meta[k]=t2;push.meta[k]=t2;push.data[k]=lv}
+    });
+    localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
+    if(Object.keys(push.meta).length){var r2=await fetch(base,{method:"PUT",headers:{"content-type":"application/json","x-app-code":c.code},body:JSON.stringify(push)});if(!r2.ok)throw 0}
+    localStorage.setItem("hoje-sync-init","1");
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
+  }catch(e){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}
+  SYN.busy=false;
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)synNow()});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-synb]");if(!b)return;SYN.msg="Sincronizando...";render();synNow().then(function(){render()})});
+
 /* ============ MEU CÉREBRO ============ */
 var BR={items:[]},BRUI={cat:"voz",q:0,txt:"",props:[],busy:"",msg:""};
 var BRCATS=[["voz","Meu jeito de falar"],["historia","Minha história"],["publico","Meu público"],["negocio","Loja, marca e produtos"],["marcas","Parcerias e marcas"],["aprend","O que aprendi"],["decisao","Decisões e rumo"]];
@@ -2176,7 +2250,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-loadLocal();brLoad();brSeed();parcLoad();mdLoad();mdSeed();state.sel=pickDay();render();
+synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
@@ -2205,7 +2279,8 @@ function fallbackD(){return {save:function(o){return new Promise(function(res,re
 D=fallbackD();
 (async function(){
   try{
-    if(!window.claude||!window.claude.use){await aiRefresh();render();return}
+    try{aiFromHash()}catch(e){}
+    if(!window.claude||!window.claude.use){await aiRefresh();render();synNow();return}
     try{S=wrapBrain(await window.claude.use("sample"))}catch(e){}
     try{var d2=await window.claude.use("downloads");if(d2)D=d2}catch(e){}
     if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){LIM=null}}else{await aiRefresh()}

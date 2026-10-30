@@ -1,0 +1,16 @@
+import w from "./worker.js";
+const kv=new Map();const env={APP_CODE:"segredo",ANTHROPIC_API_KEY:"sk-x",ALLOWED_ORIGIN:"https://luahproducao.github.io",SYNC:{get:async k=>kv.get(k)||null,put:async(k,v)=>kv.set(k,v)}};
+let upstream=null;globalThis.fetch=async(u,o)=>{upstream={u,o};return new Response(JSON.stringify({content:[{type:"text",text:"{}"}]}),{status:200})};
+const call=(m,p,hd={},body)=>w.fetch(new Request("https://w.example"+p,{method:m,headers:hd,body}),env);
+const ok=(c,n)=>console.log(c?"OK  ":"FALHOU",n);
+let r=await call("OPTIONS","/ai",{Origin:"https://luahproducao.github.io"});ok(r.status===204&&r.headers.get("access-control-allow-origin")==="https://luahproducao.github.io","preflight CORS");
+r=await call("POST","/ai",{},"{}");ok(r.status===401,"sem código = 401");
+r=await call("POST","/ai",{"x-app-code":"errado"},"{}");ok(r.status===401,"código errado = 401");
+r=await call("POST","/ai",{"x-app-code":"segredo","content-type":"application/json"},JSON.stringify({model:"gpt-x",messages:[]}));ok(r.status===400,"modelo fora da lista = 400");
+r=await call("POST","/ai",{"x-app-code":"segredo","content-type":"application/json"},JSON.stringify({model:"claude-sonnet-5-5",max_tokens:99999,messages:[{role:"user",content:"oi"}]}));
+const sent=JSON.parse(upstream.o.body);ok(r.status===200&&upstream.o.headers["x-api-key"]==="sk-x"&&sent.max_tokens===8000,"encaminha com a chave do servidor e limita tokens");
+r=await call("GET","/sync",{"x-app-code":"segredo"});ok((await r.json()).meta!==undefined,"sync GET vazio");
+r=await call("PUT","/sync",{"x-app-code":"segredo"},JSON.stringify({meta:{"hoje-tasks":5,"x":9,"hoje-brain":3},data:{"hoje-tasks":"[1]","x":"no","hoje-brain":"[2]"}}));ok((await r.json()).updated===2,"sync PUT aceita só chaves hoje-*");
+r=await call("PUT","/sync",{"x-app-code":"segredo"},JSON.stringify({meta:{"hoje-tasks":4},data:{"hoje-tasks":"[antigo]"}}));
+r=await call("GET","/sync",{"x-app-code":"segredo"});const g=await r.json();ok(g.data["hoje-tasks"]==="[1]","versão mais nova vence");
+r=await call("GET","/outra",{"x-app-code":"segredo"});ok(r.status===404,"rota desconhecida = 404");
