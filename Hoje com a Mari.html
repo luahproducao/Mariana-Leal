@@ -216,7 +216,7 @@ summary{color:var(--accent)}
 .nb{display:flex;flex-direction:column;align-items:center;gap:3px}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}}
 .stickbar{position:sticky;bottom:98px;z-index:4;display:flex;gap:8px;padding:8px;background:var(--surface);border:1px solid var(--gold);border-radius:18px;box-shadow:0 8px 24px rgba(43,32,36,.14)}.stickbar .btn{flex:1}
-.tap{cursor:pointer;-webkit-tap-highlight-color:transparent}.tap:active{opacity:.6}p.tap{border-radius:10px;padding:6px 8px;margin:4px -8px;background:rgba(127,127,127,.08)}li.tap{padding:4px 0}.row .tap{flex:1;padding:6px 0}.cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px}.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cal-w{text-align:center;font-size:11px;font-weight:700;opacity:.6}.cal-d{min-height:46px;border-radius:10px;border:1px solid rgba(127,127,127,.25);background:transparent;color:inherit;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;padding:5px 0;cursor:pointer}.cal-d i{display:flex;gap:2px;min-height:6px}.cal-d.hoje{border-color:var(--accent);font-weight:700}.cal-d.sel{background:var(--accent-soft)}.cal-g b,.cal-leg b{display:inline-block;width:6px;height:6px;border-radius:50%;margin:0 4px 0 6px}.cal-d b{margin:0}.k-f{background:var(--accent)}.k-c{background:var(--info)}.k-p{background:var(--ok)}.k-z{background:var(--warn)}.k-t{background:currentColor;opacity:.5}.cal-i{padding:8px 0;border-bottom:1px solid rgba(127,127,127,.18)}</style>
+.tap{cursor:pointer;-webkit-tap-highlight-color:transparent}.tap:active{opacity:.6}p.tap{border-radius:10px;padding:6px 8px;margin:4px -8px;background:rgba(127,127,127,.08)}li.tap{padding:4px 0}.row .tap{flex:1;padding:6px 0}.cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px}.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cal-w{text-align:center;font-size:11px;font-weight:700;opacity:.6}.cal-d{min-height:46px;border-radius:10px;border:1px solid rgba(127,127,127,.25);background:transparent;color:inherit;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;padding:5px 0;cursor:pointer}.cal-d i{display:flex;gap:2px;min-height:6px}.cal-d.hoje{border-color:var(--accent);font-weight:700}.cal-d.sel{background:var(--accent-soft)}.cal-g b,.cal-leg b{display:inline-block;width:6px;height:6px;border-radius:50%;margin:0 4px 0 6px}.cal-d b{margin:0}.k-f{background:var(--accent)}.k-c{background:var(--info)}.k-p{background:var(--ok)}.k-z{background:var(--warn)}.k-t{background:currentColor;opacity:.5}.cal-i{padding:8px 0;border-bottom:1px solid rgba(127,127,127,.18)}.k-s{background:var(--info)}.k-a{background:var(--warn)}.k-m{background:var(--ok)}.k-r{background:var(--accent);opacity:.4}.k-p{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent)}.k-z{background:var(--bad)}</style>
 
 <div class="wrap">
   <div class="top">
@@ -377,13 +377,13 @@ var ST=[["todo","A gravar"],["rec","Gravado"],["sent","Enviado à Laila"],["edit
 
 /* ============ NAVEGAÇÃO ============ */
 var NAV=[
- ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
  ["hoje","Hoje",'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
+ ["cal","Calendário",'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'],
  ["pub","Publis",'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/>'],
- ["produtos","Produtos",'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>'],
+ ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
  ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
 ];
-var MORE=[["calendario","Calendário"],["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["cerebro","Cérebro"],["ajustes","Ajustes"]];
+var MORE=[["produtos","Produtos"],["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["cerebro","Cérebro"],["ajustes","Ajustes"]];
 
 /* ============ PRODUTOS ============ */
 var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
@@ -688,72 +688,145 @@ function renderCanais(){
 }
 
 
-/* ============ CALENDÁRIO EDITORIAL ============ */
-var CAL={m:null,sel:null,f:"todos"};
-var CALK=[["todos","Tudo"],["f","Feed"],["c","Stories e canais"],["p","Publis"],["z","Prazos"],["t","Tarefas"]];
+/* ============ CALENDÁRIO EDITORIAL UNIFICADO ============ */
+var CALSEED=[["10-08","F","Tr","R","Trend adaptada: tradução baiana de dona de loja",""],["10-09","F","Po","R","Quanto custa de verdade um pedido (custo, taxa, frete e embalagem)",""],["10-10","A","Es","S","Definir a porta de entrada da assinatura: destaque + palavra-chave no ManyChat",""],["10-10","M","In","S","Boas-vindas e enquete: você tem loja?",""],["10-10","F","Ar","R","Arrume-se comigo falando com a câmera: me arrumo e respondo suas dúvidas",""],["10-11","T","Te","R","Vlog de fornecedor mais visto, cortado em 20s com gancho novo",""],["10-12","F","St","R","Comecei a Loyall com 6 bodys e metade do meu estágio",""],["10-13","F","Tr","R","Cliente x Eu: quando a cliente pede desconto",""],["10-13","M","Ba","S","Problema do dia e como eu resolvi",""],["10-14","S","Pu","S","Tray: sequência de stories sobre o site (data a confirmar)","Tray"],["10-14","F","Pu","R","Coristina D: reels (2ª semana de outubro, após aprovação da marca; data a confirmar)","Coristina D"],["10-14","F","Ca","C","Primeiros passos para vender com pouco dinheiro (checklist)",""],["10-15","A","Au","R","Aula: como valido um fornecedor (passo a passo e checklist)",""],["10-15","F","Ar","R","Arrume-se comigo para quem quer começar do zero: respondo as dúvidas enquanto me arrumo",""],["10-15","M","In","S","Me ajuda a decidir: look da viagem",""],["10-16","M","In","S","Enquete: você tem CNPJ ou MEI?",""],["10-16","F","Pu","R","Bling: Lei de Murphy parte 2 (após aprovação; data a confirmar)","Bling"],["10-17","A","Ba","S","Bastidor: minha meta da semana antes de saber se eu bato",""],["10-17","T","Te","R","Mesmo conteúdo, 3 ganchos: Comecei com R$200 / Aos 16 anos eu... / Ninguém me contou que...",""],["10-19","F","St","R","Como concilio maternidade e negócio",""],["10-20","F","St","R","Minha história, parte 1: Facebook e trouxalândia, com humor",""],["10-20","M","Ba","S","Cronograma da viagem e prioridades de fornecedores",""],["10-21","T","Te","R","Minha história parte 1 em 20s com outro gancho",""],["10-21","F","Ar","R","Arrume-se comigo silencioso: o que mudou em 5 anos",""],["10-21","S","Pu","S","Melhor Envio: 3 stories","Melhor Envio"],["10-21","F","St","R","Minha história, parte 2: CLT e loja ao mesmo tempo",""],["10-22","F","St","R","Minha história, parte 3: pandemia e largar o emprego em 2021",""],["10-22","A","Au","R","Aula: quanto investi e como reinvesti nos primeiros meses",""],["10-22","M","In","S","Caixinha: o que eu devo procurar em São Paulo?",""],["10-23","F","Pu","R","Melhor Envio: reels oficial (definir qual dos roteiros aprovados)","Melhor Envio"],["10-24","S","In","S","Teaser da viagem: o que vocês acham que vai acontecer?",""],["10-25","S","In","S","Stories da viagem: look do dia com link e caixinha \"o que vai acontecer hoje?\"",""],["10-26","M","Ba","S","Spoilers das peças",""],["10-26","F","Po","R","Como encontro bons fornecedores em São Paulo",""],["10-27","F","Ar","R","Arrume-se comigo para dia de fornecedores",""],["10-27","M","Ba","S","Prévia da lista de fornecedores novos",""],["10-28","F","Po","R","Quanto gastei na viagem",""],["10-29","A","Ba","R","Bastidor da curadoria: critérios, o que decidi comprar e por quê (com números)",""],["10-29","M","In","S","Quem já comprou a lista e o que achou?",""],["10-30","F","St","R","Vlog principal: viagem a São Paulo",""],["10-31","T","Te","R","3 recortes do vlog com ganchos diferentes",""],["10-31","F","Ca","C","Meu critério de curadoria para a loja",""],["11-02","F","St","R","O que comprei em São Paulo e por quê",""],["11-03","F","St","R","Black Friday: comece agora (minha primeira Black)",""],["11-03","M","Ba","S","Bastidor do lançamento",""],["11-04","F","Ar","R","Arrume-se comigo para o lançamento da coleção",""],["11-04","M","Pr","S","Novos fornecedores no Estoque Crescente",""],["11-05","F","Tr","R","Expectativa x realidade de dia de lançamento",""],["11-05","A","Au","R","Aula: como crio uma campanha de Black (antes, durante e depois)",""],["11-06","F","Ca","C","Black Friday em 4 semanas: o calendário",""],["11-06","F","Pu","R","Bling: como preparo minha Black","Bling"],["11-07","T","Te","R","Trend adaptada x a mesma ideia sem trend",""],["11-09","F","Po","R","Como saber até quanto de desconto sua loja aguenta (fórmula do preço mínimo)",""],["11-10","M","In","S","Me ajuda a escolher a oferta da Black (enquete)",""],["11-10","F","Ar","R","Arrume-se comigo para gravar a campanha da Black",""],["11-11","F","Tr","R","Escolha um lado: estoque grande ou giro rápido?",""],["11-11","F","Pu","R","Ton: taxas, Pix e parcelado","Ton"],["11-12","F","Ca","C","A conta do preço mínimo em 4 passos",""],["11-12","A","Au","R","Aula: preço mínimo e desconto máximo + planilha",""],["11-13","M","Ba","S","Spoiler da Black",""],["11-13","F","Pu","R","Melhor Envio: conteúdo de Black (se couber no contrato; data a confirmar)","Melhor Envio"],["11-14","F","Pr","R","Diário do app: primeiro teaser",""],["11-14","A","Ba","S","Bastidor: a meta da Black da Loyall antes do resultado",""],["11-14","T","Te","R","Gancho com pergunta x gancho com afirmação",""],["11-16","F","Po","R","Frete grátis sem prejuízo",""],["11-17","M","Ba","S","Bastidor da operação da Black",""],["11-17","F","Ba","R","Bastidor de expedição: pedidos saindo",""],["11-18","S","Pu","S","Tray: meu site pronto para a Black","Tray"],["11-18","F","Pu","R","Bling: o que pode dar errado na Black e o plano B","Bling"],["11-19","F","Tr","R","Dona e funcionária ao mesmo tempo: o dia em 15s",""],["11-19","A","Li","L","Live de preparação da Black (até 1h, slide grátis e cadastro de leads; data a confirmar)",""],["11-20","M","In","S","Contagem regressiva da Black",""],["11-20","S","Pr","S","App: lista de espera e acesso diferenciado para o Telegram (se a Mari decidir preço e regra)",""],["11-21","T","Te","R","Cortes rápidos x plano contínuo",""],["11-23","S","In","S","Contagem regressiva e checklist final da Black",""],["11-26","F","Ba","R","Bastidor da Loyall na véspera da Black",""],["11-27","M","Ba","S","O ritmo do dia da Black",""],["11-27","S","Ba","S","Black Friday ao vivo: pedidos saindo e ferramentas",""],["11-28","F","Ca","C","O que eu faria diferente na Black (números reais)",""],["11-28","T","Te","R","Black em 15s com 2 ganchos",""],["11-29","A","Ba","R","Relatório da Black com os números",""],["11-30","F","St","R","O que aprendi na Black e o plano de dezembro",""]];
+var CALC={F:"Feed principal",S:"Stories",A:"Assinatura",M:"Melhores Amigos",T:"Reels teste"};
+var CALT={Tr:"Trend",Po:"Ponte (solução)",Es:"Estrutura",In:"Interação",Ar:"Arrume-se comigo",Te:"Teste",St:"Storytelling",Ba:"Bastidor",Pu:"Publi",Ca:"Carrossel",Au:"Aula",Pr:"Produto e app",Li:"Live"};
+var CALF={R:"Reels",C:"Carrossel",E:"Post estático",S:"Story",L:"Live"};
+var CALST=["Ideia","Em andamento","Revisão","Publicado"];
+var CALKIND={"Feed principal":"f","Stories":"s","Assinatura":"a","Melhores Amigos":"m","Reels teste":"r"};
+var CALD={items:[]};
+var CAL={m:null,sel:null,f:"todos",edit:null,delc:null,busy:false,msg:""};
+var CALK=[["todos","Tudo"],["f","Feed"],["s","Stories"],["a","Assinatura"],["m","Melhores Amigos"],["r","Reels teste"],["p","Publis"],["z","Prazos"],["t","Tarefas"]];
 var CALMES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+function calSave(){try{localStorage.setItem("hoje-cal",JSON.stringify(CALD.items))}catch(e){}}
+function calLoad(){var j=null;try{j=JSON.parse(localStorage.getItem("hoje-cal")||"null")}catch(e){}
+  if(Array.isArray(j)){CALD.items=j;return}
+  CALD.items=CALSEED.map(function(r,i){return {id:"n"+i,d:"2026-"+r[0],canal:CALC[r[1]],tipo:CALT[r[2]],fmt:CALF[r[3]],t:r[4],marca:r[5]||"",st:"Ideia",nota:"",leg:"",link:"",at:0,src:"notion"}});
+  calSave()}
+function calGet(id){return CALD.items.filter(function(x){return x.id===id})[0]}
+function calNew(o){var it={id:"c"+Date.now()+Math.floor(Math.random()*1000),d:"",canal:"Feed principal",tipo:"",fmt:"Reels",t:"",marca:"",st:"Ideia",nota:"",leg:"",link:"",at:Date.now(),src:"app"};for(var k in o)it[k]=o[k];return it}
 function calIso(y,m,d){return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0")}
 function calItems(iso){
   var a=[];
-  DAYS.forEach(function(d){if(d.date!==iso)return;
-    if(d.feed)a.push({k:"f",tag:"Feed",t:d.feed.title+" · "+d.feed.kind,go:"plano|"+d.id});
-    if(d.stories&&d.stories.length)a.push({k:"c",tag:"Stories",t:d.stories.length+" stories do dia",go:"plano|"+d.id});
-    if(d.ma)a.push({k:"c",tag:"Melhores Amigos",t:String(d.ma).slice(0,120),go:"plano|"+d.id});
-    if(d.ass)a.push({k:"c",tag:"Assinatura",t:String(d.ass).slice(0,120),go:"plano|"+d.id});
-  });
-  ASSIN.forEach(function(x){var m=String(x[0]).match(/(\d{2})\/(\d{2})/);if(m&&"2026-"+m[2]+"-"+m[1]===iso)a.push({k:"c",tag:"Assinatura",t:x[1],go:"canais"})});
-  PRAZOS.forEach(function(x,i){if(x.date===iso)a.push({k:"z",tag:x.brand,t:x.t,go:"prz|"+i})});
-  Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(c&&c.d===iso)a.push({k:"p",tag:c.m,t:(c.t||"Publi")+" · dia da postagem",go:"camp|"+id})});
-  (MD.items||[]).forEach(function(it){if(it.d===iso)a.push({k:"t",tag:it.quem||"Mari",t:it.t+(it.st==="feito"?" ✓":""),go:"md|"+iso})});
+  CALD.items.forEach(function(x){if(x.d===iso)a.push({k:CALKIND[x.canal]||"f",tag:x.canal+(x.marca?" · "+x.marca:""),t:x.t,st:x.st,id:x.id,pub:x.tipo==="Publi"||!!x.marca,go:"ci|"+x.id})});
+  DAYS.forEach(function(d){if(d.date===iso)a.push({k:"d",tag:"Plano do dia",t:d.title+" · roteiro, stories e legenda prontos",go:"plano|"+d.id})});
+  ASSIN.forEach(function(x){var m=String(x[0]).match(/(\d{2})\/(\d{2})/);if(m&&"2026-"+m[2]+"-"+m[1]===iso)a.push({k:"a",tag:"Assinatura",t:x[1],go:"canais"})});
+  PRAZOS.forEach(function(x,i){if(x.date===iso)a.push({k:"z",tag:"Prazo · "+x.brand,t:x.t,go:"prz|"+i})});
+  Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(c&&c.d===iso)a.push({k:"p",tag:"Publi · "+c.m,t:(c.t||"Publi")+" · dia da postagem",pub:true,go:"camp|"+id})});
+  (MD.items||[]).forEach(function(it){if(it.d===iso&&it.st!=="cancelado")a.push({k:"t",tag:it.quem||"Mari",t:it.t+(it.st==="feito"?" ✓":""),go:"md|"+iso})});
   return a;
+}
+function calFilter(x){return CAL.f==="todos"||x.k===CAL.f||(CAL.f==="p"&&x.pub)}
+var CALTAGC={f:"",s:"m",a:"t",m:"l",r:"",p:"l",z:"t",t:"",d:""};
+function calEditor(it){
+  var h='<div class="card" style="background:var(--bg)"><h3>Conteúdo</h3>'
+   +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
+   +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+s+'</button>'}).join('')+'</div>'
+   +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
+   +'<div class="fields"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
+   +'<label class="lab">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
+   +'<label class="lab">Roteiro, takes e anotações<textarea data-cif="nota" style="min-height:140px" placeholder="Escreva o roteiro, os takes e o que lembrar. Ou peça uma primeira versão à IA.">'+esc(it.nota)+'</textarea></label>'
+   +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
+   +'<label class="lab">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'
+   +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
+   +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost" data-calx="copy|'+it.id+'">Copiar</button>'
+   +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
+   +'<button class="btn small ghost" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
+  return h;
 }
 function calHtml(){
   var today=isoToday();if(!CAL.m)CAL.m=today.slice(0,7);if(!CAL.sel)CAL.sel=today;
   var y=+CAL.m.slice(0,4),mo=+CAL.m.slice(5,7),first=new Date(y,mo-1,1).getDay(),nd=new Date(y,mo,0).getDate();
-  var h='<div><h2>Calendário editorial</h2><p class="sub">Tudo o que tem data, em um lugar: feed, stories, canais, publis, prazos e tarefas. Toque no dia e depois no item para abrir.</p></div>'
+  var h='<div><h2>Calendário editorial</h2><p class="sub">O lugar único de tudo o que vai ao ar: feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p></div>'
    +'<div class="pills">'+CALK.map(function(k){return'<button class="pill" data-calf="'+k[0]+'" aria-pressed="'+(CAL.f===k[0])+'">'+k[1]+'</button>'}).join('')+'</div>'
    +'<div class="cal-h"><button class="btn small ghost" data-calx="prev" aria-label="Mês anterior">‹</button><b>'+CALMES[mo-1]+' '+y+'</b><button class="btn small ghost" data-calx="next" aria-label="Próximo mês">›</button><button class="btn small ghost" data-calx="today">Hoje</button></div>'
    +'<div class="cal-g">'+["D","S","T","Q","Q","S","S"].map(function(x){return'<span class="cal-w">'+x+'</span>'}).join('');
   for(var i=0;i<first;i++)h+='<span></span>';
-  for(var d=1;d<=nd;d++){var iso=calIso(y,mo,d),its=calItems(iso).filter(function(x){return CAL.f==="todos"||x.k===CAL.f}),ks={};its.forEach(function(x){ks[x.k]=1});
-    h+='<button class="cal-d'+(iso===CAL.sel?' sel':'')+(iso===today?' hoje':'')+'" data-cald="'+iso+'" aria-label="'+d+' de '+CALMES[mo-1]+', '+its.length+' item(ns)"><span>'+d+'</span><i>'+Object.keys(ks).map(function(k){return'<b class="k-'+k+'"></b>'}).join('')+'</i></button>'}
-  h+='</div><p class="note cal-leg"><b class="k-f"></b>Feed <b class="k-c"></b>Canais <b class="k-p"></b>Publis <b class="k-z"></b>Prazos <b class="k-t"></b>Tarefas</p>';
-  var sel=CAL.sel,its2=calItems(sel).filter(function(x){return CAL.f==="todos"||x.k===CAL.f}),dd=new Date(sel+"T12:00:00");
+  for(var d=1;d<=nd;d++){var iso=calIso(y,mo,d),its=calItems(iso).filter(calFilter),ks={};its.forEach(function(x){if(x.k!=="d")ks[x.k]=1});
+    h+='<button class="cal-d'+(iso===CAL.sel?' sel':'')+(iso===today?' hoje':'')+'" data-cald="'+iso+'" aria-label="'+d+' de '+CALMES[mo-1]+', '+its.length+' item(ns)"><span>'+d+'</span><i>'+Object.keys(ks).slice(0,5).map(function(k){return'<b class="k-'+k+'"></b>'}).join('')+'</i></button>'}
+  h+='</div><p class="note cal-leg"><b class="k-f"></b>Feed <b class="k-s"></b>Stories <b class="k-a"></b>Assinatura <b class="k-m"></b>Melhores Amigos <b class="k-r"></b>Teste <b class="k-p"></b>Publi <b class="k-z"></b>Prazo <b class="k-t"></b>Tarefa</p>';
+  var sel=CAL.sel,its2=calItems(sel).filter(calFilter),dd=new Date(sel+"T12:00:00");
   h+='<div class="card"><h3>'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][dd.getDay()]+', '+sel.slice(8,10)+'/'+sel.slice(5,7)+'</h3>'
-   +(its2.length?its2.map(function(x){return'<div class="cal-i tap" role="button" tabindex="0" data-calgo="'+esc(x.go)+'"><span class="tag '+({f:'',c:'m',p:'l',z:'t',t:''}[x.k])+'">'+esc(x.tag)+'</span> '+esc(x.t)+' <b aria-hidden="true">›</b></div>'}).join(''):'<p class="note">Nada marcado neste dia.</p>')
-   +'<h3 style="margin-top:14px">Pôr neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: gravar o reels da Bling"></label>'
-   +'<label class="lab">Tipo<select id="cal-k">'+MDT.map(function(x){return'<option value="'+x[0]+'"'+(x[0]==="gravar"?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>'
-   +'<div class="btns"><button class="btn" data-calx="add">Adicionar ao Meu dia</button></div></div>';
+   +(its2.length?its2.map(function(x){return(x.id&&CAL.edit===x.id)?calEditor(calGet(x.id)):'<div class="cal-i tap" role="button" tabindex="0" data-calgo="'+esc(x.go)+'"><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span> '+esc(x.t)+(x.st?' <span class="note">· '+esc(x.st)+'</span>':'')+' <b aria-hidden="true">›</b></div>'}).join(''):'<p class="note">Nada marcado neste dia.</p>')
+   +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
+   +'<label class="lab">Onde<select id="cal-k">'+Object.keys(CALKIND).map(function(c){return'<option>'+c+'</option>'}).join('')+'<option value="tarefa">Tarefa só para mim (Meu dia)</option></select></label>'
+   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>';
   return h;
 }
+function renderCal(){$("#view").innerHTML='<div class="stack">'+calHtml()+'</div>'}
+function calHoje(D){
+  var its=CALD.items.filter(function(x){return x.d===D});
+  var h='<div class="block"><h3>No calendário editorial'+(its.length?' ('+its.length+')':'')+'</h3>';
+  if(!its.length)h+='<p class="note">Nada planejado para este dia no calendário.</p>';
+  its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div><div class="meta"><button class="btn small'+(x.st==="Publicado"?' ghost':'')+'" data-cstc="'+x.id+'">'+esc(x.st)+' ›</button></div></div>'});
+  h+='<div class="btns"><button class="btn ghost small" data-calgo="open">Abrir o calendário</button></div></div>';
+  return h;
+}
+function calCsv(){var q=function(v){return '"'+String(v||"").replace(/"/g,'""')+'"'};
+  return ["Conteúdo,Canal,Tipo de conteúdo,Formato de Post,Marca,Status,Data da publicação,Link"].concat(CALD.items.slice().sort(function(a,b){return a.d<b.d?-1:1}).map(function(x){return [x.t,x.canal,x.tipo,x.fmt,x.marca,x.st,x.d,x.link].map(q).join(",")})).join("\n")}
+function calAjustes(){return '<div class="card"><h3>Notion e Trello</h3><p>O calendário editorial do Notion (82 conteúdos de 08/10 a 30/11) e os roteiros da corrida Tray do Trello foram trazidos para o app em 30/10/2026. A partir daí, edite aqui: o app é o lugar único.</p><p class="note">O Notion e o Trello continuam como arquivo e não recebem as mudanças feitas aqui. Se precisar levar o calendário de volta ao Notion, copie em CSV e importe na base.</p><div class="btns"><button class="btn small ghost" data-calx="csv">Copiar calendário em CSV</button></div></div>'}
+document.addEventListener("change",function(e){
+  var el=e.target;if(!el.dataset||!el.dataset.cif||!CAL.edit)return;
+  var it=calGet(CAL.edit);if(!it)return;var f=el.dataset.cif;it[f]=el.value;it.at=Date.now();calSave();
+  if(f==="d"&&el.value){CAL.sel=el.value;CAL.m=el.value.slice(0,7)}
+  if(f==="d"||f==="canal"||f==="marca"||f==="fmt"||f==="tipo")render();
+});
 document.addEventListener("click",function(e){
   var t=e.target;if(!t.closest)return;
   var f=t.closest("[data-calf]");if(f){CAL.f=f.dataset.calf;render();return}
-  var dEl=t.closest("[data-cald]");if(dEl){CAL.sel=dEl.dataset.cald;render();return}
+  var dEl=t.closest("[data-cald]");if(dEl){CAL.sel=dEl.dataset.cald;CAL.edit=null;render();return}
+  var cs=t.closest("[data-cst]");if(cs){var q0=cs.dataset.cst.split("|"),i0=calGet(q0[0]);if(i0){i0.st=q0[1];i0.at=Date.now();calSave();render()}return}
+  var cc=t.closest("[data-cstc]");if(cc){var i1=calGet(cc.dataset.cstc);if(i1){i1.st=CALST[(CALST.indexOf(i1.st)+1)%CALST.length];i1.at=Date.now();calSave();render()}return}
   var x=t.closest("[data-calx]");
-  if(x){var a=x.dataset.calx,y=+CAL.m.slice(0,4),mo=+CAL.m.slice(5,7);
+  if(x){var q=x.dataset.calx.split("|"),a=q[0],y=+(CAL.m||isoToday()).slice(0,4),mo=+(CAL.m||isoToday()).slice(5,7);
     if(a==="prev"||a==="next"){mo+=a==="next"?1:-1;if(mo<1){mo=12;y--}if(mo>12){mo=1;y++}CAL.m=y+"-"+String(mo).padStart(2,"0");render();return}
     if(a==="today"){CAL.m=isoToday().slice(0,7);CAL.sel=isoToday();render();return}
-    if(a==="add"){var tx=($("#cal-t").value||"").trim();if(!tx)return;MD.items.push(mdNew({t:tx,tipo:$("#cal-k").value,d:CAL.sel}));mdLocal();render();return}
+    if(a==="close"){CAL.edit=null;render();return}
+    if(a==="add"){var tx=($("#cal-t").value||"").trim();if(!tx)return;var kk=$("#cal-k").value;
+      if(kk==="tarefa"){MD.items.push(mdNew({t:tx,tipo:"gravar",d:CAL.sel}));mdLocal()}
+      else{var it=calNew({t:tx,canal:kk,d:CAL.sel,fmt:kk==="Stories"||kk==="Melhores Amigos"?"Story":"Reels"});CALD.items.push(it);calSave();CAL.edit=it.id}
+      render();return}
+    if(a==="copy"){var c0=calGet(q[1]);if(c0)copyText(c0.t+"\n"+c0.canal+" · "+c0.fmt+(c0.marca?" · "+c0.marca:"")+" · "+c0.d+"\n\n"+c0.nota+"\n\nLegenda: "+c0.leg,x);return}
+    if(a==="hoje"){var c1=calGet(q[1]);if(c1){MD.items.push(mdNew({t:c1.canal+": "+c1.t,tipo:"gravar",d:c1.d||isoToday(),parc:(PARC.items.filter(function(p){return p.marca===c1.marca})[0]||{}).id||""}));mdLocal();x.textContent="Adicionado ao Meu dia"}return}
+    if(a==="parc"){var c2=calGet(q[1]),pp=PARC.items.filter(function(p){return c2&&p.marca===c2.marca})[0];if(pp){PCUI.open=pp.id;state.tab="pub";state.pub="parc";render();window.scrollTo(0,0)}return}
+    if(a==="del"){if(CAL.delc!==q[1]){CAL.delc=q[1];render();return}CALD.items=CALD.items.filter(function(z){return z.id!==q[1]});calSave();CAL.edit=null;CAL.delc=null;render();return}
+    if(a==="csv"){copyText(calCsv(),x);return}
+    if(a==="ia"){calIA(q[1]);return}
   }
   var g=t.closest("[data-calgo]");if(!g)return;
-  var q=g.dataset.calgo.split("|"),k=q[0];
-  if(k==="open"){CAL.m=null;CAL.sel=null;state.tab="mais";state.more="calendario";render();window.scrollTo(0,0);return}
-  if(k==="plano"){state.tab="hoje";state.hmode="plano";state.sel=q[1]}
-  else if(k==="md"){MDUI.date=q[1];state.tab="hoje";state.hmode="meu"}
+  var q2=g.dataset.calgo.split("|"),k=q2[0];
+  if(k==="open"){CAL.m=null;CAL.sel=null;CAL.edit=null;state.tab="cal"}
+  else if(k==="ci"){var c3=calGet(q2[1]);if(!c3)return;CAL.edit=CAL.edit===c3.id&&state.tab==="cal"?null:c3.id;CAL.sel=c3.d||isoToday();CAL.m=CAL.sel.slice(0,7);state.tab="cal"}
+  else if(k==="plano"){state.tab="hoje";state.hmode="plano";state.sel=q2[1]}
+  else if(k==="md"){MDUI.date=q2[1];state.tab="hoje";state.hmode="meu"}
   else if(k==="canais"){state.tab="mais";state.more="canais"}
-  else if(k==="prz"){var pz=PRAZOS[+q[1]];if(pz&&pz.brand==="Tray"){state.tab="pub";state.pub="tray"}else{var pp=PARC.items.filter(function(z){return pz&&z.marca===pz.brand})[0];state.tab="pub";state.pub="parc";if(pp)PCUI.open=pp.id}}
-  else if(k==="camp"){var p2=PARC.items.filter(function(z){return z.campId===q[1]})[0];state.tab="pub";state.pub="parc";if(p2)PCUI.open=p2.id}
+  else if(k==="prz"){var pz=PRAZOS[+q2[1]];if(pz&&pz.brand==="Tray"){state.tab="pub";state.pub="tray"}else{var p3=PARC.items.filter(function(z){return pz&&z.marca===pz.brand})[0];state.tab="pub";state.pub="parc";if(p3)PCUI.open=p3.id}}
+  else if(k==="camp"){var p2=PARC.items.filter(function(z){return z.campId===q2[1]})[0];state.tab="pub";state.pub="parc";if(p2)PCUI.open=p2.id}
   render();window.scrollTo(0,0);
 });
+async function calIA(id){
+  var it=calGet(id);if(!it)return;
+  if(!S){CAL.msg=NOAI;render();return}
+  CAL.busy=true;CAL.msg="";render();
+  try{
+    var marca=it.marca&&cfg().marcas[it.marca]?"\nPerfil da marca "+it.marca+": "+JSON.stringify(cfg().marcas[it.marca]):"";
+    var regras=it.marca?"\nÉ publi: inclua link exclusivo e a identificação “Parceria paga”, não prometa resultados e não invente case, depoimento ou dúvida recebida.":"";
+    var r=await S.json(RULES+"\n\nEscreva uma primeira versão para a Mari gravar.\nConteúdo: "+it.t+"\nCanal: "+it.canal+" · Formato: "+it.fmt+(it.tipo?" · Tipo: "+it.tipo:"")+marca+regras+"\nAnotações atuais: "+(it.nota||"(nenhuma)")+"\n\nResponda SOMENTE com JSON: {\"roteiro\":\"texto falado e o que aparece na tela, em blocos curtos\",\"legenda\":\"legenda pronta\",\"takes\":[\"3 a 5 takes sugeridos\"]}",{modelTier:"main"});
+    var txt=String(r.roteiro||"")+((r.takes&&r.takes.length)?"\n\nTakes sugeridos:\n- "+r.takes.join("\n- "):"");
+    it.nota=(it.nota?it.nota+"\n\n— Versão da IA —\n":"")+txt;if(r.legenda&&!it.leg)it.leg=String(r.legenda);else if(r.legenda)it.nota+="\n\nLegenda sugerida: "+r.legenda;
+    it.at=Date.now();calSave();CAL.msg="Primeira versão escrita. Leia e ajuste do seu jeito."
+  }catch(e){CAL.msg=crErr(e)||"Não consegui agora. Tente de novo."}
+  CAL.busy=false;render();
+}
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
   var inner="";
-  if(state.more==="calendario"){$("#view").innerHTML='<div class="stack">'+pillsMais()+calHtml()+'</div>';return}
+  if(state.more==="produtos"){renderProdutos();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="cerebro"){$("#view").innerHTML='<div class="stack">'+pillsMais()+brHtml()+'</div>';return}
-  if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+'</div>';return}
+  if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlIdeias();
   $("#view").innerHTML='<div class="stack">'+pillsMais()+inner+'</div>';
@@ -796,14 +869,14 @@ function htmlIdeias(){
 function render(){
   renderChrome();
   var t=state.tab;
-  if(t==="pub")renderPub();else if(t==="criar")renderHub();else if(t==="hoje")renderHoje();else if(t==="gravar")renderGravar();else if(t==="produtos")renderProdutos();else if(t==="canais")renderCanais();else renderMais();
+  if(t==="pub")renderPub();else if(t==="criar")renderHub();else if(t==="hoje")renderHoje();else if(t==="gravar")renderGravar();else if(t==="cal")renderCal();else if(t==="produtos"){state.tab="mais";state.more="produtos";renderMais()}else if(t==="canais")renderCanais();else renderMais();
   addSeg();addHero();
 }
 
 function addSeg(){
   var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
   var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
-  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button><button data-calgo="open" aria-pressed="false">Calendário</button></div>');
+  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
 }
 function addHero(){
   var t=state.tab,H=null;
@@ -1474,93 +1547,111 @@ var D_TRAY=[
 
 /* ---- Tray: direção completa por missão ---- */
 var TRAY_BASE={
- sempre:["Link exclusivo da Tray em todo conteúdo: clique você mesma antes de postar e confira se abre.","Ativar o selo “Parceria paga” no Instagram (Stories e Reels).","Oferta que abre em 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Conversão pesa mais que volume: cada conteúdo precisa terminar mandando para o link."],
- tom:"Voz da Mari: brincalhona e direta. Pode usar “gente”, “oxe”, “é mole?”, “me poupe”. Nada de lista de erros sem solução e nada de promessa de ganho garantido. Filho só nos stories, sem rotina escolar."
+ sempre:["Link rastreável exclusivo da Mari em todo conteúdo, testado antes de postar.","Identificação visível “Parceria paga”.","A oferta está prevista para abrir em 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 de investimento em Meta Ads pela Tray e bônus extras. Confirmar condições, elegibilidade e termos no briefing oficial antes de publicar.","Não prometer vendas, faturamento ou resultados. Não criar urgência artificial.","Não inventar case, depoimento, experiência ou dúvida recebida. Sugestão de pergunta não pode ser apresentada como pergunta real.","Os R$ 1.200 em Meta Ads são para clientes elegíveis. Não confundir com a bonificação da influenciadora, que é regra interna e não é benefício para quem compra.","Gravar em vertical 9:16, fala natural, legendas na tela.","CTA padrão: “Clica no link deste story para conhecer a oferta e se cadastrar. Parceria paga.”"],
+ tom:"Fonte dos roteiros: quadro do Trello (roteiros das semanas 2 e 3 e criativos). Adapte a fala ao seu jeito, sem mudar os fatos nem as regras."
 };
 var TRAYDIR={
- "w2-0":{obj:"Reabrir o assunto depois da semana 1 e levar para o link.",fmt:"3 stories (ou 3 vídeos curtos), sequência no mesmo dia",dur:"10 a 15s cada",
-  roteiro:[["Story 1 · Gancho","Gente, passou a primeira semana da corrida da Tray e eu ainda não contei o que mais me chamou atenção nessa oferta.","Texto: “Corrida Tray · semana 2” + figurinha de enquete “Você tem loja virtual?”"],
-   ["Story 2 · Virada","Eu tenho a Loyall há 7 anos. O Instagram me traz cliente, mas a loja virtual é a porta que fica aberta até quando eu estou dormindo, entendeu?","Texto na tela: “Instagram traz o cliente. A loja fecha a venda.”"],
-   ["Story 3 · Oferta e CTA","A oferta abre dia 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus. O link tá aqui embaixo, dá uma olhada.","Sticker de link com o link exclusivo + seta apontando"]],
-  takes:["Take 1: você falando para a câmera frontal, ambiente da loja ao fundo.","Take 2: mostrando a tela do celular com o Instagram e depois o site.","Take 3: take de apoio da Loyall (embalando pedido, cabides, balcão) por 2 a 3s.","Take 4: dedo apontando para o link no final."],
-  leg:"Texto de tela do story 3: “Link exclusivo · oferta abre 10/11”. Se publicar em vídeo no feed: “Black Friday começa na loja que já está pronta. A oferta da Tray abre dia 10/11 e o link tá na bio e nos stories. #publi”",
-  cta:"Clique no link e veja a oferta.",stickers:["Enquete: “Você tem loja virtual?”","Link exclusivo","Caixinha: “O que te impede de ter um site?” (usa na missão w3-3)"],
-  evitar:["Prometer venda ou faturamento.","Esquecer o selo de parceria paga.","Falar de preço sem ter conferido na página da oferta."],dica:"Grave os 3 de uma vez, com a mesma roupa. Postar em horários diferentes do dia rende mais alcance."},
- "w2-1":{obj:"Vídeo que converte: tirar a pessoa do ‘um dia eu faço’ para ‘vou ver o link’.",fmt:"Reels (também pode ir para TikTok e Shorts)",dur:"30 a 45s",
-  roteiro:[["Gancho (0 a 3s)","Quem vende só pelo Instagram precisa ouvir isso antes da Black Friday.","Texto grande: “Só Instagram? Cuidado.”"],
-   ["Problema (3 a 12s)","Se o Instagram cai, ou o algoritmo muda, ou o direct enche, o seu cliente não tem onde comprar sozinho. E você fica respondendo ‘qual o valor?’ o dia inteiro.","Cortes rápidos: direct cheio, você respirando fundo"],
-   ["Solução (12 a 30s)","A loja virtual vende enquanto você atende, produz e dorme. E a Tray tá com uma oferta que abre dia 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Texto em lista curta: loja pronta · plano Avançado · Meta Ads · bônus"],
-   ["CTA (30 a 40s)","Quer ver como funciona? O link exclusivo tá na legenda e nos stories. Vai lá antes que acabe a corrida.","Seta para o link, selo de parceria paga"]],
-  takes:["Take 1: close no rosto, olhando para a câmera, tom de ‘vou te contar’.","Take 2: tela do direct lotado de ‘valor?’ (cubra nomes dos clientes).","Take 3: você na rotina da loja (caixa, etiqueta, embalagem).","Take 4: tela do site da Tray com o link exclusivo.","Take 5: encerramento sorrindo com a mão apontando para baixo."],
-  leg:"Instagram é vitrine, a loja virtual é o caixa que não fecha. 🛍️ A oferta de Black Friday da Tray abre dia 10/11 e o link exclusivo tá aqui na legenda: [LINK EXCLUSIVO]. #publi #parceriapaga",
-  cta:"Clique no link e veja a oferta antes de 10/11.",stickers:["Link exclusivo nos stories repostando o reels","Contagem regressiva para 10/11"],
-  evitar:["Criticar quem vende só no Instagram: fale como quem já passou por isso.","Mais de uma ideia no mesmo vídeo.","Vídeo acima de 45s."],dica:"Se o vídeo for bem, repostar nos stories com o link no mesmo dia."},
- "w2-2":{obj:"Responder uma objeção real que chegou para você, em vídeo.",fmt:"Reels ou stories em vídeo (a pergunta aparece na tela)",dur:"20 a 40s",
-  roteiro:[["Abertura","Uma menina me mandou no direct: “Mari, eu não tenho dinheiro para investir em site agora.” Oxe, vamos conversar.","Print da pergunta (sem nome) na tela"],
-   ["Resposta","Eu entendo, porque eu também comecei sem folga. Só que o site não é gasto à toa: ele é mais um lugar da loja vender. E nessa oferta da Tray tem plano Avançado por 1 ano, loja pronta em até 30 dias e R$ 1.200 em Meta Ads.","Texto na tela: “Site não é gasto, é mais um canal”"],
-   ["Fechamento","Se fizer sentido para você, o link exclusivo tá aqui embaixo. Se não fizer, tudo bem, mas conhece antes de decidir.","Sticker de link"]],
-  takes:["Take 1: print da pergunta real (troque o nome).","Take 2: você respondendo olhando para a câmera, voz calma.","Take 3: apoio com a loja ou o estoque."],
-  leg:"Pergunta real que chegou no direct. 💬 Se você pensa assim também, vem ver a oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",
-  cta:"Veja a oferta e tire sua dúvida no link.",stickers:["Link exclusivo","Caixinha: “Qual é a sua dúvida sobre ter site?”"],
-  evitar:["Inventar a pergunta: use uma objeção que realmente chegou.","Tom de bronca com quem tem a dúvida.","Prometer retorno financeiro."],dica:"Procure no direct: “não tenho tempo”, “não sei mexer”, “é caro”. Escolha a que mais se repete."},
- "w2-3":{obj:"Criar um criativo que divulga a campanha (a marca pode usar em anúncio).",fmt:"Vídeo vertical curto no estilo criativo de anúncio",dur:"15 a 30s",
-  roteiro:[["Hook","Se a sua loja só vende no Instagram, para um minutinho.","Texto: “Loja só no Instagram?”"],
-   ["Prova","Eu tenho loja há 7 anos e aprendi que quem tem site não depende de uma rede só.","Cortes de loja, pedidos, embalagem"],
-   ["Oferta","Tray, Black Friday: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Textos sobrepostos aparecendo um a um"],
-   ["CTA","Link na legenda. Corre que a corrida acaba em 10/11.","Texto final: “Clique no link”"]],
-  takes:["Gravar 3 aberturas diferentes (hook A, B e C) para a Tray testar.","Take de loja sem música ao fundo para a edição escolher.","Take final olhando para a câmera com o CTA."],
-  leg:"Criativo da corrida Tray. Combine com a Tray se vão editar, e envie os takes brutos na pasta combinada. #publi",
-  cta:"Clique no link da oferta.",stickers:["Não usar stickers: o criativo vai limpo para a marca editar."],
-  evitar:["Música com direitos autorais.","Texto muito pequeno.","Gravar na horizontal."],dica:"Quanto mais variação de abertura (3 hooks), mais a marca consegue testar."},
- "w2-4":{obj:"Quebrar a objeção ‘vai dar muito trabalho montar minha loja’.",fmt:"Reels ou carrossel de stories",dur:"30 a 40s",
-  roteiro:[["Gancho","“Mari, mas montar loja virtual é muito difícil, né?”","Texto: “Dá trabalho? É mole?”"],
-   ["Quebra","A oferta da Tray vem com loja pronta em até 30 dias. Você não precisa virar programadora para sair do zero.","Corte de você rindo e respirando aliviada"],
-   ["Passo a passo","A ideia é simples: você conhece a oferta, escolhe o plano, e a loja vem pronta. Depois é cadastrar produto, foto e preço.","3 textos curtos: 1 conhece · 2 escolhe · 3 cadastra"],
-   ["CTA","Link exclusivo aqui. Vai lá ver como funciona antes de decidir.","Seta para o link"]],
-  takes:["Take 1: você sentada no computador ou celular, cara de ‘eu também tinha medo’.","Take 2: tela mostrando a página da oferta.","Take 3: você cadastrando um produto da Loyall (se tiver acesso a plataforma, mostre uma tela real)."],
-  leg:"Loja pronta em até 30 dias para quem não quer perder tempo montando do zero. 😮‍💨 Oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",
-  cta:"Veja como funciona no link.",stickers:["Link exclusivo","Quiz: “Dá mais trabalho montar loja ou responder direct?”"],
-  evitar:["Mostrar telas que você não conferiu na plataforma.","Dizer que ‘é sem esforço’."],dica:"Se você já usou a plataforma, conte o que achou fácil e o que achou difícil. Isso dá confiança."},
- "w2-5":{obj:"Vídeo curto só para empurrar para o link.",fmt:"Reels curto ou story em vídeo",dur:"10 a 15s",
-  roteiro:[["Único bloco","Última dica antes de 10/11: o link exclusivo da oferta da Tray tá aqui. Loja pronta em até 30 dias, plano Avançado por 1 ano e R$ 1.200 em Meta Ads. Vai ver e me conta o que achou.","Texto: “Oferta Tray · 10/11” + selo de parceria paga"]],
-  takes:["Take único, frontal, energia alta.","Apoio de 2s: dedo clicando no link."],
-  leg:"Link da oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique no link e veja a oferta.",
-  stickers:["Link exclusivo","Contagem regressiva"],evitar:["Mais de 15s.","Explicar demais: o vídeo é só CTA."],dica:"Esse é o vídeo ‘coringa’: grave agora e use quando o dia estiver corrido."},
- "w2-6":{obj:"Fechar a semana com urgência e levar ao link.",fmt:"4 stories",dur:"10s cada",
-  roteiro:[["Story 1","Gente, hoje fecha a semana 2 da corrida Tray.","Texto: “Último dia da semana 2”"],
-   ["Story 2","Se você ainda não viu a oferta, é agora: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Lista curta na tela"],
-   ["Story 3","A oferta abre dia 10/11. Quem já entrou no link vai receber o aviso primeiro.","Contagem regressiva"],
-   ["Story 4 · Urgência","Último aviso: o link exclusivo tá aqui. Qualquer dúvida, manda no direct que eu respondo.","Link exclusivo + selo parceria paga"]],
-  takes:["Mesmo cenário dos 4 stories, trocar só a posição.","Take de apoio com a loja."],
-  leg:"Último dia da semana 2 da corrida Tray. 🏁",cta:"Clique no link antes da meia-noite.",
-  stickers:["Contagem regressiva","Link exclusivo","Enquete: “Já viu a oferta?”"],
-  evitar:["Postar sem o selo de parceria paga.","Esquecer de conferir o link antes."],dica:"Hoje é 30/10. A semana fecha em 01/11, então grave e agende para amanhã e sábado."},
- "w3-0":{obj:"Criar expectativa para 10/11.",fmt:"Reels ou story em vídeo",dur:"15 a 20s",
-  roteiro:[["Abertura","Faltam poucos dias para abrir a oferta da Tray.","Contador na tela"],["Meio","Loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus.","Textos animados"],["CTA","O link exclusivo tá aqui para você conhecer antes de abrir.","Sticker de link"]],
-  takes:["Take frontal com calendário ao fundo ou na mão.","Take de apoio: tela com 10/11 destacado."],
-  leg:"Contagem regressiva para a oferta da Tray. ⏳ [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Veja a oferta no link.",stickers:["Contagem regressiva até 10/11","Link exclusivo"],evitar:["Contar dias errados: confira a data."],dica:"Atualize o número de dias restantes no dia em que for postar."},
- "w3-1":{obj:"Dar 3 razões práticas para aproveitar a oferta.",fmt:"Reels",dur:"30 a 40s",
-  roteiro:[["Gancho","3 motivos para você aproveitar a oferta da Tray antes de 10/11.","Texto: “3 motivos”"],["Motivo 1","Loja pronta em até 30 dias.","Número 1 na tela"],["Motivo 2","1 ano de plano Avançado.","Número 2 na tela"],["Motivo 3","R$ 1.200 em Meta Ads e bônus.","Número 3 na tela"],["CTA","Link exclusivo aqui. Vai ver se faz sentido para a sua loja.","Seta para o link"]],
-  takes:["Um take curto por motivo, mudando de ângulo.","Take de fechamento sorrindo."],
-  leg:"3 motivos práticos para olhar a oferta da Tray. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Veja os detalhes no link.",stickers:["Link exclusivo"],evitar:["Mais de 3 motivos.","Dizer ‘vai vender’."],dica:"Se a Tray mandar o detalhe dos bônus, troque o ‘bônus’ por o nome real."},
- "w3-2":{obj:"Mostrar um caso real de lojista Tray (prova social).",fmt:"Stories ou Reels",dur:"20 a 40s",
-  roteiro:[["Abertura","Quero te mostrar um caso real de uma lojista que usa a Tray.","Texto: “Caso real”"],["Meio","[PREENCHER: o que ela vendia, o que mudou, em quanto tempo, com autorização dela]","Print ou vídeo enviado por ela"],["CTA","Se você quer ver como funciona, o link exclusivo tá aqui.","Link exclusivo"]],
-  takes:["Vídeo ou áudio da lojista (com autorização).","Print de depoimento sem dado sensível.","Você comentando em take frontal."],
-  leg:"Caso real de uma lojista que usa a Tray. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Conheça a oferta no link.",stickers:["Link exclusivo"],
-  evitar:["Usar caso inventado ou sem autorização.","Citar números sem fonte."],dica:"Peça o caso para a Tray. Se não vier, use o seu: conte o que você mesma percebeu na plataforma."},
- "w3-3":{obj:"Coletar dúvidas reais e responder ao vivo.",fmt:"Caixinha de perguntas + respostas nos stories",dur:"3 ou mais respostas",
-  roteiro:[["Story da caixinha","Me manda sua dúvida sobre ter loja virtual. Pode perguntar tudo.","Sticker de perguntas"],["Respostas","[PREENCHER com as dúvidas que chegarem. Responda 1 por story]","Pergunta aparece na tela"],["Fechamento","Se ainda sobrou dúvida, o link exclusivo da Tray tá aqui e eu continuo respondendo no direct.","Link exclusivo"]],
-  takes:["Respostas em take frontal, 10 a 15s cada."],leg:"Dúvidas sobre loja virtual respondidas. [LINK EXCLUSIVO] #publi",cta:"Veja a oferta e tire dúvidas.",stickers:["Perguntas","Link exclusivo"],
-  evitar:["Responder o que não sabe: diga ‘vou confirmar com a Tray’."],dica:"Abra a caixinha pela manhã e responda no fim do dia."},
- "w3-4":{obj:"Mais uma quebra de objeção (use a que mais apareceu).",fmt:"Reels",dur:"30 a 40s",
-  roteiro:[["Gancho","A desculpa que mais escuto: “depois eu vejo isso de site”.","Texto: “Depois eu vejo”"],["Meio","O depois é caro: toda semana sem loja virtual é semana vendendo só quando você está online.","Cortes da rotina"],["Oferta","Na oferta da Tray tem loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus.","Textos curtos"],["CTA","Link exclusivo aqui.","Seta"]],
-  takes:["Take frontal, tom de conversa.","Takes de rotina da loja."],leg:"O ‘depois’ pode custar caro. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique no link.",stickers:["Link exclusivo"],evitar:["Culpar a pessoa."],dica:"Troque a frase de abertura pela objeção que mais apareceu no seu direct."},
- "w3-5":{obj:"Última chamada antes de abrir.",fmt:"Reels curto + stories",dur:"15 a 20s",
-  roteiro:[["Único bloco","É a última chamada: a oferta da Tray abre dia 10/11. Loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus. O link tá aqui.","Texto: “Última chamada”"]],
-  takes:["Take frontal com energia alta.","Take de apoio: dedo no link."],leg:"Última chamada da corrida Tray. 🏁 [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique agora no link.",stickers:["Contagem regressiva","Link exclusivo"],evitar:["Mudar a oferta: use sempre a mesma descrição."],dica:"Poste de manhã e repita nos stories à noite."},
- "w3-6":{obj:"Encerrar a corrida com 3 stories e agradecer.",fmt:"3 stories",dur:"10s cada",
-  roteiro:[["Story 1","Obrigada por ter acompanhado a corrida da Tray comigo.","Texto: “Fim da corrida”"],["Story 2","Se você ainda não viu a oferta, o link exclusivo tá aqui. Ela abre dia 10/11.","Link exclusivo"],["Story 3","O resultado da corrida sai em 13/11, e eu volto aqui contando tudo, sem enrolação.","Texto: “Resultado em 13/11”"]],
-  takes:["3 takes frontais, mesmo cenário."],leg:"Fim da corrida Tray. [LINK EXCLUSIVO] #publi",cta:"Veja a oferta no link.",stickers:["Link exclusivo"],evitar:["Anunciar resultado antes de 13/11."],dica:"Prometa o retorno do resultado: isso mantém a audiência atenta."}
+ "w2-0":{obj:"Retomar a oportunidade com informação, sem prometer nada.",fmt:"3 stories",dur:"10 a 15s cada",
+  roteiro:[["Story 1","Se você está pensando em criar uma loja virtual, estou reunindo aqui as informações de uma oferta da Tray que abre em 10/11.","Texto: “Oferta Tray • 10/11 • confira as condições”"],
+   ["Story 2","A ideia é você entender o que está incluído e avaliar se faz sentido para o momento do seu negócio.","Mesmo texto na tela"],
+   ["Story 3","Quer acompanhar os detalhes? Acesse meu link exclusivo e faça seu cadastro. Parceria paga.","Sticker de link exclusivo"]],
+  takes:["Take frontal vertical, mesmo cenário nos 3 stories.","Take de apoio: a loja ou a tela do celular, 2 a 3s.","Take final: dedo apontando para o link."],
+  leg:"Stories não levam legenda. Use o texto na tela e o sticker de link.",cta:"Acesse meu link exclusivo e faça seu cadastro. Parceria paga.",stickers:["Link exclusivo em todos os stories (no mínimo, como diz o regulamento da missão)"],
+  evitar:["Prometer resultado.","Esquecer “Parceria paga”."],dica:"Checklist: link testado, “Parceria paga” visível, condições conferidas com a Tray."},
+ "w2-1":{obj:"Vídeo de conversão: levar quem está pesquisando para o link.",fmt:"Reels (também TikTok ou Shorts)",dur:"30 a 45s",
+  roteiro:[["Gancho","Está esperando para organizar sua loja virtual? Antes de decidir, veja isso.","Texto: “Oferta prevista para 10/11 • consulte os termos”"],
+   ["Fala","No dia 10 de novembro, a Tray prevê abrir uma oferta especial para quem quer estruturar uma loja virtual. O material da campanha divulga loja pronta em até 30 dias, um ano de plano Avançado, investimento de R$ 1.200 em Meta Ads pela Tray e bônus extras. Como cada benefício tem condições específicas, o melhor é conferir os detalhes e entender o que se aplica ao seu negócio.","Cortes de apoio da loja"],
+   ["CTA","Acesse meu link exclusivo, faça seu cadastro e confira as condições. Parceria paga.","Texto final: “Parceria paga”"]],
+  takes:["Close no rosto para o gancho.","Take de rotina da loja durante a fala.","Tela do site da Tray (só se você conferiu a página).","Fechamento olhando para a câmera."],
+  leg:"Planejando criar sua loja virtual? Conheça a oferta divulgada pela Tray e confira os requisitos antes de decidir. Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Acesse meu link exclusivo, faça seu cadastro e confira as condições. Parceria paga.",stickers:["Repostar nos stories com o link exclusivo"],
+  evitar:["Dizer que os benefícios valem para todo mundo.","Prometer venda."],dica:"Confirme benefícios e condições com a Tray antes de publicar."},
+ "w2-2":{obj:"Responder uma objeção em vídeo.",fmt:"Reels ou story em vídeo",dur:"20 a 40s",
+  roteiro:[["Antes de gravar","Identifique uma pergunta real recebida pela Mari e adapte o texto. Se não houver pergunta real, use como conteúdo educativo, sem afirmar que alguém perguntou.","Se houver pergunta real, esconda nome e foto"],
+   ["Gancho","Uma coisa importante para avaliar antes de abrir uma loja virtual…","Texto: “Escolha a plataforma pensando na operação real”"],
+   ["Fala-base","Antes de escolher uma plataforma, vale olhar para a rotina do seu negócio: catálogo, estoque, pagamentos, entregas e atendimento. Também é importante entender quais recursos estão incluídos e quais custos podem existir. A Tray é uma opção que você pode pesquisar e comparar com as necessidades da sua operação. Não decida só pela oferta: veja se a estrutura faz sentido para você.","Take de apoio da rotina da loja"],
+   ["CTA","Deixei meu link exclusivo nos stories para você conferir as informações da Tray. Parceria paga.","Sticker de link"]],
+  takes:["Take frontal, voz calma.","Take de apoio: estoque, embalagem, pedido.","Print da pergunta real, somente se existir (sem nome)."],
+  leg:"Antes de escolher uma plataforma, olhe para a rotina da sua loja. Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Deixei meu link exclusivo nos stories para você conferir as informações da Tray. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Inventar a pergunta.","Inventar resposta técnica: se a objeção for preço, dificuldade, logística ou integração, adapte sem inventar."],dica:"Objeção real validada ou conteúdo reformulado como educativo."},
+ "w2-3":{obj:"Novo criativo de divulgação, diferente dos anteriores.",fmt:"Vídeo vertical curto",dur:"20 a 35s",
+  roteiro:[["Gancho","Vender pelas redes sociais e ter uma loja virtual não precisam ser caminhos excludentes.","Texto: “Redes sociais + loja virtual • conheça a proposta”"],
+   ["Fala","As redes sociais ajudam a apresentar produtos e conversar com clientes. Uma loja virtual pode ser mais um canal para organizar o catálogo e a jornada de compra. Se você está pesquisando como dar esse passo, a Tray terá uma oferta divulgada para 10/11. Confira o que está incluído, os requisitos e se combina com o seu negócio.","Cortes de loja e celular"],
+   ["CTA","Acesse meu link exclusivo e faça seu cadastro para acompanhar. Parceria paga.","Texto final"]],
+  takes:["Take frontal.","Take de apoio: celular com Instagram e loja.","Takes extras para a edição escolher."],
+  leg:"Redes sociais e loja virtual podem andar juntas. Confira a oferta divulgada pela Tray no link exclusivo. #publi #ParceriaPaga",cta:"Acesse meu link exclusivo e faça seu cadastro para acompanhar. Parceria paga.",stickers:["Sem stickers se o criativo for para a Tray editar"],
+  evitar:["Repetir os criativos anteriores: cada missão precisa de um criativo diferente."],dica:"Os criativos precisam ser diferentes entre si para cumprir missões distintas."},
+ "w2-4":{obj:"Quebra de objeção: “Ainda não sei se é o momento de ter uma loja virtual”.",fmt:"Reels falado ou 3 cards",dur:"30 a 40s",
+  roteiro:[["Gancho","Você não precisa decidir no impulso — precisa entender o que sua loja precisa.","Texto na tela com o tema"],
+   ["Fala","Antes de contratar uma plataforma, pense no que vende, no tamanho do catálogo, em como controla o estoque, como entrega e quanto pode investir. Depois compare recursos, custos e condições. A oferta da Tray pode entrar na sua pesquisa, mas a decisão precisa partir da realidade do seu negócio.","Cortes da rotina"],
+   ["CTA","Confira os detalhes da oferta pelo meu link exclusivo. Parceria paga.","Sticker de link"]],
+  takes:["Take frontal, tom de conversa.","Takes de rotina da loja."],
+  leg:"Decida com informação, não por impulso. Detalhes da oferta no link exclusivo. #publi #ParceriaPaga",cta:"Confira os detalhes da oferta pelo meu link exclusivo. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Afirmar que essa é uma objeção recebida pela audiência sem confirmação."],dica:"Se virar carrossel, 3 cards."},
+ "w2-5":{obj:"Vídeo curto só com CTA.",fmt:"Reels curto",dur:"15 a 20s",
+  roteiro:[["Fala única","Lojista, está pesquisando como criar sua loja virtual? A oferta da Tray está prevista para abrir em 10 de novembro. Acesse meu link exclusivo, faça seu cadastro e confira os benefícios e as condições. Parceria paga.","Texto: “Tray • 10/11 • link exclusivo nos stories”"]],
+  takes:["Take único, frontal.","Cortes rápidos, legenda automática revisada, CTA final visível."],
+  leg:"Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Acesse meu link exclusivo, faça seu cadastro e confira os benefícios e as condições. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Passar de 20s."],dica:"Edição: cortes rápidos, legenda automática revisada e CTA final visível."},
+ "w2-6":{obj:"Reforço e última chamada da semana, sem urgência artificial.",fmt:"4 stories",dur:"10 a 15s cada",
+  roteiro:[["Story 1 · Contexto","Passando para lembrar: a oferta da Tray está prevista para 10/11.","Texto na tela"],
+   ["Story 2 · Benefício","O material divulga loja pronta em até 30 dias e um ano de plano Avançado. Consulte os requisitos.","Texto na tela"],
+   ["Story 3 · Complemento","Também são divulgados investimento em Meta Ads pela Tray e bônus extras, sujeitos às condições oficiais.","Texto na tela"],
+   ["Story 4 · CTA","Quer receber as informações? Acesse meu link exclusivo e faça seu cadastro. Parceria paga.","Sticker de link exclusivo"]],
+  takes:["Mesmo cenário nos 4 stories.","Take de apoio da loja."],
+  leg:"Stories não levam legenda.",cta:"Acesse meu link exclusivo e faça seu cadastro. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Dizer “últimas vagas”.","Criar urgência artificial."],dica:"Semana 2 fecha em 01/11."},
+ "w3-0":{obj:"Preparar a audiência para a abertura de 10/11.",fmt:"Vídeo de contagem regressiva",dur:"15 a 30s",
+  roteiro:[["Gancho","Falta pouco para a abertura da oferta da Tray.","Texto: “Oferta prevista para 10/11”"],
+   ["Fala","Se você está pesquisando como estruturar sua loja virtual, anote a data divulgada: 10 de novembro. A campanha apresenta benefícios como loja pronta em até 30 dias, um ano de plano Avançado, investimento em Meta Ads pela Tray e bônus extras. Confira os requisitos e os termos para entender o que se aplica ao seu negócio.","Contador só se o número de dias estiver correto no dia"],
+   ["CTA","Acesse meu link exclusivo e faça seu cadastro para acompanhar. Parceria paga.","Texto final"]],
+  takes:["Take frontal.","Take do calendário ou do celular com a data."],
+  leg:"Falta pouco para a oferta da Tray. Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Acesse meu link exclusivo e faça seu cadastro para acompanhar. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Contador com número de dias errado."],dica:"Confira a contagem no dia em que for publicar."},
+ "w3-1":{obj:"Três pontos para avaliar antes de decidir.",fmt:"Reels",dur:"30 a 40s",
+  roteiro:[["Gancho","Três pontos para você avaliar antes de decidir sobre a oferta Tray.","Texto: “3 pontos”"],
+   ["Fala","Primeiro: o material divulga a possibilidade de loja pronta em até 30 dias. Segundo: anuncia um ano de plano Avançado. Terceiro: informa R$ 1.200 de investimento em Meta Ads pela Tray, além de bônus extras. Esses itens estão sujeitos às condições da campanha, então confira os requisitos e veja se atendem à necessidade da sua loja.","Na tela: 1. Loja pronta em até 30 dias* / 2. 1 ano de plano Avançado* / 3. R$ 1.200 em Meta Ads*"],
+   ["CTA","Salve este vídeo e acesse meu link exclusivo para consultar os detalhes. Parceria paga.","Rodapé: *Consulte condições e elegibilidade"]],
+  takes:["Um take por ponto, mudando o ângulo.","Take de fechamento."],
+  leg:"Três pontos para avaliar antes de decidir. Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Salve este vídeo e acesse meu link exclusivo para consultar os detalhes. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Publicar como garantia universal."],dica:"O rodapé com o asterisco é obrigatório."},
+ "w3-2":{obj:"Case ou depoimento autorizado.",fmt:"Stories ou Reels",dur:"20 a 40s",
+  roteiro:[["Condição","Executar somente se a Tray fornecer case ou depoimento aprovado e autorização de uso. Não há case aprovado neste roteiro.","Se não chegar material validado, troque por conteúdo educativo sobre critérios para escolher uma plataforma, sem simular depoimento."],
+   ["Estrutura","Hoje quero compartilhar um exemplo real de uma loja que utiliza a Tray. [Inserir marca, contexto, desafio e uso da plataforma conforme material aprovado.] O mais importante é entender o contexto desse negócio e quais aprendizados podem fazer sentido para outras operações.","[PREENCHER com o material aprovado]"],
+   ["CTA","Quer conhecer a plataforma e a oferta divulgada para 10/11? Acesse meu link exclusivo. Parceria paga.","Sticker de link"]],
+  takes:["Vídeo ou áudio da lojista, só com autorização.","Você comentando em take frontal."],
+  leg:"Exemplo real de uma loja que usa a Tray. Link exclusivo nos stories. #publi #ParceriaPaga",cta:"Quer conhecer a plataforma e a oferta divulgada para 10/11? Acesse meu link exclusivo. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Inventar case, depoimento ou experiência pessoal."],dica:"Peça o case à Tray. Sem material aprovado, use o conteúdo educativo."},
+ "w3-3":{obj:"Caixinha de perguntas com pelo menos 3 dúvidas.",fmt:"Caixinha + respostas nos stories",dur:"3 ou mais respostas",
+  roteiro:[["Story de abertura","Está pensando em criar sua loja virtual? Deixa sua dúvida sobre a Tray aqui que vou reunir as principais informações.","Sticker de perguntas"],
+   ["Pergunta 1 (sugerida)","“Preciso saber programar para montar uma loja virtual?” Resposta-base: confira a demonstração e as informações oficiais para entender as etapas e os recursos disponíveis.","Pergunta na tela"],
+   ["Pergunta 2 (sugerida)","“O que devo avaliar antes de escolher uma plataforma?” Resposta-base: avalie facilidade de uso, recursos, pagamentos, logística, atendimento e custos. A melhor opção depende da sua operação.","Pergunta na tela"],
+   ["Pergunta 3 (sugerida)","“O que está incluído na oferta da Tray?” Resposta-base: o material divulga loja pronta em até 30 dias, um ano de plano Avançado, investimento em Meta Ads pela Tray e bônus extras. Consulte os termos para confirmar os detalhes.","Pergunta na tela"],
+   ["CTA","Meu link exclusivo está aqui para você consultar a oferta. Parceria paga.","Sticker de link"]],
+  takes:["Respostas em take frontal de 10 a 15s cada."],
+  leg:"Stories não levam legenda.",cta:"Meu link exclusivo está aqui para você consultar a oferta. Parceria paga.",stickers:["Perguntas","Link exclusivo"],
+  evitar:["Apresentar as perguntas sugeridas como se já tivessem sido recebidas.","Mostrar nome ou foto de perfil sem autorização."],dica:"Se houver dúvidas reais, responda as recebidas e oculte nomes e fotos."},
+ "w3-4":{obj:"Quebra de objeção: “Ainda não é a hora”.",fmt:"Reels falado",dur:"30 a 40s",
+  roteiro:[["Gancho","Antes de contratar uma plataforma, vale entender se ela combina com a fase do seu negócio.","Texto: “Decida com informação, não por impulso”"],
+   ["Fala","Você está começando agora ou já vende todos os dias? Tem catálogo organizado, controle de estoque e uma rotina de entrega definida? Essas respostas ajudam a escolher a estrutura certa. Compare recursos, custos e condições e só avance quando entender o que está contratando. A Tray é uma opção para pesquisar dentro desse processo.","Cortes da rotina"],
+   ["CTA","Confira as informações da oferta pelo meu link exclusivo. Parceria paga.","Sticker de link"]],
+  takes:["Take frontal, tom de conversa.","Takes de rotina da loja."],
+  leg:"Decida com informação, não por impulso. #publi #ParceriaPaga",cta:"Confira as informações da oferta pelo meu link exclusivo. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Culpar quem ainda tem dúvida."],dica:"Legenda-base de reels da semana 3 vale aqui também."},
+ "w3-5":{obj:"Última chamada, só depois de confirmar com a Tray.",fmt:"Vídeo",dur:"15 a 30s",
+  roteiro:[["Condição","Publicar apenas depois de confirmar com a Tray que a oferta está disponível e qual é o prazo real. Não afirmar que está acabando se isso não estiver confirmado.","Se a campanha ainda não abriu, adaptar para “falta pouco para a abertura prevista em 10/11”."],
+   ["Gancho","Você já conferiu os detalhes da oferta da Tray?","Texto: “Confira o prazo e as condições oficiais”"],
+   ["Fala","Se você está considerando criar uma loja virtual, revise o que a campanha informa: loja pronta em até 30 dias, um ano de plano Avançado, investimento em Meta Ads pela Tray e bônus extras, conforme condições oficiais. Consulte os requisitos, o período de participação e todos os termos antes de decidir.","Cortes de apoio"],
+   ["CTA","Acesse meu link exclusivo para verificar as informações atualizadas. Parceria paga.","Sticker de link"]],
+  takes:["Take frontal.","Take de apoio com o link."],
+  leg:"Está pesquisando loja virtual? Confira os detalhes da oferta da Tray no link exclusivo. #publi #ParceriaPaga",cta:"Acesse meu link exclusivo para verificar as informações atualizadas. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Dizer que está acabando sem confirmação.","Criar urgência artificial."],dica:"Confirme data, prazo e termos no briefing atualizado."},
+ "w3-6":{obj:"Encerrar a corrida com 3 stories.",fmt:"3 stories",dur:"10 a 15s cada",
+  roteiro:[["Story 1 · Resumo","Ao longo dos últimos dias, compartilhei informações para quem está pesquisando uma loja virtual. A oferta da Tray está prevista para abrir em 10/11.","Texto na tela"],
+   ["Story 2 · Benefícios","O material divulga loja pronta em até 30 dias, um ano de plano Avançado, investimento em Meta Ads pela Tray e bônus extras. Consulte os termos.","Texto na tela"],
+   ["Story 3 · CTA","Se faz sentido para o seu negócio, acesse meu link exclusivo, confira as condições e faça seu cadastro. Parceria paga.","Sticker de link exclusivo"]],
+  takes:["Mesmo cenário nos 3 stories."],
+  leg:"Stories não levam legenda.",cta:"Se faz sentido para o seu negócio, acesse meu link exclusivo, confira as condições e faça seu cadastro. Parceria paga.",stickers:["Link exclusivo"],
+  evitar:["Anunciar a abertura sem confirmar data e horário."],dica:"Confirme se a oferta abre exatamente na data e no horário informados antes de publicar."}
 };
 function trayRow(m){
   var id="tray-"+m[0],has=!!TRAYDIR[m[0]],tx=m[1]+(parseNum(m[2])?" (+"+m[2]+")":"");
@@ -2005,8 +2096,9 @@ function mdHtml(){
   var atr=D===today?live.filter(function(x){return x.d&&x.d<today&&x.st==="pendente"}):[];
   var mine=dia.filter(function(x){return x.quem==="Mari"}),oth=dia.filter(function(x){return x.quem!=="Mari"});
   var h='<div class="btns" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,-1)+'" aria-label="Dia anterior">‹</button><div style="text-align:center"><h2 style="margin:0">'+esc(mdFmt(D).replace(/^./,function(c){return c.toUpperCase()}).replace("-feira","-feira"))+'</h2>'+(D!==today?'<button class="btn ghost small" data-mdb="dia" data-d="'+today+'">Voltar para hoje</button>':'<span class="note">Hoje</span>')+'</div><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,1)+'" aria-label="Próximo dia">›</button></div>';
-  h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
+  h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length+CALD.items.filter(function(x){return x.d===d2&&x.st!=="Publicado"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
   if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
+  h+=calHoje(D);
   var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
   if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
   var tot=mine.filter(function(x){return x.st==="pendente"}).length;
@@ -2315,7 +2407,7 @@ document.addEventListener("change",function(e){
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
 
 /* ============ SINCRONIZAÇÃO (fora do Claude) ============ */
-var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools"];
+var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal"];
 var SYN={meta:{},busy:false,timer:null,msg:"",applying:false};
 function synOn(){var c=aiGet();return !!(c.proxy&&c.code)&&!(window.claude&&window.claude.use)}
 function synLoadMeta(){try{SYN.meta=JSON.parse(localStorage.getItem("hoje-sync-meta")||"{}")}catch(e){SYN.meta={}}}
@@ -2335,7 +2427,7 @@ async function synNow(){
     localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
     if(Object.keys(push.meta).length){var r2=await fetch(base,{method:"PUT",headers:{"content-type":"application/json","x-app-code":c.code},body:JSON.stringify(push)});if(!r2.ok)throw 0}
     localStorage.setItem("hoje-sync-init","1");
-    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
     SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
   }catch(e){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}
   SYN.busy=false;
@@ -2464,7 +2556,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
+synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
