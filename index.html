@@ -363,6 +363,13 @@ h3{font-size:21px}
 #undo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:12px;background:var(--text,#2b1d22);color:#fff;padding:10px 12px 10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px);font-size:14px}
 #undo[hidden]{display:none}
 #undo button{background:#fff;color:#2b1d22;border:0;border-radius:999px;padding:8px 14px;font-weight:700;font:inherit;font-weight:700}
+
+.sld{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px;background:var(--card,transparent)}
+.sld h4{margin:0;font-size:16px}
+.sl{display:grid;gap:4px}
+.sl .slh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sl .slh b{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.sl textarea{min-height:64px}
 </style>
 
 <div class="wrap">
@@ -872,6 +879,7 @@ function calEditor(it){
    +(it.nota?'':tplBtn(it))
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
    +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
+   +slidesHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
    +((calNext(it.st)||calPrev(it.st))?'<div class="btns">'+(calPrev(it.st)?'<button class="btn ghost" data-cst="'+it.id+'|'+calPrev(it.st)+'">‹ Voltar para '+calLbl(calPrev(it.st))+'</button>':'')+(calNext(it.st)?'<button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button>':'')+'</div>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
@@ -1433,6 +1441,31 @@ document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)r
   var lbl=m.hasAttribute("data-agora")?"Tarefa marcada como feita":(m.dataset.rvx?"Marcado como postado":"Etapa alterada");
   UNDO.snap={cal:JSON.stringify(CALD.items),md:JSON.stringify(MD.items||[])};
   setTimeout(function(){var b=undoBar();b.innerHTML='<span>'+lbl+'</span><button type="button">Desfazer</button>';b.hidden=false;clearTimeout(UNDO.t);UNDO.t=setTimeout(function(){b.hidden=true;UNDO.snap=null},12000)},0)},true);
+
+
+/* ============ v36: slides do carrossel ============ */
+var SLGUIA=["Capa: a promessa em até 8 palavras. Use o título.","O problema em uma frase, como a lojista sente.","Ponto 1: uma ideia só, até 25 palavras.","Ponto 2: uma ideia só, até 25 palavras.","Ponto 3: uma ideia só, até 25 palavras.","Aplicação na loja. Se usar números, avise que são fictícios.","Slide final: chamada para salvar e enviar para outra lojista, mais uma pergunta."];
+function slPlano(it){var d=DAYS.filter(function(x){return x.date===it.d})[0];return d&&/carross/i.test(d.feed.kind)?d:null}
+function slFromPlano(d){var out=[{t:"Capa",txt:d.feed.title}];String(d.feed.body||"").split("\n").forEach(function(l){var m=l.match(/^Slide (\d+):\s*(.*)$/);if(m)out.push({t:"Slide "+m[1],txt:m[2]})});return out}
+function slSkel(it){return SLGUIA.map(function(g,i){return {t:i===0?"Capa":(i===SLGUIA.length-1?"Slide final":"Slide "+(i+1)),txt:i===0?it.t:"",g:g}})}
+function slidesHtml(it){if(!(it.fmt==="Carrossel"||it.slides&&it.slides.length))return '';
+  var h='<div class="sld"><h4>Slides do carrossel</h4>';
+  if(!it.slides||!it.slides.length){
+    h+='<p class="note">Ainda não tem slides. Monte o esqueleto e escreva um por um.</p><div class="btns"><button class="btn" data-slx="skel">Montar os slides</button>';
+    var pd=slPlano(it);if(pd)h+='<button class="btn ghost" data-slx="plano">Usar os slides do plano de '+pd.n+'/'+pd.date.slice(5,7)+'</button>';
+    return h+'</div></div>'}
+  it.slides.forEach(function(sl,i){h+='<div class="sl"><div class="slh"><b>'+esc(sl.t)+'</b><button class="btn small ghost" data-slx="rm|'+i+'" aria-label="Remover slide">Remover</button></div><textarea data-slt="'+i+'" placeholder="'+esc(sl.g||"Texto deste slide")+'">'+esc(sl.txt||"")+'</textarea></div>'});
+  h+='<div class="btns"><button class="btn small ghost" data-slx="add">Adicionar slide</button><button class="btn small ghost" data-slx="copy">Copiar slides</button></div>';
+  var pd2=slPlano(it);if(pd2)h+='<div class="btns"><button class="btn small ghost" data-slx="plano">Trocar pelos slides do plano de '+pd2.n+'/'+pd2.date.slice(5,7)+'</button></div>';
+  return h+'</div>'}
+document.addEventListener("input",function(e){var t=e.target;if(!t||!t.dataset||t.dataset.slt==null||!CAL.edit)return;var it=calGet(CAL.edit);if(!it||!it.slides)return;var sl=it.slides[+t.dataset.slt];if(sl){sl.txt=t.value;it.at=Date.now();calSave()}});
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-slx]");if(!x||!CAL.edit)return;var it=calGet(CAL.edit);if(!it)return;var q=x.dataset.slx.split("|"),a=q[0];
+  if(a==="skel"){it.slides=slSkel(it)}
+  else if(a==="plano"){var d=slPlano(it);if(d)it.slides=slFromPlano(d)}
+  else if(a==="add"){it.slides=it.slides||[];it.slides.splice(Math.max(1,it.slides.length-1),0,{t:"Slide",txt:"",g:"Texto deste slide"});it.slides.forEach(function(z,i){if(i>0&&i<it.slides.length-1)z.t="Slide "+(i+1)})}
+  else if(a==="rm"){it.slides.splice(+q[1],1)}
+  else if(a==="copy"){copyText((it.slides||[]).map(function(z){return z.t+": "+(z.txt||"")}).join("\n\n"),x);return}
+  it.at=Date.now();calSave();render()});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
