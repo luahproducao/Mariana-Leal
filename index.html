@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#FAF6F1"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Hoje com a Mari</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: uma coluna de celular, barra de navegação fixa embaixo, dias no topo só em Hoje e Gravar. */
+:root{
+  --bg:#FAF6F8; --surface:#FFFFFF; --ink:#241A26; --muted:#6B5E6E; --line:#E8DEE9;
+  --accent:#C8281C; --accent-soft:#FBE4E1; --accent-ink:#FFFFFF;
+  --ok:#2A7A58; --ok-soft:#DDF0E6; --warn:#955700; --warn-soft:#FBEBCB; --info:#2D5C99; --info-soft:#E0EAF7; --bad:#B3261E; --bad-soft:#FADDDA;
+  --hero:#17111B; --hero-ink:#FFFFFF; --hero-muted:#D9C6DD;
+  --display:'Montserrat','Segoe UI',system-ui,sans-serif;
+  --body:'DM Sans','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#150F17; --surface:#201824; --ink:#F4ECF5; --muted:#B5A7B9; --line:#382D3B;
+  --accent:#FF7062; --accent-soft:#40201E; --accent-ink:#1A0E15;
+  --ok:#6FD0A2; --ok-soft:#1D3A2E; --warn:#F2BC63; --warn-soft:#3B2D12; --info:#8DB8F2; --info-soft:#1D2D45; --bad:#FF8C84; --bad-soft:#44201E;
+  --hero:#241A28; --hero-ink:#FFFFFF; --hero-muted:#CDB8D2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#150F17; --surface:#201824; --ink:#F4ECF5; --muted:#B5A7B9; --line:#382D3B;
+  --accent:#FF7062; --accent-soft:#40201E; --accent-ink:#1A0E15;
+  --ok:#6FD0A2; --ok-soft:#1D3A2E; --warn:#F2BC63; --warn-soft:#3B2D12; --info:#8DB8F2; --info-soft:#1D2D45; --bad:#FF8C84; --bad-soft:#44201E;
+  --hero:#241A28; --hero-ink:#FFFFFF; --hero-muted:#CDB8D2; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-block:16px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h2{font-size:26px}
+h3{font-size:18px}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:20px}
+.sync{font-size:12px;color:var(--muted);text-align:right}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.day{flex:0 0 auto;min-width:64px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:8px 10px;text-align:center;cursor:pointer;font:inherit}
+.day .w{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.day .n{font-family:var(--display);font-size:20px;font-weight:700;line-height:1.1}
+.day .p{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.day[aria-pressed="true"] .w,.day[aria-pressed="true"] .p{color:var(--accent-ink);opacity:.85}
+.day.full .p{color:var(--ok);font-weight:700}
+.day[aria-pressed="true"].full .p{color:var(--accent-ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.bottom .in{display:flex;width:100%;max-width:680px;gap:2px}
+.nb{flex:1;background:none;border:0;color:var(--muted);font:inherit;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;cursor:pointer}
+.nb svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.sub{color:var(--muted);margin:0}
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:20px;padding:18px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+.hero .kicker{color:var(--hero-muted)}
+.hero h2{color:var(--hero-ink)}
+.hero p{margin:4px 0 0;color:var(--hero-muted);font-size:15px}
+.hero .txt{min-width:0;display:flex;flex-direction:column;gap:2px}
+.ring{flex:0 0 auto;position:relative;width:84px;height:84px}
+.ring svg{width:84px;height:84px;transform:rotate(-90deg)}
+.ring .bg{stroke:rgba(255,255,255,.2)}
+.ring .fg{stroke:#8FE3B5;transition:stroke-dashoffset .3s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:20px;color:#fff;font-variant-numeric:tabular-nums}
+.need{background:var(--warn-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.need>b{color:var(--warn);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.alert{background:var(--accent-soft);border-radius:14px;padding:12px 14px}
+.alert b{color:var(--accent);font-size:12px;letter-spacing:.06em;text-transform:uppercase;display:block}
+.block{display:flex;flex-direction:column;gap:8px}
+.block>h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--body);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.item.done{background:var(--ok-soft);border-color:transparent}
+.row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px}
+.row input[type=checkbox]{flex:0 0 auto;width:24px;height:24px;margin:1px 0 0;accent-color:var(--ok);cursor:pointer}
+.row label,.row .txt{flex:1;min-width:0;font-weight:500}
+.row label{cursor:pointer}
+.chkd label{text-decoration:line-through;color:var(--muted)}
+.need .row{padding:4px 0}
+.s-num{flex:0 0 auto;font-family:var(--display);font-weight:700;color:var(--muted);min-width:22px;font-variant-numeric:tabular-nums}
+.meta{display:flex;gap:8px;align-items:center;padding:0 14px 12px;flex-wrap:wrap}
+select{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 8px}
+select.st-rec,select.st-sent{background:var(--info-soft);border-color:transparent;color:var(--info)}
+select.st-edit{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+select.st-posted,select.st-venda{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+details{border-top:1px solid var(--line)}
+summary{padding:10px 14px;cursor:pointer;color:var(--accent);font-size:14px;font-weight:700}
+details .in{padding:0 14px 12px;display:flex;flex-direction:column;gap:8px}
+details .in p{margin:0;white-space:pre-line}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:6px;vertical-align:1px}
+.tag.l{background:var(--ok-soft);color:var(--ok)}
+.tag.m{background:var(--info-soft);color:var(--info)}
+.tag.t{background:var(--warn-soft);color:var(--warn)}
+textarea,input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;padding:10px 12px}
+textarea{min-height:84px;resize:vertical}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:10px 16px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.small{padding:7px 12px;font-size:14px}
+.btn.big{padding:16px 20px;font-size:18px;width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.card p{margin:0}
+.card.click{cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.card.click:hover{border-color:var(--accent)}
+.date{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.count.hot{color:var(--warn);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.scroll{overflow-x:auto}
+.link{color:var(--accent);font-weight:700}
+.note{font-size:13px;color:var(--muted)}
+.draft{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
+.rest{background:var(--info-soft);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.rec{background:var(--surface);border:2px solid var(--accent);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.rec .big-text{font-family:var(--display);font-size:24px;line-height:1.3}
+.tip{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:15px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields label,.lab{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+@media (max-width:440px){.fields{grid-template-columns:1fr}.hero{padding:14px}}
+.out{background:var(--ok-soft);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.out .big{font-family:var(--display);font-size:34px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.out.bad{background:var(--bad-soft)}.out.bad .big{color:var(--bad)}
+.ebook{display:flex;flex-direction:column;gap:12px}
+.ebook .page{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.ebook .page p{margin:0;white-space:pre-line}
+.ebook .page h3{font-size:22px}
+.cols3{display:grid;gap:12px;grid-template-columns:1fr}
+.good{color:var(--ok);font-weight:700}.badc{color:var(--bad);font-weight:700}
+@media (prefers-reduced-motion:reduce){.ring .fg{transition:none}}
+
+/* ---- visual v3: marfim, vinho e dourado, delicado e elegante ---- */
+:root{--bg:#FAF6F1;--surface:#FFFEFC;--ink:#2B2024;--muted:#6F6065;--line:#EBE0D6;--accent:#7B1E2E;--accent-soft:#F5E8E9;--accent-ink:#FFFFFF;--gold:#B08D57;--gold-ink:#8A6A3A;--gold-soft:#F3EBDD;--hero:#2B1620;--display:'Cormorant Garamond','Playfair Display',Georgia,serif;--shadow:0 1px 0 rgba(176,141,87,.10),0 24px 40px -30px rgba(80,40,50,.28);--glass:rgba(255,254,252,.9);--r:18px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171016;--surface:#211820;--ink:#F3EAE4;--muted:#B3A3A8;--line:#3A2C33;--accent:#E3B0AA;--accent-soft:#3A2227;--accent-ink:#2A1519;--gold:#D4B483;--gold-ink:#D4B483;--gold-soft:#2E2519;--hero:#2A1822;--shadow:0 1px 0 rgba(212,180,131,.08),0 24px 40px -30px rgba(0,0,0,.7);--glass:rgba(33,24,32,.9)}}
+:root[data-theme="dark"]{--bg:#171016;--surface:#211820;--ink:#F3EAE4;--muted:#B3A3A8;--line:#3A2C33;--accent:#E3B0AA;--accent-soft:#3A2227;--accent-ink:#2A1519;--gold:#D4B483;--gold-ink:#D4B483;--gold-soft:#2E2519;--hero:#2A1822;--shadow:0 1px 0 rgba(212,180,131,.08),0 24px 40px -30px rgba(0,0,0,.7);--glass:rgba(33,24,32,.9)}
+body{padding-block:18px 130px;font-size:15.5px;font-weight:400;line-height:1.55}
+.wrap{gap:22px}
+h1,h2,h3{font-family:var(--display);letter-spacing:.005em}
+h2{font-weight:600;font-size:31px;line-height:1.08}
+h3{font-weight:700;font-size:21px;line-height:1.15}
+.kicker{font-family:var(--body);font-size:10.5px;font-weight:600;letter-spacing:.2em;color:var(--gold-ink)}
+.who{display:flex;align-items:center;gap:13px;min-width:0}
+.logo{flex:0 0 auto;width:42px;height:42px;border-radius:50%;background:var(--surface);color:var(--accent);display:grid;place-items:center;font:600 18px var(--display);font-style:italic;letter-spacing:.02em;box-shadow:none;border:1px solid var(--gold)}
+.brand{font:600 23px var(--display);letter-spacing:.005em}
+.sync{font-size:10.5px;letter-spacing:.04em;max-width:32%}
+.hero2{background:radial-gradient(90% 130% at 100% 0%,rgba(212,180,131,.22),transparent 60%),linear-gradient(150deg,#2C1722,#4A1E2D);color:#FBF3EA;border:1px solid rgba(176,141,87,.55);border-radius:24px;padding:26px 24px 28px;gap:12px;box-shadow:var(--shadow)}
+.hero2 .pilltag{border:1px solid rgba(212,180,131,.85);color:#E7CFA3;font:600 10px var(--body);letter-spacing:.22em;padding:4px 13px}
+.hero2 h2{color:#FBF3EA;text-transform:none;font:500 38px/1.02 var(--display);letter-spacing:.005em}
+.hero2 h2::after{content:"";display:block;width:42px;height:1px;background:#D4B483;margin-top:14px}
+.hero2 p{color:#E8D8D3;font-size:15px;max-width:32ch}
+.card,.item,.ebook .page,.rec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card{padding:18px;gap:8px}
+.card p{line-height:1.55}
+.tiles{gap:14px}
+.tile{min-height:168px;padding:18px;gap:6px}
+.tile h3{font-size:20px}
+.tile .sub{font-size:13px}
+.ico{width:44px;height:44px;border-radius:50%;background:var(--gold-soft);box-shadow:none;border:1px solid var(--gold);margin-bottom:8px}
+.ico svg{width:20px;height:20px;stroke:var(--gold);stroke-width:1.4}
+.btn{border-radius:999px;background:var(--accent);color:var(--accent-ink);box-shadow:none;font-weight:600;font-size:14px;letter-spacing:.05em;padding:13px 24px}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--gold)}
+.btn.small{padding:9px 16px;font-size:13px}
+.btn:hover{filter:brightness(1.06)}
+textarea,input[type=text],input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:15px}
+select{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+textarea:focus,input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.fields label,.lab{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fields label input,.fields label select,.lab input,.lab textarea,.lab select{text-transform:none;letter-spacing:0;font-weight:400}
+.pills{gap:8px}
+.pill{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.04em;padding:9px 18px}
+.pill[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--gold);color:var(--accent)}
+.seg{background:transparent;border:1px solid var(--line);padding:4px}
+.seg button{font-weight:600;font-size:13px;letter-spacing:.05em}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);box-shadow:none;border:1px solid var(--gold)}
+.bottom{background:var(--glass);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:6px 8px}
+.nb{background:transparent;border-radius:18px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 2px 6px}
+.nb svg{stroke-width:1.5}
+.nb[aria-current="page"]{background:transparent;color:var(--accent)}
+.nb[aria-current="page"]::after{content:"";width:18px;height:2px;border-radius:2px;background:var(--gold);margin-top:1px}
+.day{background:var(--surface);border:1px solid var(--line);box-shadow:none;border-radius:16px}
+.day .n{font-family:var(--display);font-size:24px;font-weight:700}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.hero{background:linear-gradient(150deg,#2C1722,#4A1E2D);border:1px solid rgba(176,141,87,.5);border-radius:24px}
+.ring .fg{stroke:#D4B483}
+.tag{font-size:10px;letter-spacing:.14em;padding:3px 10px;font-weight:600}
+.block>h3{font-family:var(--body);font-size:11px;letter-spacing:.18em;color:var(--gold-ink)}
+.need{background:var(--gold-soft)}.need>b{color:var(--gold-ink)}
+.alert{background:var(--accent-soft)}
+.row input[type=checkbox]{accent-color:var(--accent)}
+.date{color:var(--accent)}
+.rec{border:1px solid var(--gold)}
+.rec .big-text{font-family:var(--display);font-weight:600;font-size:28px}
+.out .big{font-family:var(--display)}
+summary{color:var(--accent)}
+.hero2{margin-bottom:22px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:340px){.tiles{grid-template-columns:1fr}}
+.tile{display:flex;flex-direction:column;align-items:flex-start;text-align:left;transition:border-color .2s,transform .15s}
+.tile:active{transform:scale(.985)}
+.ico{display:grid;place-items:center}
+.ico svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px 8px}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:0 0 auto;white-space:nowrap}
+.seg{display:flex;gap:4px;border-radius:999px;margin-bottom:18px}
+.seg button{flex:1;border:0;background:none;color:var(--muted);font-family:var(--body);padding:10px;border-radius:999px;cursor:pointer}
+.bottom{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.bottom .in{max-width:640px;gap:2px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="who"><span class="logo" aria-hidden="true">ML</span><div><div class="kicker">Mari · Loyall</div><div class="brand">Hoje com a Mari</div></div></div>
+    <div class="sync" id="sync" aria-live="polite">Salvando neste aparelho</div>
+  </div>
+  <nav class="days" id="days" aria-label="Dias"></nav>
+  <main id="view"></main>
+</div>
+<nav class="bottom" id="bottom" aria-label="Seções"><div class="in" id="bottomin"></div></nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ============ CONTEÚDO (vem dos cartões do Trello "Operação Marketing", lidos em 30/10) ============ */
+var TRELLO="https://trello.com/b/JgmSPYBZ";
+var HOW_REC="Leia o story em voz alta uma vez. Grave de uma vez só, olhando para a câmera, do seu jeito. Se errar, continue a frase e corte depois.";
+/* aud: L = cliente da Loyall, M = lojista (perfil da Mari), - = geral. c = essencial do dia. t = Tray */
+var DAYS=[
+{id:"d1030",date:"2026-10-30",w:"Sex",n:"30",title:"Sexta 30/10",theme:"Vlog: por trás da curadoria",phase:"Black: antecipação · faltam 28 dias",
+ start:"Comece com o look do dia.",finish:"Termine com a contagem regressiva.",
+ needs:["Gravar os stories 2, 3 e 4 na loja (1 minuto cada)","Dizer a regra da ação da Black em uma frase: o que é, até quando vale e como participar","Salvar o link exclusivo da Tray, se for citar a oferta de 10/11 (parceria paga)"],
+ feed:{kind:"Reel principal · 45 a 75s",title:"Por trás da curadoria",
+  body:"Gancho na tela: “Viajar para comprar mercadoria é muito mais do que escolher peças bonitas.”\n\nFala: “Essa viagem teve algumas missões: buscar opções para a próxima coleção da Loyall, pesquisar fornecedores para o Estoque Crescente e observar oportunidades para os próximos passos do negócio. E uma coisa que fica muito clara é que comprar não é simplesmente gostar de uma peça. É pensar no público, na proposta da loja, no custo, na combinação com o que já existe e em como essa mercadoria vai entrar no planejamento. Agora começa outra etapa: organizar tudo e transformar essas escolhas em decisões.”\n\nFecho: “Você quer acompanhar mais os bastidores das escolhas ou a parte de planejamento?”\nTexto na tela: “A viagem termina. A curadoria continua.”\nCTA: comentar “CURADORIA” ou escolher nos Stories.\nEdição: cortes de 1 a 3s, alternando fala, deslocamento, detalhes de peças e anotações. Não mostrar fornecedores sem autorização.",
+  legenda:"Por trás de uma coleção existem pesquisa, critérios e muitas decisões. Vou compartilhar os aprendizados dessa viagem e mostrar como eles se conectam à rotina de uma loja. O que você quer ver primeiro?"},
+ stories:[
+  ["L","Bom dia + look do dia (com link).","c"],
+  ["L","Apresente a ação da Black na Loyall: o que é, até quando vale e como a cliente participa.\nFrase-guia: “Gente, a esquenta da Black começou aqui na Loyall. Olha como funciona.”","c"],
+  ["L","Mostre a ação dentro da loja: ande pela loja, mostre as araras, as peças ou o cartaz da ação.","c"],
+  ["L","Lembrete simples de como participar (sticker de link ou WhatsApp da loja).",""],
+  ["M","Compartilhe o Reel do vlog: “Mostrei um pouco do que essa viagem realmente significou.”",""],
+  ["M","Enquete: “Você costuma planejar as compras ou decide na hora?”",""],
+  ["M","Bastidor leve da organização do dia (sem mostrar fornecedores).",""],
+  ["-","Contagem regressiva da Black: “Faltam 28 dias” (adesivo de contagem para 27/11).","c"]],
+ ma:"Como a ação da Black da Loyall foi pensada: por que essa ação, o que ela precisa cobrir (margem e estoque) e o que deu mais trabalho. Só o que você puder falar, sem números que não queira expor.",
+ ass:"Abrir a série “Esquenta de Black para lojistas”: calendário das 4 semanas até 27/11 (antecipação, preparação, execução e pós). Entregar só o que estiver pronto."},
+{id:"d1031",date:"2026-10-31",w:"Sáb",n:"31",title:"Sábado 31/10",theme:"Carrossel educativo + Reel teste",phase:"Black: preparação · faltam 27 dias",
+ start:"Comece com o look do dia.",finish:"Termine com a contagem e o convite para a loja.",
+ needs:["Foto ou vídeo da peça de destaque da ação","1 depoimento ou print de cliente, só se ela autorizar"],
+ feed:{kind:"Carrossel · 7 slides",title:"5 critérios para avaliar um fornecedor antes de comprar",
+  body:"Slide 2: 1. Qualidade e consistência: a peça corresponde ao que você espera?\nSlide 3: 2. Custo total: considere produto, frete, taxas e possíveis perdas.\nSlide 4: 3. Pedido mínimo e reposição: o volume cabe no seu caixa e na sua estratégia?\nSlide 5: 4. Prazo e comunicação: o fornecedor informa condições e responde com clareza?\nSlide 6: 5. Adequação ao seu público: a peça combina com sua cliente e com a proposta da loja?\nSlide 7: Salve este checklist para sua próxima compra. Qual desses critérios você costuma esquecer?\nCTA: salvar e enviar para outra lojista.\nObservação: conteúdo educativo geral. Não afirmar que todos os pontos foram verificados em um fornecedor específico.\n\nReel teste (12 a 20s). Versão A, gancho: “Não compre uma peça só porque você se apaixonou por ela.” Depois: “Antes, pense em público, custo total, combinação com seu estoque e margem.” Fecho: “Salve para lembrar na próxima compra.”\nVersão B, se der: “A peça é linda. Mas ela faz sentido para a sua loja?”\nNão publique as duas no feed principal no mesmo dia.",
+  legenda:"Encontrar uma peça bonita é só o começo. Uma compra precisa fazer sentido para o público, para a operação e para o caixa. Use estes critérios como ponto de partida e adapte à realidade da sua loja."},
+ stories:[
+  ["L","Bom dia + look do dia (com link).","c"],
+  ["L","Peça de destaque da ação da Black: mostre 1 peça e como ela entra na ação.\nFrase-guia: “Essa aqui entra na esquenta da Black. Olha o caimento.”","c"],
+  ["L","Prova social: print ou vídeo de uma cliente satisfeita (com autorização, dados borrados).",""],
+  ["M","Enquete: “O que pesa mais na sua decisão?” Opções: A peça / Os números.",""],
+  ["M","Compartilhe o carrossel e peça que salvem o checklist.",""],
+  ["M","Caixa de pergunta: “Qual sua maior dificuldade ao negociar com fornecedores?”",""],
+  ["-","Contagem regressiva: “Faltam 27 dias” e convite para passar na loja ou chamar no WhatsApp.","c"]],
+ ma:"Como você organiza as opções antes da Black: o que entra na ação, o que fica de fora e por quê. Não divulgar contatos privados, endereços ou preços não autorizados.",
+ ass:"Esquenta de Black, semana 1 para lojistas: avisar as clientes antes, organizar o estoque da ação e definir o preço mínimo. Entregar só o que estiver pronto."},
+{id:"d1101",date:"2026-11-01",w:"Dom",n:"01",title:"Domingo 01/11",theme:"Conexão e reflexão + Tray Missão 7",phase:"Black: antecipação · faltam 26 dias",
+ start:"Comece com a reflexão.",finish:"Termine com o convite leve para a loja.",
+ urgent:"Último dia da Semana 2 da corrida Tray. Os 4 stories da Tray precisam ir ao ar hoje.",
+ needs:["Gravar os 4 stories da Tray (Missão 7, prazo hoje) e salvar o print de cada um","Escolher: reflexão (story 1) ou bastidor (story 2). Não precisa dos dois"],
+ feed:{kind:"Reel opcional · 15 a 25s",title:"Conexão com imagens da viagem",
+  body:"Voz: “Nem toda evolução aparece na hora. Às vezes, primeiro a gente pesquisa, compara, aprende e organiza. Depois transforma isso em decisão. Respeitar o processo também faz parte de crescer.”\nTexto na tela: “Nem toda etapa do crescimento aparece.”\nSe o vlog de sexta ainda não tiver sido publicado, não compita com ele: priorize os stories e guarde o Reel.",
+  legenda:"O trabalho que ninguém vê também faz parte da construção."},
+ stories:[
+  ["M","Reflexão de domingo: “Empreender também é parar, olhar para o que aconteceu e organizar o próximo passo.”","c"],
+  ["M","Bastidor leve de planejamento (caderno ou calendário).",""],
+  ["M","Enquete: “O que você quer organizar na sua loja esta semana?” Opções: Estoque / Conteúdo e vendas.",""],
+  ["M","Tray 1/4 · Contexto: “Passando para lembrar: a oferta da Tray está prevista para 10/11.”","ct"],
+  ["M","Tray 2/4 · Benefício: “O material divulga loja pronta em até 30 dias e um ano de plano Avançado. Consulte os requisitos.”","ct"],
+  ["M","Tray 3/4 · Complemento: “Também são divulgados investimento em Meta Ads pela Tray e bônus extras, sujeitos às condições oficiais.”","ct"],
+  ["M","Tray 4/4 · CTA: “Quer receber as informações? Acesse meu link exclusivo e faça seu cadastro. Parceria paga.”","ct"],
+  ["L","Boa noite: “Semana começando, e a esquenta da Black segue aqui na Loyall. Quem ainda não viu, passa na loja ou me chama no WhatsApp.”","c"]],
+ ma:"Como foi montar a esquenta da Black na loja: o que deu certo e o que ainda está sendo ajustado. Só experiências reais.",
+ ass:"Post de abertura da semana: “Nesta semana, vamos aprofundar escolhas de compra e organização de estoque.” Liste só o que de fato será entregue."},
+{id:"d1102",date:"2026-11-02",w:"Seg",n:"02",title:"Segunda 02/11",theme:"Peça bonita ou compra estratégica",phase:"Black: preparação · faltam 25 dias",
+ start:"Comece com o look e o aviso de como a loja funciona no feriado.",finish:"Termine convidando para enviar a dúvida.",
+ urgent:"Feriado de Finados: confirme se a loja abre e em que horário. Hoje começa a Semana 3 da Tray (02 a 09/11).",
+ needs:["Confirmar o funcionamento da loja no feriado","Gravar o Reel principal (30 a 45s)","Gravar junto o vídeo de contagem da Tray, para publicar em outro horário ou no dia seguinte"],
+ feed:{kind:"Reel · 30 a 45s",title:"Uma peça linda pode não ser uma boa compra",
+  body:"Gancho: “Uma peça pode ser linda e ainda assim não ser uma boa compra para a sua loja.”\n\nFala: “Na hora de escolher mercadoria, tenta olhar além da peça. Ela combina com o público que compra de você? Conversa com o restante do seu estoque? O custo total permite trabalhar com uma margem saudável? Você está comprando porque existe uma estratégia ou porque gostou na hora? Não existe uma resposta igual para todas as lojas, mas fazer essas perguntas ajuda a tomar decisões mais conscientes.”\n\nCTA: “Salve este vídeo para rever antes da próxima compra e me conte: qual é o critério mais difícil para você?”\nTexto na tela: “Gostar da peça não é o único critério.”\n\nReel teste (10 a 15s): gancho “Antes de comprar mais, olhe para o que já está parado.” Final: “Você faz essa análise?”\n\nTray, Missão 1 da Semana 3 (+6): vídeo de contagem regressiva, já escrito no cartão “Tray · Roteiros Semana 3”. Publique um vídeo por vez.",
+  legenda:"Curadoria também é saber dizer não. A compra precisa conversar com o público, o estoque e a realidade financeira da loja."},
+ stories:[
+  ["L","Bom dia + look do dia (com link) e aviso de como a loja funciona hoje (feriado).","c"],
+  ["L","A ação da Black da Loyall: lembrete de como participar e até quando vale.\nFrase-guia: “A esquenta da Black segue aqui. Quem ainda não aproveitou, olha como funciona.”","c"],
+  ["M","Enquete: “Você já comprou algo lindo e depois teve dificuldade para vender?” Opções: Já / Ainda não.",""],
+  ["M","Explique que a intenção não é julgar, mas aprender com os dados.",""],
+  ["M","Mostre o Reel.",""],
+  ["M","Dica prática: revisar vendas, estoque parado e perguntas das clientes antes de repor.",""],
+  ["M","Tray (contagem): “Faltam 8 dias para a oferta da Tray.” Link exclusivo e “Parceria paga”.","ct"],
+  ["M","CTA: enviar a maior dúvida por resposta ao story.","c"]],
+ ma:"Como você definiu o que entra na ação da Black e o que ficou de fora. Só experiências reais.",
+ ass:"Aula ou áudio exclusivo “Como transformar a escolha de mercadoria em um processo, não em impulso” (público, histórico de vendas, estoque atual, custo total, margem e objetivo da compra, com exercício de 5 minutos) e uma linha do calendário da esquenta para lojistas: semana 2, preço mínimo e margem. Só anuncie como entregue depois de publicar."},
+{id:"d1103",date:"2026-11-03",w:"Ter",n:"03",title:"Terça 03/11",theme:"Estoque inteligente + carrossel salvável",phase:"Black: preparação · faltam 24 dias",
+ start:"Comece com o look do dia.",finish:"Termine com a pergunta da caixinha.",
+ needs:["Mandar a lista (pode ser no caderno) de repor / observar / não comprar agora, para virar o story 3 sem dados reais","Foto ou vídeo das peças da ação, para o story 2"],
+ feed:{kind:"Carrossel · 6 slides",title:"Antes de comprar mais mercadoria, faça estas 4 verificações",
+  body:"Slide 2: 1. O que vendeu? Identifique categorias e peças que tiveram procura.\nSlide 3: 2. O que está parado? Veja tamanhos, cores e quantidades sem giro.\nSlide 4: 3. O que falta? Separe reposição necessária de novidade por desejo.\nSlide 5: 4. Quanto posso investir? Considere caixa, custo total e prioridades.\nSlide 6: Salve para consultar antes de fazer seu próximo pedido.\nCTA: salvar e enviar para uma lojista.\n\nReel teste opcional (12 a 18s). Gancho: “Seu dinheiro pode estar parado na prateleira.” Fala: “Antes de comprar mais, descubra o que vende, o que está parado e o que realmente falta.” CTA: “Salve para revisar seu estoque.” Sem tom alarmista e sem prometer que isso garante vendas.",
+  legenda:"Estoque inteligente não significa comprar sempre menos ou sempre mais. Significa entender o que a sua loja precisa antes de comprometer dinheiro. Adapte a análise ao seu histórico e à sua realidade."},
+ stories:[
+  ["L","Bom dia + look do dia (com link).","c"],
+  ["L","A ação da Black na Loyall: mostre de novo as peças que entram e lembre como participar.\nFrase-guia: “Olha o que está entrando na esquenta da Black.”","c"],
+  ["M","Lista fictícia, sem dados reais: repor, observar, não comprar agora.",""],
+  ["M","Enquete: “Você acompanha o que está parado no estoque?” Opções: Toda semana / Preciso melhorar.",""],
+  ["M","Black para lojistas: “Antes de dar desconto, descubra seu preço mínimo: custo + frete + taxas + a margem que você quer.” Sem números reais da Loyall.",""],
+  ["M","Compartilhe o carrossel.",""],
+  ["M","Pergunta: “Qual parte da gestão de estoque mais te trava?”","c"],
+  ["M","Estoque Crescente: descreva só o que ele oferece hoje, sem preço e sem lançamento do app.",""]],
+ ma:"Uma decisão de reposição para a Black: o que repõe, o que observa e por quê. Sem números que você não queira expor.",
+ ass:"Exercício das 3 listas (repor, testar com cautela, não comprar agora, com uma justificativa por item) aplicado à Black: o que entra na ação e o que não entra."},
+{id:"d1104",date:"2026-11-04",w:"Qua",n:"04",title:"Quarta 04/11",theme:"Respostas da comunidade + ponte para assinatura",phase:"Black: preparação · faltam 23 dias",
+ start:"Comece com o look do dia.",finish:"Termine com a pergunta ou o CTA do funil, só depois de testar.",
+ needs:["Escolher a dúvida real do dia para o Reel de resposta","Dizer se o funil da assinatura (Kiwify e ManyChat) já foi testado","Mandar as referências para o carrossel da Bling, se ainda faltarem (a copy precisa ser aprovada até amanhã)"],
+ funnel:["Link de assinatura/Kiwify funcionando","Palavra-chave e automação do ManyChat funcionando","O que está incluso na assinatura está descrito com clareza","Acesso à assinatura não está misturado com promessa de acesso ao app"],
+ feed:{kind:"Reel de resposta · 20 a 40s",title:"Resposta a uma dúvida real",
+  body:"1. Mostre a pergunta, com nome e foto ocultos.\n2. Gancho: “Uma dúvida comum na hora de escolher fornecedor é…”\n3. Responda em 2 ou 3 pontos concretos, sem revelar contatos privados e sem informação não confirmada.\n4. Fecho: “Se você quer que eu aprofunde esse assunto, me conta nos comentários.”\n\nSe não houver pergunta real adequada: “Três coisas para comparar antes de fechar com um fornecedor” (sem dizer “vocês me perguntaram”).",
+  legenda:"A melhor escolha depende do contexto de cada loja. Use estes pontos como checklist e adapte à sua realidade."},
+ stories:[
+  ["L","Bom dia + look do dia (com link).","c"],
+  ["L","A ação da Black na Loyall: o que mais saiu até agora e como participar. Só conte o que você souber de fato, sem números inventados.","c"],
+  ["M","Responda uma dúvida real recebida (nome e foto ocultos).",""],
+  ["M","Compartilhe o Reel de resposta.",""],
+  ["M","Enquete de próximo tema: Fornecedores / Gestão de estoque.",""],
+  ["M","Black para lojistas: “O que eu estou revisando no meu estoque antes da Black” (o que vendeu, o que está parado, o que falta).",""],
+  ["M","Explique o que será aprofundado na assinatura, só com entregas confirmadas.",""],
+  ["M","CTA para o direct com a palavra-chave, só depois de testar o caminho completo do funil.","c"]],
+ ma:"Bastidor da semana da Black na loja: o que cansou, o que surpreendeu e o que ainda precisa ser resolvido.",
+ ass:"Aprofundamento “Como comparar fornecedores sem olhar só para o preço” (qualidade, consistência, pedido mínimo, custo total, prazo, troca, comunicação e adequação ao público): aula curta + ficha de avaliação. Só anuncie depois de publicar os materiais."},
+{id:"d1105",date:"2026-11-05",w:"Qui",n:"05",title:"Quinta 05/11",theme:"Preparação da operação + Tray (caixinha)",phase:"Black: preparação · faltam 22 dias",
+ start:"Comece com o look do dia.",finish:"Termine com a contagem regressiva e o agradecimento.",
+ urgent:"Hoje vence a aprovação da copy do carrossel da Bling. A publicação é dia 09/11.",
+ needs:["Aprovar (ou comentar) a copy do carrossel da Bling até hoje","Gravar 1 spoiler da coleção e o canto da expedição","Deixar o link exclusivo da Tray salvo para o story 4"],
+ feed:{kind:"Feed · escolha uma opção",title:"Opção A ou B, uma por vez",
+  body:"Opção A (+8, prazo 09/11): Missão 2 da Semana 3, vídeo “3 motivos para conhecer a oferta”, já escrito no cartão “Tray · Roteiros Semana 3”.\nOpção B: Reel “o que ninguém vê antes do pedido chegar” (bastidor de expedição) com o material de edição existente.\n\nCaixinha da Tray (Missão 4). Perguntas sugeridas, que NÃO devem ser apresentadas como já recebidas: “Preciso saber programar para montar uma loja virtual?”, “O que devo avaliar antes de escolher uma plataforma?”, “O que está incluído na oferta da Tray?”. Se vierem dúvidas reais, responda as reais, só com informação do material oficial.",
+  legenda:""},
+ stories:[
+  ["L","Bom dia + look do dia (com link).","c"],
+  ["L","A ação da Black na Loyall: lembrete de como participar e até quando vale, com as suas palavras.","c"],
+  ["M","Black para lojistas, operação: “O que eu confiro antes da Black: estoque cadastrado, embalagem, etiquetas e coleta combinada.” Mostre o canto da expedição.",""],
+  ["M","Tray · Missão 4 (+7), caixinha de perguntas: “Está pensando em criar sua loja virtual? Deixa sua dúvida sobre a Tray aqui que vou reunir as principais informações.” Link exclusivo e “Parceria paga”.","ct"],
+  ["L","Spoiler da coleção de fim de ano: 1 peça, sem revelar tudo (o resto vai para os Melhores Amigos).",""],
+  ["L","Enquete: “Qual novidade você quer ver primeiro?” (duas opções de peças ou categorias).",""],
+  ["M","Responda 1 ou 2 dúvidas reais da caixinha (nome e foto ocultos). Só informação confirmada pelo material oficial.",""],
+  ["-","Contagem regressiva: “Faltam 22 dias para a Black” e agradecimento.","c"]],
+ ma:"Bastidor de como a coleção de fim de ano está sendo preparada (cadastro, etiquetas, organização do estoque). Só o que você puder mostrar.",
+ ass:"Continuação da série “Esquenta de Black para lojistas”: semana 2, preparar a operação (estoque, embalagem e envio). Entregar só o que estiver pronto."}
+];
+
+var PRAZOS=[
+ {date:"2026-11-01",brand:"Tray",t:"Missão 7 da corrida",d:"Último dia da Semana 2. 4 stories com link exclusivo e “Parceria paga”."},
+ {date:"2026-11-02",brand:"Tray",t:"Semana 3 da corrida começa",d:"A corrida vai de 20/10 a 10/11."},
+ {date:"2026-11-05",brand:"Bling",t:"Aprovar a copy do carrossel",d:"Sem esse ok a equipe não entrega a tempo."},
+ {date:"2026-11-09",brand:"Bling",t:"Publicar o carrossel “X ideias de conteúdo para Black Friday”",d:"Elementos verdes, sem azul e sem citar concorrentes. Falar da plataforma como “plataforma completa de negócios”."},
+ {date:"2026-11-10",brand:"Tray",t:"Fim da corrida e abertura da oferta",d:"O resultado sai em 13/11."},
+ {date:"2026-11-27",brand:"Loyall",t:"Black Friday",d:"A esquenta existe para chegar forte neste dia."}
+];
+var APPMS=[
+ ["app-1","Página de venda do Estoque Crescente pronta"],
+ ["app-2","Oferta de migração para quem está no Telegram definida"],
+ ["app-3","Data de lançamento do app decidida"],
+ ["app-4","Conteúdo de aquecimento do app no calendário"]
+];
+var ST=[["todo","A gravar"],["rec","Gravado"],["sent","Enviado à Laila"],["edit","Editado"],["posted","Postado"]];
+
+/* ============ NAVEGAÇÃO ============ */
+var NAV=[
+ ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
+ ["hoje","Hoje",'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],
+ ["pub","Publis",'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/>'],
+ ["produtos","Produtos",'<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>'],
+ ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
+];
+var MORE=[["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["ideias","Ideias"],["ajustes","Ajustes"]];
+
+/* ============ PRODUTOS ============ */
+var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
+var PRODS=[
+ {id:"p0",tipo:"eBook",nome:"Preço mínimo antes da Black",prom:"Entenda sua conta em 10 minutos e pare de dar desconto no escuro.",fase:"Até 27/11",app:"Calculadora de custos"},
+ {id:"p1",tipo:"Calculadora",nome:"Calculadora de preço mínimo",prom:"Digite custo, frete, taxas e margem. Veja o menor preço e até onde o desconto vai.",fase:"Até 27/11",app:"Calculadora de custos"},
+ {id:"p2",tipo:"Checklist",nome:"Checklist da operação da Black",prom:"Nada esquecido no estoque, na embalagem, no envio e no atendimento.",fase:"Até 27/11",app:"Checklist de operação"},
+ {id:"p3",tipo:"Ficha",nome:"Ficha de avaliação de fornecedor",prom:"Compare fornecedores pelo custo total, prazo e reposição, não só pela peça.",fase:"Dezembro",app:"Cadastro de fornecedores"},
+ {id:"p4",tipo:"Exercício",nome:"As 3 listas do estoque",prom:"Separe o que repor, o que testar com cautela e o que não comprar agora.",fase:"Dezembro",app:"Painel de estoque"},
+ {id:"p5",tipo:"Modelo",nome:"Calendário da esquenta de Black",prom:"Quatro semanas de preparação: antecipação, preparação, execução e pós.",fase:"Até 27/11",app:"Modelo de planejamento sazonal"}
+];
+var EBOOK=[
+ {t:"Por que desconto sem conta vira prejuízo",b:"Na Black, a vontade é baixar o preço para vender mais. O problema é que a venda aparece na hora e o prejuízo só aparece depois, no caixa.\n\nVender mais não ajuda se cada peça vendida deixa menos dinheiro do que você precisa para repor o estoque e pagar as contas. Antes de qualquer desconto, descubra o menor preço em que a peça ainda faz sentido. Esse número é o seu preço mínimo."},
+ {t:"O que entra no custo",b:"Custo não é só o que você pagou pela peça. Some tudo o que foi preciso para ela chegar na cliente:\n\n• o valor pago ao fornecedor\n• o frete da compra\n• embalagem e etiqueta\n• perdas, como peça com defeito ou que não vende\n\nQuanto mais completo o custo, mais confiável o seu preço mínimo."},
+ {t:"Taxas e frete de venda",b:"Existem custos que dependem do preço de venda: taxa do cartão, comissão de plataforma, taxa do meio de pagamento. Eles costumam ser uma porcentagem do que a cliente paga.\n\nO frete que você paga para enviar ao cliente é outro custo. Veja o que a sua loja realmente paga e use os números reais, não os que você imagina."},
+ {t:"Margem: quanto você quer ficar",b:"Margem é a parte do preço que sobra para você depois de pagar tudo. Neste guia, a margem é uma porcentagem do preço de venda.\n\nDefina a margem que a sua loja precisa. Ela paga o aluguel, o seu trabalho e a reposição do estoque. Se a margem estiver baixa demais, a loja trabalha muito e quase não sobra nada."},
+ {t:"A fórmula do preço mínimo",b:"Preço mínimo = (custo da peça + frete) ÷ (1 − taxas − margem)\n\nTaxas e margem entram como porcentagem. Exemplo: 6% de taxas e 30% de margem viram 0,06 e 0,30.\n\nSe a soma de taxas e margem chegar perto de 100%, a conta deixa de funcionar. Isso é um aviso de que o negócio precisa de ajuste."},
+ {t:"Um exemplo com números fictícios",b:"Exemplo inventado só para ilustrar, não são números de nenhuma loja.\n\nCusto da peça: R$ 40. Frete: R$ 5. Taxas: 6%. Margem desejada: 30%.\n\nPreço mínimo = 45 ÷ (1 − 0,06 − 0,30) = 45 ÷ 0,64 = R$ 70,31.\n\nSe a peça custa R$ 90 hoje, o desconto máximo antes de comprometer a margem é de cerca de 21,9%. Um desconto de 30% levaria o preço a R$ 63 e a margem cairia para cerca de 22,6%."},
+ {t:"Como usar o resultado na Black",b:"Com o preço mínimo em mãos, você decide a ação com segurança:\n\n• escolha quais peças aguentam desconto e quais não aguentam\n• dê o desconto maior nas peças com margem de sobra\n• nas peças de margem apertada, prefira brinde, frete combinado ou kit\n• não anuncie um desconto que você não consegue sustentar\n\nUma ação boa é a que você consegue cumprir sem aperto no caixa."},
+ {t:"Seu checklist final",b:"Antes de lançar a ação, confira:\n\n☐ Calculei o preço mínimo das peças da ação\n☐ Conferi o custo, o frete e as taxas reais\n☐ Defini a margem que a loja precisa\n☐ Escolhi o desconto de cada peça dentro do limite\n☐ Conferi o estoque de cada peça da ação\n☐ Expliquei a regra da ação em uma frase\n\nGuarde este guia e refaça a conta a cada nova coleção."}
+];
+var ESQUENTA=[
+ {w:"Semana 1 · Antecipação",items:["Avisar as clientes antes de a ação começar","Organizar o estoque da ação","Definir o preço mínimo e a margem de cada peça"]},
+ {w:"Semana 2 · Preparação",items:["Preparar a operação: estoque cadastrado, embalagem, etiquetas e coleta combinada","Definir quem atende no WhatsApp e deixar mensagens prontas","Juntar prova social: depoimentos e fotos com autorização"]},
+ {w:"Semana 3 · Execução",items:["Lançar a ação e repetir a regra em uma frase","Acompanhar o estoque todos os dias","Responder as clientes no mesmo dia"]},
+ {w:"Semana 4 · Pós",items:["Agradecer as clientes","Cuidar de trocas e entregas","Anotar o que vendeu, o que sobrou e o que aprender para a próxima"]}
+];
+var OPCHK=[
+ ["Estoque",["Peças da ação cadastradas no sistema","Quantidade de cada peça conferida","Peças sem estoque retiradas da ação"]],
+ ["Preço",["Preço mínimo calculado para cada peça","Desconto de cada peça dentro da margem"]],
+ ["Embalagem e envio",["Embalagens suficientes para o volume esperado","Etiquetas impressas","Coleta combinada com a transportadora","Prazo de postagem informado às clientes"]],
+ ["Atendimento",["Quem responde o WhatsApp está definido","Mensagens prontas para as dúvidas mais comuns","Horário de atendimento divulgado"]],
+ ["Comunicação",["Regra da ação escrita em uma frase","Stories e artes da ação prontos"]],
+ ["Depois",["Plano para trocas e devoluções","Agradecimento às clientes preparado"]]
+];
+var FICHA=[["nome","Nome ou código interno"],["cat","Categoria"],["min","Pedido mínimo"],["custo","Custo total (peça + frete + taxas)"],["prazo","Prazo de entrega"],["troca","Política de troca"],["pub","Combina com o público da loja? Por quê?"],["obs","Observações"]];
+var RATE=[["qual","Qualidade e consistência"],["com","Comunicação"],["prz","Prazo e cumprimento"],["cus","Custo total"]];
+var LISTAS=[["rep","Repor","Peças que venderam e fazem falta."],["test","Testar com cautela","Novidade ou dúvida: compre pouco."],["nao","Não comprar agora","Parado, sem giro ou fora do público."]];
+
+/* ============ CANAIS ============ */
+var MAWEEKS=[["02/11","w1"],["09/11","w2"],["16/11","w3"],["23/11","w4"]];
+var MASERIE=["Uma decisão real da semana (só o que você puder contar)","Aviso do que sai no feed, antes de todo mundo","Votação do próximo tema"];
+var ASSIN=[
+ ["02/11","Aula ou áudio “Como transformar a escolha de mercadoria em processo” + linha do calendário da esquenta (preço mínimo e margem)"],
+ ["04/11","Aprofundamento “Como comparar fornecedores sem olhar só para o preço” + ficha de avaliação"],
+ ["09/11","Proposta: eBook e calculadora de preço mínimo (mini produtos 1 e 2)"],
+ ["16/11","Proposta: checklist da operação da Black"],
+ ["23/11","Proposta: calendário da esquenta completo e relato da semana da Black"]
+];
+var IDEIAS_MA=[
+ ["O que eu não comprei e por quê","Mostra critério na prática. Precisa de um exemplo real da Mari."],
+ ["Duas peças lado a lado: qual entra na loja?","Análise de critério. Se ela não puder mostrar o fornecedor, faz uma análise geral."],
+ ["Prévia da coleção de fim de ano","Uma peça no feed, o resto aqui antes de todo mundo."],
+ ["Do cadastro no sistema à etiqueta na peça","Bastidor que ensina operação."],
+ ["Relato do dia da Black na loja","O que cansou, o que surpreendeu e o que ainda precisa resolver."],
+ ["Três dúvidas respondidas por semana","Vira tema de aula na assinatura."],
+ ["Vote no gancho do próximo Reel","Testa o tema antes de gravar."],
+ ["Do pedido ao caminhão: como o envio acontece","Responde uma dúvida que muita lojista tem."]
+];
+var IDEIAS_AS=[
+ ["Aula curta: preço mínimo","Base: o eBook e a calculadora."],
+ ["Revisão guiada do estoque","As 3 listas passo a passo, com um exemplo."],
+ ["Ficha de avaliação de fornecedor","Aula de 5 minutos mais a ficha preenchida."],
+ ["Calendário da esquenta","Uma semana por mês, com tarefas e prazo."],
+ ["Perguntas e respostas do mês","Junta as dúvidas dos Melhores Amigos."],
+ ["Pós-Black: o que mediu e aprendeu","Só publicar com números que a Mari possa mostrar."]
+];
+
+/* ============ ESTADO ============ */
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){var d=document.createElement('div');d.textContent=s==null?"":String(s);return d.innerHTML};
+var state={checks:{},st:{},notes:{},results:{},prod:{},ideas:[],tool:{},tab:"criar",hub:"inicio",more:"prazos",sel:null,core:false,rec:0,pOpen:null,chap:0,cr:null};
+var C={};
+function loadLocal(){try{var j=JSON.parse(localStorage.getItem("hoje-mari-2")||"{}");["checks","st","notes","results","prod"].forEach(function(k){state[k]=j[k]||{}});state.ideas=j.ideas||[];state.tool=JSON.parse(localStorage.getItem("hoje-tools")||"{}");state.cr=JSON.parse(localStorage.getItem("hoje-cr")||"null");state.voz=localStorage.getItem("hoje-voz")||""}catch(e){}if(!state.cr)state.cr=crNew();loadHub();loadPub();cfgLoad()}
+function saveLocal(){try{localStorage.setItem("hoje-mari-2",JSON.stringify({checks:state.checks,st:state.st,notes:state.notes,results:state.results,prod:state.prod,ideas:state.ideas}))}catch(e){}}
+function saveTool(){try{localStorage.setItem("hoje-tools",JSON.stringify(state.tool))}catch(e){}}
+function setSync(t){$("#sync").textContent=t}
+function dbSet(col,id,data,okMsg){
+  saveLocal();
+  if(C[col]){C[col].doc(id).set(data).then(function(){setSync(okMsg||"Salvo para a equipe")},function(){setSync("Salvo só neste aparelho")})}
+  else setSync("Salvo só neste aparelho");
+}
+function isoToday(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")}
+function pickDay(){var t=isoToday();for(var i=0;i<DAYS.length;i++){if(DAYS[i].date>=t)return DAYS[i].id}return DAYS[DAYS.length-1].id}
+function dayById(id){return DAYS.filter(function(d){return d.id===id})[0]}
+function daysUntil(iso){var a=new Date(isoToday()+"T00:00:00"),b=new Date(iso+"T00:00:00");return Math.round((b-a)/86400000)}
+function trackItems(d){
+  var out=[{id:d.id+"-f",label:"Feed: "+d.feed.title}];
+  d.stories.forEach(function(s,i){out.push({id:d.id+"-s"+(i+1),label:"Story "+(i+1),core:s[2].indexOf("c")>=0,aud:s[0],tray:s[2].indexOf("t")>=0,text:s[1],n:i+1})});
+  out.push({id:d.id+"-ma",label:"Melhores Amigos"});out.push({id:d.id+"-as",label:"Assinatura"});
+  return out;
+}
+function stOf(id){return state.st[id]||"todo"}
+function dayProgress(d){var its=trackItems(d),n=its.filter(function(x){return stOf(x.id)!=="todo"}).length;return {n:n,t:its.length}}
+function isRest(d){return !!state.checks["rest-"+d.id]}
+function getProd(id){return state.prod[id]||{s:"ideia",preco:""}}
+function T(path,def){var p=path.split("."),o=state.tool;for(var i=0;i<p.length;i++){if(o==null)return def;o=o[p[i]]}return o==null?def:o}
+function setT(path,v){var p=path.split("."),o=state.tool;for(var i=0;i<p.length-1;i++){if(o[p[i]]==null||typeof o[p[i]]!=="object")o[p[i]]={};o=o[p[i]]}o[p[p.length-1]]=v;saveTool()}
+function parseNum(v){var s=String(v==null?"":v).trim();if(s.indexOf(",")>=0)s=s.replace(/\./g,"").replace(",",".");var n=parseFloat(s);return isNaN(n)?0:n}
+function brl(n){return n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function pct(n){return n.toLocaleString("pt-BR",{maximumFractionDigits:1,minimumFractionDigits:1})+"%"}
+function copyText(text,btn){
+  var done=function(m){if(btn)btn.textContent=m};
+  var fallback=function(){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy")}catch(_){}document.body.removeChild(ta);done(ok?"Copiado":"Não consegui copiar")};
+  try{navigator.clipboard.writeText(text).then(function(){done("Copiado")},fallback)}catch(_){fallback()}
+}
+
+/* ============ DESENHO ============ */
+function renderChrome(){
+  var showDays=(state.tab==="hoje"||state.tab==="gravar");
+  $("#days").hidden=!showDays;
+  if(showDays)$("#days").innerHTML=DAYS.map(function(d){
+    var p=dayProgress(d),full=p.n===p.t&&!isRest(d);
+    var sub=isRest(d)?"pausa":(full?"feito":p.n+"/"+p.t);
+    return '<button class="day'+(full?' full':'')+'" data-day="'+d.id+'" aria-pressed="'+(state.sel===d.id)+'"><div class="w">'+d.w+'</div><div class="n">'+d.n+'</div><div class="p">'+sub+'</div></button>';
+  }).join("");
+  $("#bottomin").innerHTML=NAV.map(function(n){return '<button class="nb" data-tab="'+n[0]+'"'+((state.tab===n[0]||(n[0]==="hoje"&&state.tab==="gravar"))?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+n[2]+'</svg>'+n[1]+'</button>'}).join("");
+}
+function stSelect(id){
+  var v=stOf(id);
+  return '<select class="st-'+v+'" data-st="'+id+'" aria-label="Situação">'+ST.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===v?' selected':'')+'>'+s[1]+'</option>'}).join("")+'</select>';
+}
+function audTag(a){return a==="L"?'<span class="tag l">Cliente Loyall</span>':(a==="M"?'<span class="tag m">Lojista</span>':'')}
+function ringSvg(p){var c=2*Math.PI*34,off=c*(1-p/100);return '<div class="ring"><svg viewBox="0 0 84 84" aria-hidden="true"><circle class="bg" cx="42" cy="42" r="34" fill="none" stroke-width="8"/><circle class="fg" cx="42" cy="42" r="34" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg><b>'+p+'%</b></div>'}
+function chk(id,text){return '<div class="row'+(state.checks[id]?' chkd':'')+'"><input type="checkbox" id="c-'+id+'" data-chk="'+id+'"'+(state.checks[id]?' checked':'')+'><label for="c-'+id+'">'+esc(text)+'</label></div>'}
+
+function renderHoje(){
+  var d=dayById(state.sel),p=dayProgress(d),pc=Math.round(p.n/p.t*100);
+  var needsDone=d.needs.filter(function(_,k){return state.checks[d.id+"-n"+k]}).length;
+  var h='<div class="stack">';
+  if(isRest(d)){
+    h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>Dia de pausa</p></div></div>'
+      +'<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar. Descansar também faz parte do plano. Se mudar de ideia, é só voltar.</p><div class="btns"><button class="btn" data-rest="0">Voltar ao dia</button></div></div></div>';
+    $("#view").innerHTML=h;return;
+  }
+  h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>'+esc(d.theme)+'</p><p>'+(p.n===p.t?'Dia completo':'Faltam '+(p.t-p.n)+' entregas')+' · pedidos para você: '+needsDone+'/'+d.needs.length+'</p></div>'+ringSvg(pc)+'</div>';
+  if(d.urgent)h+='<div class="alert"><b>Atenção</b>'+esc(d.urgent)+'</div>';
+  h+='<div class="need"><b>Preciso de você</b>'+d.needs.map(function(t,k){return chk(d.id+"-n"+k,t)}).join("")+'</div>';
+  h+='<div class="card"><p><b>Começar:</b> '+esc(d.start)+'</p><p><b>Terminar:</b> '+esc(d.finish)+'</p></div>';
+  var fid=d.id+"-f";
+  h+='<div class="block"><h3>Feed principal</h3><div class="item'+(stOf(fid)==="posted"?' done':'')+'"><div class="row"><div class="txt"><span class="tag">'+esc(d.feed.kind)+'</span><br>'+esc(d.feed.title)+'</div></div><div class="meta">'+stSelect(fid)+'</div>'
+    +'<details><summary>Ver roteiro</summary><div class="in"><p>'+esc(d.feed.body)+'</p></div></details>'
+    +(d.feed.legenda?'<details><summary>Legenda</summary><div class="in"><p>'+esc(d.feed.legenda)+'</p><div class="btns"><button class="btn small ghost" data-copylegenda="'+d.id+'">Copiar legenda</button></div></div></details>':'')
+    +'</div></div>';
+  var sts=trackItems(d).filter(function(x){return x.n});
+  var shown=sts.filter(function(x){return !state.core||x.core});
+  h+='<div class="block"><h3><span>Stories ('+shown.length+(state.core?' de '+sts.length:'')+')</span><label class="toggle"><input type="checkbox" id="core"'+(state.core?' checked':'')+'> Só o essencial</label></h3>';
+  shown.forEach(function(x){
+    h+='<div class="item'+(stOf(x.id)==="posted"?' done':'')+'"><div class="row"><span class="s-num">'+x.n+'</span><div class="txt">'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'<div>'+esc(x.text).replace(/\n/g,'<br>')+'</div></div></div>'
+      +(x.tray?'<div class="meta"><span class="note">Use o link exclusivo da Tray e escreva “Parceria paga”.</span></div>':'')
+      +'<div class="meta">'+stSelect(x.id)+'</div></div>';
+  });
+  h+='</div>';
+  h+='<div class="block"><h3>Canais extras</h3>'
+    +'<div class="item"><div class="row"><div class="txt"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div></div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div></div>'
+    +'<div class="item"><div class="row"><div class="txt"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div></div></div><div class="meta">'+stSelect(d.id+"-as")+'</div></div></div>';
+  if(d.funnel)h+='<div class="block"><h3>Antes de qualquer chamada para a assinatura</h3><div class="item">'+d.funnel.map(function(t,k){return chk(d.id+"-fun"+k,t)}).join("")+'</div></div>';
+  h+='<div class="block"><h3>Avisar a Laila</h3><div class="btns"><button class="btn" id="avisar">Copiar aviso para a Laila</button></div><p class="note">Monta uma mensagem com o que você já gravou e o seu recado. É só colar no WhatsApp.</p></div>';
+  var r=state.results[d.id]||{};
+  h+='<div class="block"><h3>Depois de postar · 30 segundos</h3><div class="fields">'
+    +'<label>Alcance<input type="text" id="r-alc" value="'+esc(r.alc||"")+'" inputmode="numeric"></label>'
+    +'<label>Curtidas<input type="text" id="r-cur" value="'+esc(r.cur||"")+'" inputmode="numeric"></label>'
+    +'<label>Respostas nos stories<input type="text" id="r-res" value="'+esc(r.res||"")+'" inputmode="numeric"></label>'
+    +'<label>Salvamentos<input type="text" id="r-sal" value="'+esc(r.sal||"")+'" inputmode="numeric"></label></div>'
+    +'<label class="lab">O que eu aprendi hoje<textarea id="r-apr" placeholder="O que funcionou, o que não funcionou...">'+esc(r.apr||"")+'</textarea></label>'
+    +'<div class="btns"><button class="btn small" id="saveres">Salvar resultado</button></div></div>';
+  h+='<div class="block"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia..." aria-label="Recado para a equipe">'+esc(state.notes[d.id]||"")+'</textarea><div class="btns"><button class="btn small ghost" id="savenote">Salvar recado</button><button class="btn small ghost" data-rest="1">Hoje vou descansar</button></div></div>';
+  h+='<p class="note">Roteiros completos e briefings das marcas ficam no <a class="link" href="'+TRELLO+'" target="_blank" rel="noopener">Trello Operação Marketing</a>.</p></div>';
+  $("#view").innerHTML=h;
+}
+function renderGravar(){
+  var d=dayById(state.sel);
+  if(isRest(d)){$("#view").innerHTML='<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar.</p></div>';return}
+  var list=trackItems(d).filter(function(x){return x.n&&(!state.core||x.core)});
+  if(state.rec>=list.length)state.rec=list.length-1; if(state.rec<0)state.rec=0;
+  var x=list[state.rec],last=state.rec===list.length-1;
+  var tip=state.rec===0?"Como começar: "+d.start:(last?"Como terminar: "+d.finish:HOW_REC);
+  $("#view").innerHTML='<div class="stack"><div><div class="kicker">'+esc(d.title)+'</div><h2>Gravar agora</h2></div>'
+   +'<label class="toggle"><input type="checkbox" id="core"'+(state.core?' checked':'')+'> Só o essencial do dia</label>'
+   +'<div class="rec"><div class="kicker">Story '+x.n+' · '+(state.rec+1)+' de '+list.length+'</div><div>'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'</div>'
+   +'<div class="big-text">'+esc(x.text).replace(/\n/g,'<br>')+'</div>'
+   +(x.tray?'<div class="tip">Link exclusivo da Tray e “Parceria paga” neste story.</div>':'')
+   +'<div class="tip">'+esc(tip)+'</div>'
+   +'<button class="btn big" data-recdone="'+x.id+'">'+(last?'Gravei, terminar':(stOf(x.id)==="todo"?'Gravei, próximo':'Já gravado, próximo'))+'</button>'
+   +'<div class="btns"><button class="btn ghost small" data-recnav="-1"'+(state.rec===0?' disabled':'')+'>Anterior</button><button class="btn ghost small" data-recnav="1"'+(last?' disabled':'')+'>Pular</button></div></div>'
+   +'<p class="note">Terminou? Volte em Hoje, toque em “Copiar aviso para a Laila” e cole no WhatsApp.</p></div>';
+}
+
+/* ---- Produtos ---- */
+function renderProdutos(){
+  if(state.pOpen)return renderProduto(state.pOpen);
+  var h='<div class="stack"><div><h2>Mini produtos</h2><p class="sub">Seis produtos prontos para revisar. Cada um resolve um problema só e depois vira módulo do app Estoque Crescente.</p></div>';
+  h+='<button class="card click" data-popen="criar" style="border-color:var(--accent)"><div><span class="tag">Novo</span></div><h3>Criar um material com a sua ideia</h3><p class="sub">Escreva o que quer ensinar. O app faz as perguntas, monta o eBook, checklist, ficha ou exercício com a sua identidade e você salva o arquivo.</p></button>';
+  PRODS.forEach(function(p){
+    var g=getProd(p.id);
+    h+='<button class="card click" data-popen="'+p.id+'"><div><span class="tag">'+esc(p.tipo)+'</span><span class="tag m">'+esc(p.fase)+'</span></div><h3>'+esc(p.nome)+'</h3><p class="sub">'+esc(p.prom)+'</p><p class="note">Situação: '+esc((PST.filter(function(s){return s[0]===g.s})[0]||[])[1])+(g.preco?' · Preço: '+esc(g.preco):' · Preço: a definir')+'</p></button>';
+  });
+  h+='<p class="note">Os rascunhos são para a Mari revisar. Anuncie só o que estiver pronto e confirme o que a assinatura inclui antes de oferecer.</p></div>';
+  $("#view").innerHTML=h;
+}
+function renderProduto(id){
+  if(id==="criar"){if(isDirect(state.cr.tipo)){if(state.cr.material)pushDraft({tipo:state.cr.tipo,titulo:state.cr.material.titulo,data:JSON.parse(JSON.stringify(state.cr))});state.cr=crNew()}return renderCriar()}
+  var p=PRODS.filter(function(x){return x.id===id})[0],g=getProd(id);
+  var h='<div class="stack"><div class="btns"><button class="btn ghost small" data-pback="1">← Produtos</button></div>'
+   +'<div><div><span class="tag">'+esc(p.tipo)+'</span></div><h2>'+esc(p.nome)+'</h2><p class="sub">'+esc(p.prom)+'</p></div>'
+   +'<div class="draft">Rascunho para a Mari revisar. Os números dos exemplos são fictícios.</div>'
+   +'<div class="card"><div class="meta" style="padding:0"><select data-pst="'+id+'" aria-label="Situação do produto">'+PST.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===g.s?' selected':'')+'>'+s[1]+'</option>'}).join('')+'</select>'
+   +'<input type="text" data-price="'+id+'" value="'+esc(g.preco)+'" placeholder="Preço: a definir" aria-label="Preço" style="width:160px"></div><p class="note">Vira no app: '+esc(p.app)+'</p></div>';
+  if(id==="p0")h+=bodyEbook();
+  else if(id==="p1")h+=bodyCalc();
+  else if(id==="p2")h+=bodyOp();
+  else if(id==="p3")h+=bodyFicha();
+  else if(id==="p4")h+=bodyListas();
+  else h+=bodyEsquenta();
+  h+='</div>';
+  $("#view").innerHTML=h;
+  if(id==="p1")updateCalc(); if(id==="p3")updateFicha();
+}
+function bodyEbook(){
+  var c=EBOOK[state.chap];
+  return '<div class="ebook"><div class="kicker">Capítulo '+(state.chap+1)+' de '+EBOOK.length+'</div><div class="page"><h3>'+esc(c.t)+'</h3><p>'+esc(c.b)+'</p></div>'
+   +'<div class="btns"><button class="btn ghost small" data-chap="-1"'+(state.chap===0?' disabled':'')+'>Anterior</button><button class="btn small" data-chap="1"'+(state.chap===EBOOK.length-1?' disabled':'')+'>Próximo capítulo</button></div>'
+   +'<details><summary>Índice</summary><div class="in">'+EBOOK.map(function(x,i){return '<button class="pill" data-chapgo="'+i+'" aria-pressed="'+(i===state.chap)+'">'+(i+1)+'. '+esc(x.t)+'</button>'}).join('')+'</div></details></div>';
+}
+function bodyCalc(){
+  function f(key,label,def,hint){return '<label>'+label+'<input type="text" inputmode="decimal" data-tool="calc.'+key+'" value="'+esc(T("calc."+key,def))+'">'+(hint?'<span class="note">'+hint+'</span>':'')+'</label>'}
+  return '<div class="card"><h3>Seus números</h3><div class="fields">'
+   +f("custo","Custo da peça (R$)","40")+f("frete","Frete da compra (R$)","5")+f("tax","Taxas sobre a venda (%)","6","Cartão, plataforma, etc.")+f("mar","Margem que você quer (%)","30","Parte do preço que sobra")+f("atual","Preço atual (R$)","90","Opcional")
+   +'</div><p class="note">Os valores iniciais são um exemplo fictício. Troque pelos seus.</p></div><div id="calc-out"></div>';
+}
+function updateCalc(){
+  var o=$("#calc-out");if(!o)return;
+  var custo=parseNum(T("calc.custo","40")),frete=parseNum(T("calc.frete","5")),tax=parseNum(T("calc.tax","6")),mar=parseNum(T("calc.mar","30")),atual=parseNum(T("calc.atual","90"));
+  var den=1-tax/100-mar/100;
+  if(den<=0.05){o.innerHTML='<div class="out bad"><b>Essa conta não fecha</b><p>Taxas mais margem passam de 95% do preço. Reduza a margem ou veja se as taxas estão certas.</p></div>';return}
+  var minimo=(custo+frete)/den,lucro=minimo*mar/100;
+  var h='<div class="out"><span class="note">Preço mínimo</span><span class="big">'+brl(minimo)+'</span><span>Sobram '+brl(lucro)+' por peça, com margem de '+pct(mar)+'.</span></div>';
+  if(atual>0){
+    if(atual<minimo)h+='<div class="out bad"><b>O preço atual está abaixo do mínimo</b><p>Com '+brl(atual)+' você não atinge a margem desejada. Sem desconto, já falta '+brl(minimo-atual)+'.</p></div>';
+    else h+='<div class="out"><span class="note">Desconto máximo sobre '+brl(atual)+'</span><span class="big">'+pct((1-minimo/atual)*100)+'</span></div>';
+    h+='<div class="card"><h3>Simulação de desconto</h3><div class="scroll"><table><thead><tr><th>Desconto</th><th>Preço</th><th>Margem</th><th></th></tr></thead><tbody>';
+    [10,20,30,40].forEach(function(d){
+      var pr=atual*(1-d/100),m=((pr*(1-tax/100))-custo-frete)/pr*100;
+      var ok=m>=mar,neg=m<0;
+      h+='<tr><td>'+d+'%</td><td>'+brl(pr)+'</td><td>'+pct(m)+'</td><td class="'+(ok?'good':'badc')+'">'+(ok?'Dentro':(neg?'Prejuízo':'Abaixo'))+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  h+='<p class="note">Fórmula: (custo + frete) ÷ (1 − taxas − margem). Margem calculada sobre o preço de venda.</p>';
+  o.innerHTML=h;
+}
+function bodyOp(){
+  var tot=0,done=0;OPCHK.forEach(function(g,gi){g[1].forEach(function(_,i){tot++;if(T("op."+gi+"_"+i,false))done++})});
+  var h='<div class="card"><h3>'+done+' de '+tot+' itens</h3><p class="note">Marque conforme for conferindo.</p></div>';
+  OPCHK.forEach(function(g,gi){
+    h+='<div class="block"><h3>'+esc(g[0])+'</h3><div class="item">'+g[1].map(function(t,i){var k="op."+gi+"_"+i,on=T(k,false);return '<div class="row'+(on?' chkd':'')+'"><input type="checkbox" id="t-'+gi+'-'+i+'" data-toolchk="'+k+'"'+(on?' checked':'')+'><label for="t-'+gi+'-'+i+'">'+esc(t)+'</label></div>'}).join('')+'</div></div>';
+  });
+  return h;
+}
+function bodyFicha(){
+  var h='<div class="card"><h3>Ficha do fornecedor</h3><div class="stack">';
+  FICHA.forEach(function(f){h+='<label class="lab">'+esc(f[1])+(f[0]==="obs"||f[0]==="pub"?'<textarea data-tool="ficha.'+f[0]+'">'+esc(T("ficha."+f[0],""))+'</textarea>':'<input type="text" data-tool="ficha.'+f[0]+'" value="'+esc(T("ficha."+f[0],""))+'">')+'</label>'});
+  h+='</div></div><div class="card"><h3>Notas de 1 a 5</h3><div class="fields">';
+  RATE.forEach(function(r){var v=T("ficha.r_"+r[0],"3");h+='<label>'+esc(r[1])+'<select data-tool="ficha.r_'+r[0]+'">'+[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(String(v)===String(n)?' selected':'')+'>'+n+'</option>'}).join('')+'</select></label>'});
+  h+='</div><div class="out" id="ficha-out"></div><div class="btns"><button class="btn small ghost" id="copyficha">Copiar ficha</button></div></div>';
+  return h;
+}
+function fichaText(){
+  var t="FICHA DE FORNECEDOR\n";FICHA.forEach(function(f){t+=f[1]+": "+(T("ficha."+f[0],"")||"-")+"\n"});
+  RATE.forEach(function(r){t+=r[1]+": "+T("ficha.r_"+r[0],"3")+"/5\n"});return t;
+}
+function updateFicha(){
+  var o=$("#ficha-out");if(!o)return;var s=0;RATE.forEach(function(r){s+=parseNum(T("ficha.r_"+r[0],"3"))});var m=s/RATE.length;
+  o.innerHTML='<span class="note">Média</span><span class="big">'+m.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+' / 5</span>';
+}
+function bodyListas(){
+  var h='<div class="card"><p>Para cada peça ou categoria, escreva o motivo em uma frase. A justificativa é o que evita a compra por impulso.</p></div><div class="cols3">';
+  LISTAS.forEach(function(L){
+    var arr=T("listas."+L[0],[]);
+    h+='<div class="card"><h3>'+L[1]+'</h3><p class="note">'+L[2]+'</p>'
+     +arr.map(function(it,i){return '<div class="item"><div class="row"><div class="txt"><b>'+esc(it.t)+'</b><div class="note">'+esc(it.j)+'</div></div><button class="btn small ghost" data-ldel="'+L[0]+':'+i+'" aria-label="Remover">Remover</button></div></div>'}).join('')
+     +'<input type="text" id="l-'+L[0]+'-t" placeholder="Peça ou categoria"><input type="text" id="l-'+L[0]+'-j" placeholder="Por quê?"><div class="btns"><button class="btn small" data-ladd="'+L[0]+'">Adicionar</button></div></div>';
+  });
+  return h+'</div>';
+}
+function bodyEsquenta(){
+  return ESQUENTA.map(function(w,wi){return '<div class="block"><h3>'+esc(w.w)+'</h3><div class="item">'+w.items.map(function(t,i){var k="esq."+wi+"_"+i,on=T(k,false);return '<div class="row'+(on?' chkd':'')+'"><input type="checkbox" id="e-'+wi+'-'+i+'" data-toolchk="'+k+'"'+(on?' checked':'')+'><label for="e-'+wi+'-'+i+'">'+esc(t)+'</label></div>'}).join('')+'</div></div>'}).join('')
+   +'<p class="note">Modelo para o público lojista. A Mari ajusta as datas conforme a Black da loja.</p>';
+}
+
+/* ---- Canais ---- */
+function renderCanais(){
+  var h='<div class="stack"><div><h2>Melhores Amigos e assinatura</h2><p class="sub">O feed atrai. Estes dois canais constroem confiança e geram a primeira compra.</p></div>'
+   +'<div class="card"><h3>Papel de cada canal</h3><p><span class="tag m">Melhores Amigos</span> proximidade, bastidor real, votação e aviso antes de todo mundo.</p><p><span class="tag m">Assinatura</span> profundidade: ficha, exercício, aula curta e modelo para usar.</p><p class="note">Só anuncie o que estiver pronto. Não misture acesso à assinatura com acesso ao app antes de definir o que cada um inclui.</p></div>';
+  h+='<div class="block"><h3>Melhores Amigos · série semanal</h3>';
+  MAWEEKS.forEach(function(w){h+='<div class="item"><div class="row"><div class="txt"><b>Semana de '+w[0]+'</b></div></div>'+MASERIE.map(function(t,k){return chk('ma-'+w[1]+'-'+k,t)}).join('')+'</div>'});
+  h+='</div><div class="block"><h3>Assinatura · entrega da semana</h3>'+ASSIN.map(function(a){return '<div class="card"><div><span class="date">'+a[0]+'</span></div><p>'+esc(a[1])+'</p></div>'}).join('')+'</div>';
+  h+='<div class="block"><h3>Banco de ideias · Melhores Amigos</h3>'+IDEIAS_MA.map(function(a){return '<div class="card"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p></div>'}).join('')+'</div>';
+  h+='<div class="block"><h3>Banco de ideias · Assinatura</h3>'+IDEIAS_AS.map(function(a){return '<div class="card"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p></div>'}).join('')+'</div>';
+  h+='<p class="note">As entregas marcadas como proposta ainda precisam da decisão da Mari. As ideias que pedem um exemplo real só entram se ela puder contar.</p></div>';
+  $("#view").innerHTML=h;
+}
+
+/* ---- Mais ---- */
+function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
+function renderMais(){
+  var inner="";
+  if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+'</div>';return}
+  if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
+  if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlIdeias();
+  $("#view").innerHTML='<div class="stack">'+pillsMais()+inner+'</div>';
+}
+function htmlPrazos(){
+  var h='<div><h2>Prazos que não podem passar</h2><p class="sub">Só o que tem data e depende de você ou de uma marca.</p></div>';
+  PRAZOS.forEach(function(x){
+    var n=daysUntil(x.date),dd=x.date.slice(8,10)+"/"+x.date.slice(5,7);
+    var c=n<0?"passou há "+(-n)+" dia"+(n===-1?"":"s"):(n===0?"é hoje":(n===1?"é amanhã":"faltam "+n+" dias"));
+    h+='<div class="card"><div><span class="date">'+dd+'</span> <span class="tag'+(x.brand==="Loyall"?' l':'')+'">'+esc(x.brand)+'</span> <span class="count'+(n>=0&&n<=2?' hot':'')+'">'+c+'</span></div><h3>'+esc(x.t)+'</h3><p class="sub">'+esc(x.d)+'</p></div>';
+  });
+  var done=APPMS.filter(function(m){return state.checks[m[0]]}).length;
+  h+='<div class="block"><h3>Lançamento do app Estoque Crescente · '+done+'/'+APPMS.length+'</h3><div class="item">'+APPMS.map(function(m){return chk(m[0],m[1])}).join("")+'</div></div>';
+  return h;
+}
+function htmlEquipe(){
+  var rows=DAYS.map(function(d){
+    var its=trackItems(d),cnt={todo:0,rec:0,sent:0,edit:0,posted:0};
+    its.forEach(function(x){cnt[stOf(x.id)]++});
+    var r=state.results[d.id],n=state.notes[d.id];
+    return '<tr><td>'+d.w+' '+d.n+(isRest(d)?'<br><span class="note">pausa</span>':'')+'</td><td>'+cnt.todo+' a gravar<br>'+(cnt.rec?'<b>'+cnt.rec+' gravado(s) esperando envio</b><br>':'')+(cnt.sent?cnt.sent+' com a Laila<br>':'')+(cnt.edit?cnt.edit+' editado(s)<br>':'')+cnt.posted+' postado(s)</td><td>'
+      +(r?'Alcance '+esc(r.alc||"-")+', curtidas '+esc(r.cur||"-")+', respostas '+esc(r.res||"-")+', salvos '+esc(r.sal||"-")+(r.apr?'<br><span class="note">Aprendi: '+esc(r.apr)+'</span>':''):'<span class="note">sem resultado</span>')
+      +(n?'<br><span class="note">Recado: '+esc(n)+'</span>':'')+'</td></tr>';
+  }).join("");
+  var done=APPMS.filter(function(m){return state.checks[m[0]]}).length;
+  var venda=PRODS.filter(function(p){return getProd(p.id).s==="venda"}).length,and=PRODS.filter(function(p){var s=getProd(p.id).s;return s==="roteiro"||s==="feito"}).length;
+  return '<div><h2>Visão da equipe</h2><p class="sub">Onde cada entrega está, os resultados que a Mari registrou e os recados.</p></div>'
+   +'<div class="scroll"><table><thead><tr><th>Dia</th><th>Entregas</th><th>Resultado e recado</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+   +'<div class="card"><h3>App Estoque Crescente</h3><p>'+done+' de '+APPMS.length+' marcos concluídos.</p></div>'
+   +'<div class="card"><h3>Mini produtos</h3><p>'+venda+' à venda, '+and+' em andamento, de '+PRODS.length+'.</p></div>'
+   +'<p class="note">Briefings confidenciais das marcas não aparecem aqui. Ficam no quadro interno.</p>';
+}
+function htmlIdeias(){
+  var list=state.ideas.slice().sort(function(a,b){return (b.at||0)-(a.at||0)});
+  return '<div><h2>Caixa de ideias</h2><p class="sub">Anote a trend ou o assunto na hora. A equipe transforma em roteiro depois.</p></div>'
+   +'<textarea id="idea" placeholder="Ex.: trend do áudio X, mostrando a embalagem do pedido..." aria-label="Nova ideia"></textarea>'
+   +'<div class="btns"><button class="btn" id="addidea">Guardar ideia</button></div>'
+   +(list.length?list.map(function(i){return '<div class="card"><textarea data-ide="'+i.id+'" aria-label="Ideia">'+esc(i.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(i.at).toLocaleDateString("pt-BR")+'</span><button class="btn ghost small" data-idel="'+i.id+'">Apagar</button></div></div>'}).join(""):'<p class="note">Nenhuma ideia guardada ainda.</p>');
+}
+function render(){
+  renderChrome();
+  var t=state.tab;
+  if(t==="pub")renderPub();else if(t==="criar")renderHub();else if(t==="hoje")renderHoje();else if(t==="gravar")renderGravar();else if(t==="produtos")renderProdutos();else if(t==="canais")renderCanais();else renderMais();
+  addSeg();addHero();
+}
+
+function addSeg(){
+  var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
+  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-tab="hoje" aria-pressed="'+(t==="hoje")+'">O dia</button><button data-tab="gravar" aria-pressed="'+(t==="gravar")+'">Gravar agora</button></div>');
+}
+function addHero(){
+  var t=state.tab,H=null;
+  if(t==="criar"&&(state.hub||"inicio")==="inicio")H=["@mariana.leaal","Seu espaço de criação","Ideias, roteiros, ações e materiais. Tudo no seu jeito."];
+  else if(t==="pub"&&state.pub!=="mat")H=["Publicidade","Publis","Campanhas, prazos, roteiros e pagamentos em um lugar só."];
+  else if(t==="mais")H=["Mais","Seu painel","Prazos, equipe, canais, ideias e ajustes."];
+  if(H)$("#view").insertAdjacentHTML("afterbegin",'<div class="hero2"><span class="pilltag">'+H[0]+'</span><h2>'+H[1]+'</h2><p>'+H[2]+'</p></div>');
+}
+/* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
+var S=null,D=null;
+var TIPOS=[["ebook","eBook"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
+var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
+function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}
+function saveCr(){try{localStorage.setItem("hoje-cr",JSON.stringify(state.cr))}catch(e){}}
+function tipoLabel(t){return (TIPOS.filter(function(x){return x[0]===t})[0]||[,"Material"])[1]}
+function normMat(r,old){return {titulo:String(r.titulo||old.titulo),subtitulo:String(r.subtitulo||""),intro:String(r.intro||""),fechamento:String(r.fechamento||""),secoes:(r.secoes||old.secoes).map(function(x){return {titulo:String(x.titulo||""),corpo:String(x.corpo||""),itens:(x.itens||[]).map(String)}})}}
+function crErr(e){
+  var c=e&&e.code;
+  if(c==="not_granted")return "Para criar com o Claude, permita o uso quando o aviso aparecer.";
+  if(c==="rate_limited")return "Muitas tentativas seguidas. Espere um pouco e tente de novo.";
+  if(c==="cancelled")return "";
+  return "Não consegui gerar agora. Seus textos continuam salvos. Tente de novo em instantes.";
+}
+async function crRun(label,fn){
+  state.cr.busy=label;state.cr.err="";saveCr();render();
+  try{await fn()}catch(e){state.cr.err=crErr(e)}
+  state.cr.busy="";saveCr();render();
+}
+function qa(){var c=state.cr;return c.perguntas.map(function(q,i){return "P: "+q+"\nR: "+(c.respostas[i]||"(sem resposta)")}).join("\n\n")}
+function crAction(a,el){
+  var c=state.cr;
+  if(!S&&(a==="ask"||a==="outline"||a==="write"||a==="sug"||a==="gerarguia"||a.indexOf("voz")===0||a.indexOf("apl")===0)){c.err="Este recurso usa o Claude e só funciona quando o app é aberto dentro do Claude.";render();return}
+  if(a==="gerarguia"){gerarGuia();return}
+  if(a==="savemodel"){cfg().doc=clone(c.material);cfgSave();el.textContent="Modelo salvo";return}
+  if(a==="gclear"){gImgs=[];render();return}
+  if(a==="sugclear"){c.sug=[];render();return}
+  if(a==="sug"){
+    var nb=c.material.secoes.length;
+    crRun("Analisando o material...",async function(){
+      var r=await S.json(RULES+"\n\nAnalise este material ("+tipoLabel(c.tipo)+") e liste até 5 melhorias específicas e acionáveis: clareza, ordem, o que falta, lacunas [PREENCHER], chamada final. Para cada uma informe \"bloco\" (número do bloco de 1 a "+nb+", ou 0 se for geral), \"titulo\" e \"como\" (instrução curta de reescrita). Responda SOMENTE com JSON {\"sugestoes\":[{\"bloco\":0,\"titulo\":\"\",\"como\":\"\"}]}.\n\n"+JSON.stringify(c.material),{modelTier:"quick"});
+      c.sug=(r.sugestoes||[]).slice(0,5).map(function(x){var b=parseInt(x.bloco,10);return {bloco:(b>=1&&b<=nb)?b:0,titulo:String(x.titulo||""),como:String(x.como||"")}});
+    });return;
+  }
+  if(a.indexOf("apl")===0){
+    var si=parseInt(a.slice(3),10),sg=(c.sug||[])[si];if(!sg||!(sg.bloco>0))return;
+    var ix=sg.bloco-1,sec0=c.material.secoes[ix];
+    crRun("Aplicando a sugestão...",async function(){
+      var r3=await S.json(RULES+"\n\n"+vozGuia(sg.como)+"\n\nAplique a melhoria pedida. Mantenha os fatos e os trechos [PREENCHER]. Bloco atual:\n"+JSON.stringify(sec0)+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"corpo\":\"\",\"itens\":[\"\"]}.",{modelTier:"default"});
+      c.undo={kind:"sec",i:ix,data:JSON.parse(JSON.stringify(sec0))};
+      c.material.secoes[ix]={titulo:String(r3.titulo||sec0.titulo),corpo:String(r3.corpo||""),itens:(r3.itens||[]).map(String)};
+      c.sug.splice(si,1);
+    });return;
+  }
+  if(a==="ask"){
+    if(!c.ideia.trim()){c.err="Escreva a ideia primeiro, do jeito que você falaria.";render();return}
+    crRun("Pensando nas perguntas...",async function(){
+      var r=await S.json(RULES+"\n\nTipo de material: "+tipoLabel(c.tipo)+"\nIdeia da Mari: "+c.ideia+"\nPara quem: "+(c.publico||"(não informado)")+"\n\nFaça 4 perguntas curtas e específicas que ajudem a amadurecer essa ideia: para quem é, qual problema resolve, qual resultado a pessoa terá e que exemplo real a Mari pode contar. Responda SOMENTE com JSON no formato {\"perguntas\":[\"...\",\"...\",\"...\",\"...\"]}.",{modelTier:"quick"});
+      c.perguntas=(r&&r.perguntas||[]).slice(0,5).map(String);c.respostas=c.perguntas.map(function(){return ""});c.step=1;
+    });return;
+  }
+  if(a==="outline"){
+    crRun("Montando o esqueleto...",async function(){
+      var forma={ebook:"um eBook curto com 5 a 8 seções; em itens, liste os tópicos de cada seção",checklist:"um checklist com 4 a 6 grupos; em itens, liste de 3 a 6 tarefas curtas no imperativo por grupo",ficha:"uma ficha para preencher; em itens, liste os campos de cada grupo",exercicio:"um exercício prático; em itens, liste os passos de cada etapa"}[c.tipo];
+      var r=await S.json(RULES+"\n\nTipo: "+forma+".\nIdeia da Mari: "+c.ideia+"\nPara quem: "+(c.publico||"(não informado)")+"\n\nPerguntas e respostas:\n"+qa()+"\n\nCrie o esqueleto. Responda SOMENTE com JSON no formato {\"titulo\":\"\",\"subtitulo\":\"\",\"secoes\":[{\"titulo\":\"\",\"itens\":[\"\"]}]}.",{modelTier:"default"});
+      c.outline={titulo:String(r.titulo||""),subtitulo:String(r.subtitulo||""),secoes:(r.secoes||[]).map(function(s){return {titulo:String(s.titulo||""),itens:(s.itens||[]).map(String)}})};c.step=2;
+    });return;
+  }
+  if(a==="write"){
+    crRun("Escrevendo o material...",async function(){
+      var o=c.outline;
+      var forma={ebook:"Para cada seção escreva \"corpo\" com 60 a 120 palavras, simples e prático. Pode deixar \"itens\" vazio ou usar como lista de apoio.",checklist:"Mantenha \"itens\" claros, curtos e no imperativo. \"corpo\" é no máximo uma frase de apoio.",ficha:"\"itens\" são os campos a preencher. \"corpo\" é uma frase de instrução.",exercicio:"\"itens\" são os passos. \"corpo\" explica o objetivo da etapa em 1 ou 2 frases."}[c.tipo];
+      var r=await S.json(RULES+"\n\nTipo: "+tipoLabel(c.tipo)+".\nIdeia da Mari: "+c.ideia+"\nPara quem: "+(c.publico||"(não informado)")+"\n\nPerguntas e respostas:\n"+qa()+"\n\nEsqueleto aprovado:\n"+JSON.stringify(o)+"\n\n"+forma+" Escreva também \"intro\" (2 a 3 frases) e \"fechamento\" (1 a 2 frases). Responda SOMENTE com JSON no formato {\"titulo\":\"\",\"subtitulo\":\"\",\"intro\":\"\",\"secoes\":[{\"titulo\":\"\",\"corpo\":\"\",\"itens\":[\"\"]}],\"fechamento\":\"\"}.",{modelTier:"default"});
+      c.material={titulo:String(r.titulo||o.titulo),subtitulo:String(r.subtitulo||o.subtitulo),intro:String(r.intro||""),fechamento:String(r.fechamento||""),secoes:(r.secoes||[]).map(function(s){return {titulo:String(s.titulo||""),corpo:String(s.corpo||""),itens:(s.itens||[]).map(String)}})};c.step=3;c.view="edit";c.undo=null;
+    });return;
+  }
+  if(a==="ver"){c.view="ver";saveCr();render();return}
+  if(a==="editar"){c.view="edit";saveCr();render();return}
+  if(a==="maddsec"){c.material.secoes.push({titulo:"",corpo:"",itens:[]});saveCr();render();return}
+  if(a.indexOf("mdel")===0){c.material.secoes.splice(parseInt(a.slice(4),10),1);saveCr();render();return}
+  if(a==="undo"&&c.undo){if(c.undo.kind==="all")c.material=c.undo.data;else c.material.secoes[c.undo.i]=c.undo.data;c.undo=null;saveCr();render();return}
+  if(a.indexOf("voz")===0){
+    var voz=(state.voz||"").trim(),ins=(c.instr||"").trim();
+    if(!voz&&!ins){c.err="Cole um texto seu em “Meu jeito de falar” ou escreva um ajuste, como “mais direto”.";render();return}
+    var all=a==="voz-all",idx=all?-1:parseInt(a.slice(3),10);
+    var guia="Jeito da Mari de escrever e falar (exemplos reais dela):\n"+(voz||"(não informado)")+"\nAjuste pedido: "+(ins||"(nenhum)")+"\n\nReescreva no jeito dela: mesma linguagem, ritmo e expressões dos exemplos. Mantenha todos os fatos e o sentido, não acrescente informação nova, mantenha os trechos [PREENCHER] e a mesma estrutura de campos. Não copie frases inteiras dos exemplos.";
+    crRun(all?"Reescrevendo tudo no seu jeito...":"Reescrevendo o bloco...",async function(){
+      if(all){
+        var r=await S.json(RULES+"\n\n"+guia+"\n\nMaterial atual:\n"+JSON.stringify(c.material)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"subtitulo\":\"\",\"intro\":\"\",\"secoes\":[{\"titulo\":\"\",\"corpo\":\"\",\"itens\":[\"\"]}],\"fechamento\":\"\"}.",{modelTier:"default"});
+        c.undo={kind:"all",data:JSON.parse(JSON.stringify(c.material))};
+        c.material=normMat(r,c.material);
+      }else{
+        var sec=c.material.secoes[idx];
+        var r2=await S.json(RULES+"\n\n"+guia+"\n\nBloco atual:\n"+JSON.stringify(sec)+"\n\nResponda SOMENTE com JSON no formato {\"titulo\":\"\",\"corpo\":\"\",\"itens\":[\"\"]}.",{modelTier:"default"});
+        c.undo={kind:"sec",i:idx,data:JSON.parse(JSON.stringify(sec))};
+        c.material.secoes[idx]={titulo:String(r2.titulo||sec.titulo),corpo:String(r2.corpo||""),itens:(r2.itens||[]).map(String)};
+      }
+    });return;
+  }
+  if(a==="back"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub="camp";else state.cr=crNew();saveCr();render();return}
+  if(a==="back"){c.step=c.tipo==="guia"?0:Math.max(0,c.step-1);c.err="";saveCr();render();return}
+  if(a==="reset"&&isDirect(c.tipo)&&c.tipo!=="guia"){if(state.tab==="pub")state.pub="camp";state.cr=crNew();saveCr();render();return}
+  if(a==="reset"){state.cr=crNew(c.tipo==="guia"?"guia":undefined);saveCr();render();return}
+  if(a==="addsec"){c.outline.secoes.push({titulo:"",itens:[]});saveCr();render();return}
+  if(a.indexOf("delsec")===0){c.outline.secoes.splice(parseInt(a.slice(6),10),1);saveCr();render();return}
+  if(a==="copy"){copyText(materialText(c.material),el);return}
+  if(a==="pdf"){
+    if(!D){el.textContent="Salvar não está disponível aqui";return}
+    var doc=null;try{doc=makePdf(c.material,c.tipo)}catch(e){doc=null}
+    if(!doc){el.textContent="PDF indisponível agora";return}
+    D.save({filename:crName(c.material)+".pdf",data:doc.output("arraybuffer")}).then(function(){el.textContent="PDF salvo"},function(e){el.textContent=(e&&e.code==="declined")?"Salvar cancelado":"Não consegui salvar o PDF"});
+    return;
+  }
+  if(a==="save"){
+    var m=c.material,name=(m.titulo||"material").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"material";
+    var doc='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(m.titulo)+'</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"><style>body{margin:0;padding:16px;background:#F6F1F3}'+MAT_CSS+'</style></head><body>'+materialHtml(m,c.tipo)+'</body></html>';
+    if(!D){el.textContent="Salvar não está disponível aqui";return}
+    D.save({filename:name+".html",data:doc}).then(function(){el.textContent="Arquivo salvo"},function(e){el.textContent=(e&&e.code==="declined")?"Salvar cancelado":"Não consegui salvar"});
+    return;
+  }
+}
+var MAT_CSS=".mt{font-family:'DM Sans',system-ui,sans-serif;color:#1F1A20;max-width:720px;margin:0 auto;line-height:1.55}"
++".mt *{box-sizing:border-box}"
++".mt-cover{background:#15101A;color:#fff;border-radius:18px;padding:32px 22px 24px;display:flex;flex-direction:column;gap:16px;min-height:380px;justify-content:flex-end}"
++".mt-pill{align-self:flex-start;border:1.5px solid rgba(255,255,255,.85);border-radius:999px;padding:4px 14px;font:600 12px Montserrat,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}"
++".mt-title{font:800 34px/1.05 Montserrat,'Arial Black',Arial,sans-serif;text-transform:uppercase;margin:0;overflow-wrap:anywhere}"
++".mt-sub{margin:0;color:#E8DCE3;font-size:16px}"
++".mt-tag{align-self:flex-start;background:#D22B1F;color:#fff;font:800 14px Montserrat,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:4px}"
++".mt-by{font-size:13px;color:#CDBFC8}"
++".mt-hl{background:#FFF0B8;border-radius:12px;padding:14px 16px;margin-top:14px;color:#2A2118}"
++".mt-page{background:#fff;border:1px solid #EADFE5;border-radius:16px;padding:20px;margin-top:14px;display:flex;flex-direction:column;gap:10px}"
++".mt-label{align-self:flex-start;background:#D22B1F;color:#fff;border-radius:3px;padding:4px 12px;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}"
++".mt-h{font:800 21px/1.15 Montserrat,Arial,sans-serif;text-transform:uppercase;margin:0;overflow-wrap:anywhere}"
++".mt-body{margin:0;white-space:pre-line}"
++".mt-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}"
++".mt-list li{display:flex;gap:10px;align-items:flex-start}"
++".mt-list li:before{content:'';flex:0 0 18px;height:18px;border:2px solid #D22B1F;border-radius:4px;margin-top:3px}";
+function materialHtml(m,tipo){
+  var cs=CAPA?' style="background:linear-gradient(180deg,rgba(21,16,26,.3),rgba(21,16,26,.93) 72%),url('+CAPA+') center/cover"':'';
+  var h='<div class="mt"><div class="mt-cover"'+cs+'><span class="mt-pill">@mariana.leaal</span><h1 class="mt-title">'+esc(m.titulo)+'</h1>'+(m.subtitulo?'<p class="mt-sub">'+esc(m.subtitulo)+'</p>':'')+'<span class="mt-tag">'+esc(tipoLabel(tipo))+'</span><span class="mt-by">Estoque Crescente</span></div>';
+  if(m.intro)h+='<div class="mt-hl">'+esc(m.intro)+'</div>';
+  (m.secoes||[]).forEach(function(s,i){
+    h+='<section class="mt-page"><span class="mt-label">'+pdfLabel(tipo,i,m.secoes.length)+'</span><h2 class="mt-h">'+esc(s.titulo)+'</h2>'
+     +(s.corpo?'<p class="mt-body">'+esc(s.corpo)+'</p>':'')
+     +((s.itens&&s.itens.length)?'<ul class="mt-list">'+s.itens.map(function(t){return '<li><span>'+esc(t)+'</span></li>'}).join('')+'</ul>':'')+'</section>';
+  });
+  if(m.fechamento)h+='<div class="mt-hl">'+esc(m.fechamento)+'</div>';
+  return h+'</div>';
+}
+function materialText(m){
+  var t=m.titulo+"\n"+(m.subtitulo||"")+"\n\n"+(m.intro?m.intro+"\n\n":"");
+  (m.secoes||[]).forEach(function(s,i){t+=(i+1)+". "+s.titulo+"\n"+(s.corpo?s.corpo+"\n":"")+(s.itens||[]).map(function(x){return "☐ "+x}).join("\n")+"\n\n"});
+  return t+(m.fechamento||"");
+}
+function renderCriar(){
+  var c=state.cr;
+  var G=c.tipo==="guia";
+  var h='<div class="stack"><div class="btns">'+(state.tab==="criar"?'<button class="btn ghost small" data-hub="inicio">← Criar</button>':state.tab==="pub"?'<button class="btn ghost small" data-pub="camp">← Publis</button>':'<button class="btn ghost small" data-pback="1">← Produtos</button>')+'</div>'
+   +(isDirect(c.tipo)&&!G?'<div><h2>'+esc(tipoLabel(c.tipo))+'</h2><p class="sub">Edite o texto, preencha o que está em [PREENCHER] e salve o PDF.</p></div>':G?'<div><h2>Guia de captação e edição</h2><p class="sub">Conte o que o vídeo precisa ser, mostre referências e o app monta o direcionamento para a editora, em PDF.</p></div>':'<div><h2>Criar material</h2><p class="sub">Escreva a ideia, responda algumas perguntas e o material sai montado com a sua identidade.</p></div>');
+  if(!S&&!c.material){
+    h+='<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão. Abra o link pelo Claude para criar materiais.</div></div>';
+    $("#view").innerHTML=h;return;
+  }
+  if(!G)h+='<div class="note">Passo '+(c.step+1)+' de 4</div>';
+  if(c.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(c.err)+'</div>';
+  if(c.busy){h+='<div class="card"><h3>'+esc(c.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos. Não feche esta tela.</p></div></div>';$("#view").innerHTML=h;return}
+  if(c.step===0&&G){
+    h+=guiaForm(c);
+  }else if(c.step===0){
+    h+='<div class="card"><div class="pills">'+TIPOS.filter(function(t){return !isDirect(t[0])}).map(function(t){return '<button class="pill" data-crtipo="'+t[0]+'" aria-pressed="'+(c.tipo===t[0])+'">'+t[1]+'</button>'}).join('')+'</div>'
+     +'<label class="lab">Sua ideia, do jeito que você falaria<textarea data-cr="ideia" placeholder="Ex.: quero ensinar a lojista a conferir o estoque antes de comprar mais...">'+esc(c.ideia)+'</textarea></label>'
+     +'<label class="lab">Para quem é (opcional)<input type="text" data-cr="publico" value="'+esc(c.publico)+'" placeholder="Ex.: lojista que está começando"></label>'
+     +'<div class="btns"><button class="btn" data-crx="ask">Amadurecer a ideia</button></div></div>';
+  }else if(c.step===1){
+    h+='<div class="card"><h3>Responda o que souber</h3><p class="note">Respostas curtas bastam. O que ficar sem resposta vira lacuna marcada no material, sem inventar nada.</p>'
+     +c.perguntas.map(function(q,i){return '<label class="lab"><b style="color:var(--ink)">'+esc(q)+'</b><textarea data-cr="r'+i+'">'+esc(c.respostas[i]||"")+'</textarea></label>'}).join('')
+     +'<div class="btns"><button class="btn ghost small" data-crx="back">Voltar</button><button class="btn" data-crx="outline">Montar o esqueleto</button></div></div>';
+  }else if(c.step===2){
+    var o=c.outline;
+    h+='<div class="card"><h3>Ajuste o esqueleto</h3><p class="note">Mude títulos, apague o que não serve. Em cada bloco, um tópico por linha.</p>'
+     +'<label class="lab">Título<input type="text" data-cr="ot" value="'+esc(o.titulo)+'"></label><label class="lab">Subtítulo<input type="text" data-cr="os" value="'+esc(o.subtitulo)+'"></label></div>'
+     +o.secoes.map(function(s,i){return '<div class="card"><label class="lab">Bloco '+(i+1)+'<input type="text" data-cr="st'+i+'" value="'+esc(s.titulo)+'"></label><label class="lab">Tópicos<textarea data-cr="si'+i+'">'+esc(s.itens.join("\n"))+'</textarea></label><div class="btns"><button class="btn ghost small" data-crx="delsec'+i+'">Remover bloco</button></div></div>'}).join('')
+     +'<div class="btns"><button class="btn ghost small" data-crx="addsec">Adicionar bloco</button></div>'
+     +'<div class="btns"><button class="btn ghost small" data-crx="back">Voltar</button><button class="btn" data-crx="write">Escrever o material</button></div>';
+  }else if(c.view==="ver"){
+    h+='<div class="draft">Rascunho para a Mari revisar. Confira cada frase e preencha o que estiver como [PREENCHER].</div><style>'+MAT_CSS+'</style>'+materialHtml(c.material,c.tipo)
+     +'<div class="btns"><button class="btn" data-crx="pdf">Salvar PDF</button><button class="btn ghost" data-crx="sug">Sugerir melhorias</button><button class="btn ghost" data-crx="save">Salvar página (HTML)</button><button class="btn ghost" data-crx="copy">Copiar texto</button><button class="btn ghost" data-crx="editar">Voltar a editar</button><button class="btn ghost" data-crx="reset">Começar outro</button></div>'+sugHtml(c);
+  }else{
+    var m=c.material;
+    h+='<div class="draft">Este texto é um rascunho. Mude o que quiser direto nos campos ou peça para reescrever no seu jeito.</div>'
+     +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (uma legenda, um roteiro, um áudio transcrito). O app usa isso para escrever como você. Fica salvo neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea><label class="lab">Ajuste extra (opcional)<input type="text" data-cr="instr" value="'+esc(c.instr||"")+'" placeholder="Ex.: mais curto, mais animado, mais direto"></label><div class="btns"><button class="btn" data-crx="voz-all">Reescrever tudo no meu jeito</button>'+(c.undo?'<button class="btn ghost small" data-crx="undo">Desfazer a última reescrita</button>':'')+'</div></div>'
+     +'<div class="card"><label class="lab">Título<input type="text" data-cr="mt" value="'+esc(m.titulo)+'"></label><label class="lab">Subtítulo<input type="text" data-cr="ms" value="'+esc(m.subtitulo)+'"></label><label class="lab">Abertura<textarea data-cr="mi">'+esc(m.intro)+'</textarea></label></div>'
+     +m.secoes.map(function(s,i){return '<div class="card"><label class="lab">Título do bloco '+(i+1)+'<input type="text" data-cr="mst'+i+'" value="'+esc(s.titulo)+'"></label><label class="lab">Texto<textarea data-cr="msc'+i+'">'+esc(s.corpo)+'</textarea></label><label class="lab">Itens (um por linha)<textarea data-cr="msi'+i+'">'+esc((s.itens||[]).join("\n"))+'</textarea></label><div class="btns"><button class="btn small" data-crx="voz'+i+'">Reescrever no meu jeito</button><button class="btn ghost small" data-crx="mdel'+i+'">Remover bloco</button></div></div>'}).join('')
+     +'<div class="btns"><button class="btn ghost small" data-crx="maddsec">Adicionar bloco</button></div>'
+     +'<div class="card"><label class="lab">Fechamento<textarea data-cr="mf">'+esc(m.fechamento)+'</textarea></label></div>'
+     +'<div class="btns"><button class="btn" data-crx="ver">Ver como vai ficar</button>'+(c.tipo==="midia"?'<button class="btn ghost small" data-crx="savemodel">Salvar como meu modelo</button>':'')+'<button class="btn ghost small" data-crx="sug">Sugerir melhorias</button><button class="btn ghost small" data-crx="back">'+(G?'Voltar ao formulário':isDirect(c.tipo)?'Voltar':'Refazer a partir do esqueleto (apaga as edições)')+'</button></div>'+sugHtml(c);
+  }
+  $("#view").innerHTML=h+'</div>';
+}
+
+/* ============ ESPAÇO DE CRIAÇÃO (aba inicial) ============ */
+var gImgs=[],CAPA="",LIM=null,GBUSY="";
+var FORMATOS=["Reels","Story","Carrossel","Melhores Amigos","Assinatura","Publi","Outro"];
+var PLST=[["fazer","A fazer"],["gravado","Gravado"],["postado","Postado"]];
+function rotNew(){return {formato:"Reels",ideia:"",obj:"",res:null,busy:"",err:"",sug:[]}}
+function saveRot(){try{localStorage.setItem("hoje-rot",JSON.stringify(state.rot))}catch(e){}}
+function saveDrafts(){try{localStorage.setItem("hoje-drafts",JSON.stringify(state.drafts))}catch(e){}}
+function savePlano(){try{localStorage.setItem("hoje-plano",JSON.stringify(state.plano))}catch(e){}}
+function loadHub(){
+  try{state.rot=JSON.parse(localStorage.getItem("hoje-rot")||"null")}catch(e){}if(!state.rot)state.rot=rotNew();
+  try{state.drafts=JSON.parse(localStorage.getItem("hoje-drafts")||"[]")}catch(e){state.drafts=[]}
+  try{state.plano=JSON.parse(localStorage.getItem("hoje-plano")||"{}")}catch(e){state.plano={}}
+}
+function pushDraft(d){d.id="d"+Date.now();d.at=Date.now();state.drafts.unshift(d);state.drafts=state.drafts.slice(0,50);saveDrafts();draftSync(d)}
+function draftSync(d){if(C.drafts)C.drafts.doc(d.id).set({json:JSON.stringify(d),at:d.at}).then(function(){setSync("Rascunho salvo para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function vozGuia(ins){return "Jeito da Mari de escrever e falar (exemplos reais dela):\n"+((state.voz||"").trim()||"(não informado)")+"\nAjuste pedido: "+(ins||"(nenhum)")+"\n\nEscreva no jeito dela: mesma linguagem, ritmo e expressões dos exemplos. Não copie frases inteiras dos exemplos."}
+function hubGo(k){
+  var c=state.cr;
+  if(k==="guia"&&c.tipo!=="guia"){if(c.material)pushDraft({tipo:c.tipo,titulo:c.material.titulo,data:JSON.parse(JSON.stringify(c))});state.cr=crNew("guia")}
+  if(k==="material"&&isDirect(c.tipo)){if(c.material)pushDraft({tipo:c.tipo,titulo:c.material.titulo,data:JSON.parse(JSON.stringify(c))});state.cr=crNew()}
+  state.hub=k;saveCr();render();window.scrollTo(0,0);
+}
+var HUBI={ideias:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',roteiro:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',guia:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',material:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',rascunhos:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
+function hubCard(k,t,d,tag){return '<button class="card click tile" data-hub="'+k+'"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">'+(HUBI[k]||"")+'</svg></span>'+(tag?'<span class="tag">'+esc(tag)+'</span>':'')+'<h3>'+esc(t)+'</h3><p class="sub">'+esc(d)+'</p></button>'}
+function renderHub(){
+  var hb=state.hub||"inicio";
+  if(hb==="guia"||hb==="material"){renderCriar();return}
+  if(hb==="inicio"){
+    var np=Object.keys(state.plano||{}).length;
+    $("#view").innerHTML='<div class="tiles">'
+     +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
+     +hubCard("roteiro","Roteiro","Transforme uma ideia em roteiro de Reels, Story ou Carrossel, na sua voz.")
+     +hubCard("calendario","Calendário de ações",np?np+" ação(ões) planejada(s).":"Organize o que vai gravar e postar, dia a dia.")
+     +hubCard("guia","Guia de captação e edição","Monte o direcionamento para a editora com suas referências e envie em PDF junto com os arquivos.","Novo")
+     +hubCard("material","Material digital","eBook, checklist, ficha ou exercício, com a identidade da Mari e PDF.")
+     +hubCard("rascunhos","Rascunhos",state.drafts.length?state.drafts.length+" salvo(s).":"Seus trabalhos salvos aparecem aqui.")+'</div>';
+    return;
+  }
+  var back='<div class="btns"><button class="btn ghost small" data-hub="inicio">← Criar</button></div>';
+  var body=hb==="ideias"?'<div class="stack">'+htmlIdeias()+'</div>':hb==="roteiro"?hubRoteiro():hb==="calendario"?hubPlano():hubDrafts();
+  $("#view").innerHTML='<div class="stack">'+back+body+'</div>';
+}
+/* ---- Roteiro ---- */
+function hubRoteiro(){
+  var r=state.rot,h='<div><h2>Roteiro</h2><p class="sub">Escreva a ideia. O app monta o roteiro e você edita e coloca no seu jeito.</p></div>';
+  if(!S)return h+'<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão.</div>';
+  if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
+  if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
+  h+='<div class="card"><div class="pills">'+["Reels","Story","Carrossel"].map(function(f){return '<button class="pill" data-rotfmt="'+f+'" aria-pressed="'+(r.formato===f)+'">'+f+'</button>'}).join('')+'</div>'
+   +'<label class="lab">Sua ideia<textarea data-cr="qi" placeholder="Ex.: mostrar como confiro o estoque antes de comprar...">'+esc(r.ideia)+'</textarea></label>'
+   +'<label class="lab">Objetivo (opcional)<input type="text" data-cr="qo" value="'+esc(r.obj)+'" placeholder="Ex.: gerar salvamentos, convidar para a assinatura"></label>'
+   +'<div class="btns"><button class="btn" data-rot="gerar">Escrever roteiro</button></div></div>';
+  if(r.res){
+    var x=r.res;
+    h+='<div class="card"><h3>Roteiro</h3>'
+     +'<label class="lab">Título<input type="text" data-cr="qt" value="'+esc(x.titulo)+'"></label>'
+     +'<label class="lab">Gancho (primeiros segundos)<textarea data-cr="qg">'+esc(x.gancho)+'</textarea></label>'
+     +'<label class="lab">Roteiro<textarea data-cr="qr" style="min-height:180px">'+esc(x.roteiro)+'</textarea></label>'
+     +'<label class="lab">Legenda<textarea data-cr="ql">'+esc(x.legenda)+'</textarea></label>'
+     +'<label class="lab">Chamada final (CTA)<input type="text" data-cr="qc" value="'+esc(x.cta)+'"></label>'
+     +'<div class="btns"><button class="btn small" data-rot="voz">Reescrever no meu jeito</button><button class="btn ghost small" data-rot="sug">Sugerir melhorias</button><button class="btn ghost small" data-rot="copy">Copiar</button><button class="btn ghost small" data-rot="draft">Salvar rascunho</button></div>'
+     +'<p class="note">Usa o texto de “Meu jeito de falar” (em Criar material ou Guia). Se ainda não colou um texto seu, escreva um ajuste no campo abaixo.</p>'
+     +'<label class="lab">Ajuste extra (opcional)<input type="text" data-cr="qa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais curto, mais animado"></label></div>';
+    if(r.sug&&r.sug.length)h+='<div class="card"><h3>Sugestões de melhoria</h3>'+r.sug.map(function(s){return '<p><b>'+esc(s.titulo)+'</b><br><span class="note">'+esc(s.como)+'</span></p>'}).join('')+'</div>';
+  }
+  return h;
+}
+async function rotRun(label,fn){var r=state.rot;r.busy=label;r.err="";saveRot();render();try{await fn()}catch(e){r.err=crErr(e)}r.busy="";saveRot();render()}
+function rotText(x){return x.titulo+"\n\nGancho: "+x.gancho+"\n\n"+x.roteiro+"\n\nLegenda: "+x.legenda+"\n\nCTA: "+x.cta}
+function rotAction(a,el){
+  var r=state.rot;
+  if(a==="gerar"){
+    if(!r.ideia.trim()){r.err="Escreva a ideia primeiro.";render();return}
+    rotRun("Escrevendo o roteiro...",async function(){
+      var forma={Reels:"Reels de 30 a 60 segundos. Em \"roteiro\", escreva a fala e, entre colchetes, a indicação do que aparece na tela.",Story:"sequência de 4 a 6 stories. Em \"roteiro\", numere cada story com a fala e a indicação visual.",Carrossel:"carrossel de 6 a 8 slides. Em \"roteiro\", numere os slides com o texto de cada um."}[r.formato];
+      var x=await S.json(RULES+"\n\nFormato: "+forma+"\nIdeia da Mari: "+r.ideia+"\nObjetivo: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON no formato {\"titulo\":\"\",\"gancho\":\"\",\"roteiro\":\"\",\"legenda\":\"\",\"cta\":\"\"}.",{modelTier:"default"});
+      r.res={titulo:String(x.titulo||""),gancho:String(x.gancho||""),roteiro:String(x.roteiro||""),legenda:String(x.legenda||""),cta:String(x.cta||"")};r.sug=[];
+    });return;
+  }
+  if(a==="voz"){
+    if(!(state.voz||"").trim()&&!(r.instr||"").trim()){r.err="Cole um texto seu em “Meu jeito de falar” (Criar material) ou escreva um ajuste, como “mais direto”.";render();return}
+    rotRun("Reescrevendo no seu jeito...",async function(){
+      var x=await S.json(RULES+"\n\n"+vozGuia(r.instr||"")+"\n\nMantenha os fatos e o sentido, sem acrescentar informação nova. Roteiro atual:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"gancho\":\"\",\"roteiro\":\"\",\"legenda\":\"\",\"cta\":\"\"}.",{modelTier:"default"});
+      r.res={titulo:String(x.titulo||r.res.titulo),gancho:String(x.gancho||""),roteiro:String(x.roteiro||""),legenda:String(x.legenda||""),cta:String(x.cta||"")};
+    });return;
+  }
+  if(a==="sug"){
+    rotRun("Analisando o roteiro...",async function(){
+      var x=await S.json(RULES+"\n\nAnalise este roteiro de "+r.formato+" e liste até 5 melhorias específicas (gancho, clareza, ritmo, chamada final, o que falta). Responda SOMENTE com JSON {\"sugestoes\":[{\"titulo\":\"\",\"como\":\"\"}]}.\n\n"+JSON.stringify(r.res),{modelTier:"quick"});
+      r.sug=(x.sugestoes||[]).slice(0,5).map(function(s){return {titulo:String(s.titulo||""),como:String(s.como||"")}});
+    });return;
+  }
+  if(a==="copy"){copyText(rotText(r.res),el);return}
+  if(a==="draft"){pushDraft({tipo:"roteiro",titulo:r.res.titulo||"Roteiro",data:JSON.parse(JSON.stringify(r))});el.textContent="Salvo em Rascunhos";return}
+}
+/* ---- Calendário ---- */
+function hubPlano(){
+  var ids=Object.keys(state.plano||{}).sort(function(a,b){return (state.plano[a].d||"").localeCompare(state.plano[b].d||"")});
+  var h='<div><h2>Calendário de ações</h2><p class="sub">O que vai gravar e postar. A equipe vê o mesmo calendário.</p></div>'
+   +'<div class="card"><div class="fields"><label>Data<input type="date" id="pl-d" value="'+isoToday()+'"></label><label>Formato<select id="pl-f">'+FORMATOS.map(function(f){return '<option>'+f+'</option>'}).join('')+'</select></label></div>'
+   +'<label class="lab">O que é<input type="text" id="pl-t" placeholder="Ex.: Reel sobre conferir estoque"></label><div class="btns"><button class="btn" id="pl-add">Adicionar ao calendário</button></div></div>';
+  if(!ids.length)return h+'<p class="note">Nenhuma ação planejada ainda.</p>';
+  ids.forEach(function(id){
+    var p=state.plano[id];
+    h+='<div class="item" style="padding:12px;display:flex;flex-direction:column;gap:8px"><div class="fields"><input type="date" data-plf="'+id+'|d" value="'+esc(p.d||"")+'" aria-label="Data"><select data-plf="'+id+'|f" aria-label="Formato">'+FORMATOS.map(function(f){return '<option'+(f===p.f?' selected':'')+'>'+f+'</option>'}).join('')+'</select></div><input type="text" data-plf="'+id+'|t" value="'+esc(p.t||"")+'" aria-label="O que é"><div class="meta" style="padding:0"><select data-plst="'+id+'" aria-label="Situação">'+PLST.map(function(s2){return '<option value="'+s2[0]+'"'+(s2[0]===p.s?' selected':'')+'>'+s2[1]+'</option>'}).join('')+'</select><button class="btn ghost small" data-pldel="'+id+'">Remover</button></div></div>';
+  });
+  return h;
+}
+/* ---- Rascunhos ---- */
+function hubDrafts(){
+  var h='<div><h2>Rascunhos</h2><p class="sub">Trabalhos salvos neste aparelho.</p></div>';
+  if(!state.drafts.length)return h+'<p class="note">Nenhum rascunho salvo ainda.</p>';
+  return h+state.drafts.map(function(d){return '<div class="card"><div><span class="tag">'+esc(d.tipo==="roteiro"?"Roteiro":(d.tipo==="proteiro"?"Roteiro de publi":tipoLabel(d.tipo)))+'</span> <span class="note">'+new Date(d.at).toLocaleDateString("pt-BR")+'</span></div><b>'+esc(d.titulo)+'</b><div class="btns"><button class="btn small" data-dopen="'+d.id+'">Abrir</button><button class="btn ghost small" data-ddel="'+d.id+'">Apagar</button></div></div>'}).join('');
+}
+/* ---- Guia de captação e edição ---- */
+function gOf(c){if(!c.g)c.g={titulo:"",formato:"Reels 9:16",diretriz:"",arquivos:"",legenda:"",refs:[{url:"",nota:""},{url:"",nota:""},{url:"",nota:""}]};return c.g}
+function guiaForm(c){
+  var g=gOf(c),canImg=!!LIM,max=LIM&&LIM.maxCount?LIM.maxCount:6;
+  var h='<div class="card"><h3>1. Sobre o vídeo</h3>'
+   +'<label class="lab">Nome do vídeo<input type="text" data-cr="gt" value="'+esc(g.titulo)+'" placeholder="Ex.: Um dia comigo na curadoria"></label>'
+   +'<label class="lab">Formato<input type="text" data-cr="gf" value="'+esc(g.formato)+'"></label>'
+   +'<label class="lab">Diretriz do conteúdo: o assunto, a sensação e a mensagem<textarea data-cr="gd" placeholder="Ex.: mostrar a rotina de compras com leveza, sem parecer propaganda...">'+esc(g.diretriz)+'</textarea></label>'
+   +'<label class="lab">Arquivos que você vai enviar e o que tem em cada um<textarea data-cr="ga" placeholder="Ex.: VIDEO_01: chegada ao mercado. VIDEO_02: provando peças...">'+esc(g.arquivos)+'</textarea></label></div>';
+  h+='<div class="card"><h3>2. Referências</h3><p class="note">O app não abre links. Os links entram no guia para a editora. Para o app analisar a referência, cole a legenda ou a transcrição e envie prints ou o vídeo.</p>';
+  g.refs.forEach(function(r,i){h+='<label class="lab">Referência '+(i+1)+'<input type="text" data-cr="gu'+i+'" value="'+esc(r.url)+'" placeholder="Link do vídeo"></label><label class="lab">O que chamou sua atenção (ritmo, corte, cor, texto na tela...)<input type="text" data-cr="gn'+i+'" value="'+esc(r.nota)+'"></label>'});
+  h+='<label class="lab">Legenda ou transcrição da referência (opcional)<textarea data-cr="gl">'+esc(g.legenda)+'</textarea></label>';
+  if(canImg){
+    h+='<label class="lab">Prints da referência (até '+max+')<input type="file" accept="image/*" multiple data-gfile="img"></label>'
+     +'<label class="lab">Vídeo de referência (o app tira alguns quadros)<input type="file" accept="video/*" data-gfile="vid"></label>'
+     +(gImgs.length?'<p class="note">'+gImgs.length+' imagem(ns) anexada(s): '+esc(gImgs.map(function(x){return x.name}).join(", "))+'</p><div class="btns"><button class="btn ghost small" data-crx="gclear">Remover imagens</button></div>':'');
+  }else h+='<p class="note">O envio de imagens não está disponível neste aparelho.</p>';
+  if(GBUSY)h+='<p class="note">'+esc(GBUSY)+'</p>';
+  h+='</div><div class="card"><h3>3. Foto de capa do PDF (opcional)</h3><p class="note">A capa fica com a sua foto e o título por cima, como nas capas do seu perfil.</p><input type="file" accept="image/*" data-gfile="capa">'+(CAPA?'<p class="note">Capa carregada.</p>':'')+'</div>'
+   +'<div class="btns"><button class="btn" data-crx="gerarguia">Montar o guia</button></div>';
+  return h;
+}
+function sugHtml(c){
+  if(!c.sug||!c.sug.length)return '';
+  return '<div class="card"><h3>Sugestões de melhoria</h3>'+c.sug.map(function(s,i){return '<p><b>'+esc(s.titulo)+'</b>'+(s.bloco>0?' <span class="note">(bloco '+s.bloco+')</span>':'')+'<br><span class="note">'+esc(s.como)+'</span>'+(s.bloco>0?'<br><button class="btn small ghost" data-crx="apl'+i+'">Aplicar no bloco '+s.bloco+'</button>':'')+'</p>'}).join('')+'<div class="btns"><button class="btn ghost small" data-crx="sugclear">Fechar sugestões</button></div></div>';
+}
+/* ---- imagens e quadros ---- */
+function imgBlob(file){return new Promise(function(res,rej){var im=new Image();im.onload=function(){var sc=Math.min(1,1024/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);c.toBlob(function(b){b?res(b):rej({code:"img"})},"image/jpeg",0.8)};im.onerror=function(){rej({code:"img"})};im.src=URL.createObjectURL(file)})}
+function prepCapa(file){return new Promise(function(res,rej){var im=new Image();im.onload=function(){var cw=1000,ch=1414,c=document.createElement("canvas");c.width=cw;c.height=ch;var x=c.getContext("2d"),r=Math.max(cw/im.width,ch/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);URL.revokeObjectURL(im.src);res(c.toDataURL("image/jpeg",0.8))};im.onerror=function(){rej({code:"img"})};im.src=URL.createObjectURL(file)})}
+function videoFrames(file,n){return new Promise(function(res,rej){var v=document.createElement("video"),out=[],k=0,times=[];v.muted=true;v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(file);
+  function next(){if(k>=times.length){URL.revokeObjectURL(v.src);res(out);return}v.currentTime=times[k]}
+  v.onloadedmetadata=function(){var d=v.duration||1;for(var i=0;i<n;i++)times.push(d*(i+0.5)/n);next()};
+  v.onseeked=function(){var sc=Math.min(1,640/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement("canvas");c.width=Math.round(v.videoWidth*sc);c.height=Math.round(v.videoHeight*sc);c.getContext("2d").drawImage(v,0,0,c.width,c.height);c.toBlob(function(b){if(b)out.push(b);k++;next()},"image/jpeg",0.7)};
+  v.onerror=function(){rej({code:"video"})}})}
+async function handleFiles(kind,files){
+  var max=LIM&&LIM.maxCount?LIM.maxCount:6,c=state.cr;c.err="";
+  try{
+    if(kind==="capa"){GBUSY="Preparando a capa...";render();CAPA=await prepCapa(files[0])}
+    else if(kind==="img"){GBUSY="Preparando as imagens...";render();for(var i=0;i<files.length&&gImgs.length<max;i++)gImgs.push({name:files[i].name,blob:await imgBlob(files[i])})}
+    else if(kind==="vid"){GBUSY="Tirando quadros do vídeo...";render();var room=Math.max(0,max-gImgs.length),fr=await videoFrames(files[0],Math.min(6,room||1));fr.slice(0,room).forEach(function(b,i){gImgs.push({name:files[0].name+" · quadro "+(i+1),blob:b})})}
+  }catch(e){c.err="Não consegui ler esse arquivo. Tente outro formato, como JPG ou MP4."}
+  GBUSY="";render();
+}
+async function gerarGuia(){
+  var c=state.cr,g=gOf(c);
+  if(!g.diretriz.trim()){c.err="Escreva a diretriz do conteúdo: o assunto e o que você quer que a pessoa sinta.";render();return}
+  crRun("Montando o guia...",async function(){
+    var refs=g.refs.filter(function(r){return r.url.trim()||r.nota.trim()}).map(function(r,i){return (i+1)+". "+(r.url||"(sem link)")+" | O que chamou atenção: "+(r.nota||"(não informado)")}).join("\n");
+    var usaImg=LIM&&gImgs.length;
+    var p=RULES+"\n\nTarefa: criar um guia de captação e direção de edição, em PDF, para a editora de vídeo da Mari. Ele acompanha os arquivos brutos.\n"
+     +"Você não consegue abrir links. Baseie a análise só no que a Mari escreveu, no texto colado e nas imagens anexas"+(usaImg?" (prints ou quadros dos vídeos de referência)":"")+". Não descreva nada que não esteja nessas fontes. Quando for uma recomendação sua, comece com “Sugestão:”. Quando faltar dado, escreva [PREENCHER: o que falta].\n\n"
+     +"Nome do vídeo: "+(g.titulo||"(não informado)")+"\nFormato: "+g.formato+"\nDiretriz da Mari: "+g.diretriz+"\nArquivos enviados e conteúdo de cada um: "+(g.arquivos||"(não informado)")+"\nReferências:\n"+(refs||"(nenhuma)")+"\nLegenda ou transcrição colada: "+(g.legenda||"(nenhuma)")+"\n\n"
+     +vozGuia("")+"\n\nMonte estas seções, nesta ordem, em JSON: 1) Visão geral (corpo). 2) Estilo e ritmo (itens: ritmo dos cortes, transições, trilha, o que copiar das referências). 3) Estrutura cena a cena (itens no formato \"tempo | arquivo | direção\"). 4) Texto na tela e legendas (itens). 5) Cor e acabamento (itens: colorimetria e tratamento, só com base nas referências e imagens). 6) Narração (corpo: roteiro de narração à parte, na voz da Mari, curto). 7) Referências (itens: cada link e o que observar). 8) Cuidados (itens). 9) Entrega (itens: formato, duração aproximada, nomes dos arquivos, prazo [PREENCHER]). "
+     +"Responda SOMENTE com JSON {\"titulo\":\"\",\"subtitulo\":\"\",\"intro\":\"\",\"secoes\":[{\"titulo\":\"\",\"corpo\":\"\",\"itens\":[\"\"]}],\"fechamento\":\"\"}.";
+    var opt={modelTier:"default"};if(usaImg)opt.images=gImgs.map(function(x){return x.blob});
+    var r=await S.json(p,opt);
+    c.material=normMat(r,{titulo:g.titulo||"Guia de edição",secoes:[]});if(!c.material.titulo)c.material.titulo=g.titulo||"Guia de edição";
+    c.step=3;c.view="edit";c.undo=null;c.sug=[];
+  });
+}
+
+/* ============ PUBLIS: campanhas, roteiro de publi, fit, marcas, Tray ============ */
+var DIRECT=["guia","midia","relatorio","roteiro"];
+function isDirect(t){return DIRECT.indexOf(t)>=0}
+function pad2(n){return String(n).padStart(2,"0")}
+function addDays(iso,n){var d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
+function fd(iso){return iso?iso.slice(8,10)+"/"+iso.slice(5,7):"?"}
+var PUBS=[["camp","Campanhas"],["roteiro","Roteiro"],["fit","Fit"],["marcas","Marcas"],["tray","Tray"]];
+var D_GUIA={
+ "Bling":{ang:"Plataforma completa de negócios: gestão de ponta a ponta.",usar:["plataforma completa de negócios","gestão de ponta a ponta","centralizador da operação","Loja Virtual Nativa (ao falar da loja virtual)"],evitar:["chamar só de “meu ERP”, “sistema de notas” ou “plataforma de e-commerce”","azul predominante","citar concorrentes","criticar marketplaces"],visual:"Elementos verdes. Lilás só quando o assunto for loja virtual. Carrossel no template oficial do Canva.",temas:["estoque sem planilha","lucro real por produto","nota fiscal sem medo","pedidos de vários canais num lugar só","Lei de Murphy na loja"]},
+ "Melhor Envio":{ang:"Frete como estratégia de venda: frete grátis a partir de um valor para subir o ticket, comparando Correios e transportadoras.",usar:["cotações reais, mesmo pacote e mesmo CEP","cupom MARILEAL (confirmar a validade a cada campanha)"],evitar:["cotação inventada ou sem print real"],visual:"",temas:["embalar para não ter devolução","custo de troca","prazo x preço","rotina de envio em 15 minutos"]},
+ "Tray":{ang:"O site como complemento do Instagram, não substituto.",usar:["link exclusivo da Tray","selo de parceria paga em todo conteúdo"],evitar:["tratar o site como substituto do Instagram"],visual:"",temas:["o que a loja virtual precisa para a cliente confiar","página de produto que vende","carrinho abandonado","Instagram ou site"]},
+ "Ton":{ang:"A marca que mais conversa com iniciante: o primeiro degrau da escada.",usar:["linguagem simples para quem está começando"],evitar:[],visual:"",temas:["taxa da maquininha embutida no preço","Pix x débito x parcelado","separar dinheiro da loja e pessoal","fluxo de caixa de quem recebe parcelado"]},
+ "Meta":{ang:"Business Agent do WhatsApp como funcionário novo que atende a Loyall 24h, do pedido ao pagamento.",usar:["marcações @whatsappforbusiness, #publicidade e #publi"],evitar:["se aprofundar na ferramenta além do que o briefing pede"],visual:"",temas:["impulsionar com orçamento pequeno","métricas que importam para a loja","Reels x Stories x carrossel","vender pelo direct sem parecer spam"]},
+ "99 Food":{ang:"Praticidade na rotina de quem empreende e cuida da casa: o tempo que sobra para a loja.",usar:[],evitar:[],visual:"",temas:[]}
+};
+var D_ETAPAS=[
+ {id:"e1",label:"Briefing final recebido",quem:"Marca",ref:"post",off:-7},
+ {id:"e2",label:"Roteiro enviado à marca",quem:"Mari",ref:"post",off:-5},
+ {id:"e3",label:"Roteiro aprovado (até 48h)",quem:"Marca",ref:"post",off:-3},
+ {id:"e4",label:"Vídeo gravado (3 dias antes, no mínimo)",quem:"Mari",ref:"post",off:-3},
+ {id:"e5",label:"Vídeo ou copy enviado para aprovação",quem:"Mari",ref:"post",off:-2},
+ {id:"e6",label:"Vídeo aprovado (até 48h)",quem:"Marca",ref:"envio",off:2},
+ {id:"e7",label:"Postado com selo de parceria paga, #publi, cupom e link conferidos",quem:"Mari",ref:"post",off:0},
+ {id:"e8",label:"Relatório enviado (prints de alcance, interações e cliques)",quem:"Mari",ref:"post",off:7},
+ {id:"e9",label:"Nota fiscal emitida",quem:"Mari",ref:"post",off:7},
+ {id:"e10",label:"Nota paga (até 30 dias após a NF)",quem:"Marca",ref:"nf",off:30}
+];
+var D_PCK=["Briefing salvo com entregáveis, datas, termos obrigatórios e o que evitar","Roteiro em uma página só, aprovado pela marca","Gancho gravado nos 3 primeiros segundos","Telas reais da ferramenta, sem dados de clientes","Nada de logo de concorrente visível","Cores e termos conforme o guia da marca","Selo de parceria paga + #publi","Cupom e link conferidos (clique você mesma antes de postar)","Vídeo final aprovado pela marca","Prints do resultado guardados para o relatório e para o mídia kit"];
+var D_FITC=[["aud","Combina com a audiência dela (lojista iniciante)?"],["vida","Combina com a vida e a loja da Mari?"],["nar","Dá para contar uma história real com a marca?"],["cred","Ela consegue falar com credibilidade?"],["pos","Ajuda ou prejudica o posicionamento? (5 = ajuda muito)"],["conf","Sem conflito com Bling, Tray, Melhor Envio e Ton? (5 = nenhum conflito)"],["rec","Tem potencial de recorrência?"],["val","O valor financeiro compensa? (não entra na média de fit)"]];
+function clone(o){return JSON.parse(JSON.stringify(o))}
+var CF=null,cfT=null;
+function cfgDef(){return {marcas:clone(D_GUIA),etapas:clone(D_ETAPAS),pck:D_PCK.slice(),fit:clone(D_FITC),lim:{contratos:7,meta:20000,recusa:"emagrecedor, gummy"},tray:clone(D_TRAY),doc:null,regras:""}}
+function cfg(){if(!CF)CF=cfgDef();return CF}
+var RULES0=null;
+function applyRegras(){if(RULES0===null)RULES0=RULES;var r=(cfg().regras||"").trim();RULES=RULES0+(r?"\nREGRAS EXTRAS DA MARI (siga sempre): "+r:"")}
+function cfgMerge(j){var d=cfgDef();Object.keys(d).forEach(function(k){if(j&&j[k]!==undefined&&j[k]!==null)d[k]=j[k]});return d}
+function cfgLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-cfg")||"null");if(j)CF=cfgMerge(j)}catch(e){}applyRegras()}
+function cfgSave(){
+  try{localStorage.setItem("hoje-cfg",JSON.stringify(cfg()))}catch(e){}
+  applyRegras();
+  if(C.cfg)C.cfg.doc("main").set({json:JSON.stringify(cfg()),at:Date.now()}).then(function(){setSync("Ajustes salvos para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho");
+}
+function cfgSaveSoon(){clearTimeout(cfT);cfT=setTimeout(cfgSave,700)}
+function setPath(o,p,v){var a=p.split("|");for(var i=0;i<a.length-1;i++){if(o[a[i]]==null)o[a[i]]={};o=o[a[i]]}o[a[a.length-1]]=v}
+function marcaList(){return Object.keys(cfg().marcas).concat(["Outra marca"])}
+function etapaDates(c){
+  var P=c.d,out={};
+  cfg().etapas.forEach(function(e){
+    var ov=(e.id==="e5"&&c.env)?c.env:(e.id==="e9"&&c.nf)?c.nf:null;
+    var base=e.ref==="envio"?(out.e5||P):e.ref==="nf"?(out.e9||addDays(P,7)):P;
+    out[e.id]=ov||addDays(base,parseInt(e.off,10)||0);
+  });
+  return out;
+}
+function etapaDate(c,id){return etapaDates(c)[id]||c.d}
+function savePub(){try{localStorage.setItem("hoje-camp",JSON.stringify(state.camp))}catch(e){}}
+function loadPub(){
+  try{state.camp=JSON.parse(localStorage.getItem("hoje-camp")||"{}")}catch(e){state.camp={}}
+  try{state.pr=JSON.parse(localStorage.getItem("hoje-pr")||"null")}catch(e){}
+  if(!state.pr)state.pr=prNew();
+  state.pub="camp";state.campOpen=null;
+  state.fit={n:"",cat:"",agora:false,depois:false,s:{aud:3,vida:3,nar:3,cred:3,pos:3,conf:5,rec:3,val:3}};
+}
+function prNew(){return {marca:"Bling",briefing:"",obj:"",instr:"",res:null,ck:{},busy:"",err:""}}
+function savePr(){try{localStorage.setItem("hoje-pr",JSON.stringify(state.pr))}catch(e){}}
+function campSave(id){savePub();dbSet("camp",id,state.camp[id],"Campanha salva")}
+function stBadge(date,done){
+  if(done)return '<span class="tag l">feito</span>';
+  var n=daysUntil(date);
+  if(n<0)return '<span class="tag" style="background:var(--bad-soft);color:var(--bad)">atrasado '+(-n)+'d</span>';
+  if(n===0)return '<span class="tag t">hoje</span>';
+  return '<span class="tag m">em '+n+'d</span>';
+}
+function nextEtapa(c){var es=cfg().etapas;for(var i=0;i<es.length;i++){if(!(c.done||{})[es[i].id])return [es[i].id,es[i].label]}return null}
+/* ---- painel ---- */
+function renderPub(){
+  if(state.pub==="mat"){renderCriar();return}
+  var pills='<div class="pills">'+PUBS.map(function(m){return '<button class="pill" data-pub="'+m[0]+'" aria-pressed="'+(state.pub===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>';
+  var v=state.pub,inner=v==="roteiro"?pubRoteiro():v==="fit"?pubFit():v==="marcas"?pubMarcas():v==="tray"?pubTray():pubCamp();
+  $("#view").innerHTML='<div class="stack">'+pills+inner+'</div>';
+  if(v==="tray")updTray();
+}
+/* ---- campanhas e dinheiro ---- */
+function pubResumo(){
+  var L=cfg().lim,mes=isoToday().slice(0,7),ids=Object.keys(state.camp),doMes=[],val=0,aEmitir=[],aReceber=[];
+  ids.forEach(function(id){var c=state.camp[id],dn=c.done||{};
+    if(c.d&&c.d.slice(0,7)===mes){doMes.push(c);val+=parseNum(c.v)}
+    if(dn.e7&&!dn.e9)aEmitir.push(c);
+    if(dn.e9&&!dn.e10)aReceber.push(c);
+  });
+  var h='<div class="card"><h3>Mês de '+isoToday().slice(5,7)+'/'+isoToday().slice(0,4)+'</h3>'
+   +'<p><b>'+doMes.length+'</b> de '+L.contratos+' contratos no mês</p>'
+   +'<p><b>'+brl(val)+'</b> em campanhas com postagem neste mês <span class="note">(meta: '+brl(parseNum(L.meta))+' por mês)</span></p>';
+  if(doMes.length>=parseNum(L.contratos))h+='<p class="note" style="color:var(--bad)">Limite de contratos atingido. Novas propostas só com muito fit.</p>';
+  if(aEmitir.length)h+='<p class="note"><b>Emitir nota:</b> '+aEmitir.map(function(c){return esc(c.m)}).join(", ")+'</p>';
+  if(aReceber.length)h+='<p class="note"><b>A receber:</b> '+aReceber.map(function(c){return esc(c.m)+" até "+fd(etapaDate(c,"e10"))}).join(", ")+'</p>';
+  return h+'</div>';
+}
+function etapasEditor(){
+  var es=cfg().etapas,h='<div class="card"><h3>Etapas e prazos</h3><p class="note">Mude os nomes e os dias. “Dias” conta a partir da postagem (negativo = antes). Em “Envio” e “NF” conta a partir da data de envio para aprovação ou da nota emitida.</p>';
+  es.forEach(function(e,i){
+    h+='<div class="card" style="background:var(--bg)"><input type="text" data-ed="etapas|'+i+'|label" value="'+esc(e.label)+'"><div class="fields"><label>Quem<select data-ed="etapas|'+i+'|quem"><option'+(e.quem==="Mari"?' selected':'')+'>Mari</option><option'+(e.quem==="Marca"?' selected':'')+'>Marca</option></select></label><label>Conta a partir de<select data-ed="etapas|'+i+'|ref"><option value="post"'+(e.ref==="post"?' selected':'')+'>Postagem</option><option value="envio"'+(e.ref==="envio"?' selected':'')+'>Envio p/ aprovação</option><option value="nf"'+(e.ref==="nf"?' selected':'')+'>Nota emitida</option></select></label></div><label class="lab">Dias<input type="text" inputmode="numeric" data-ed="etapas|'+i+'|off" data-num="1" value="'+esc(e.off)+'"></label>'+(["e7","e9","e10"].indexOf(e.id)>=0?'<p class="note">Usada no resumo do mês: pode renomear, mas não remover.</p>':'<div class="btns"><button class="btn ghost small" data-cfx="etapa-del|'+i+'">Remover etapa</button></div>')+'</div>';
+  });
+  return h+'<div class="btns"><button class="btn ghost small" data-cfx="etapa-add">Adicionar etapa</button><button class="btn ghost small" data-cfx="etapa-reset">Voltar ao padrão</button></div></div>';
+}
+function pubCamp(){
+  var ids=Object.keys(state.camp).sort(function(a,b){return (state.camp[a].d||"").localeCompare(state.camp[b].d||"")});
+  var h='<div><h2>Campanhas</h2><p class="sub">Cada publi com as etapas e as datas calculadas a partir do dia da postagem.</p></div>'+pubResumo();
+  h+='<div class="card"><h3>Nova campanha</h3><div class="fields"><label>Marca<select id="cp-m">'+marcaList().map(function(m){return '<option>'+esc(m)+'</option>'}).join('')+'</select></label><label>Data da postagem<input type="date" id="cp-d" value="'+addDays(isoToday(),10)+'"></label></div>'
+   +'<label class="lab">Nome da campanha<input type="text" id="cp-t" placeholder="Ex.: Reels Black Friday"></label>'
+   +'<div class="btns"><button class="btn" data-campx="add">Criar campanha</button>'+(ids.length?'':'<button class="btn ghost" data-campx="seed">Começar pela Bling · Black Friday (09/11)</button>')+'</div></div>';
+  if(!ids.length)h+='<p class="note">Nenhuma campanha ainda.</p>';
+  ids.forEach(function(id){
+    var c=state.camp[id],nx=nextEtapa(c),open=state.campOpen===id,ds=etapaDates(c);
+    h+='<div class="card"><button class="card click" style="border:0;padding:0;box-shadow:none" data-campopen="'+id+'"><div><span class="tag m">'+esc(c.m)+'</span> <span class="date">posta em '+fd(c.d)+'</span></div><h3>'+esc(c.t||"Campanha")+'</h3>'
+     +'<p class="sub">'+(nx?'Próximo: '+esc(nx[1])+' · '+fd(ds[nx[0]])+' '+stBadge(ds[nx[0]],false):'Tudo concluído')+'</p></button>';
+    if(open){
+      h+='<label class="lab">Nome<input type="text" data-cf="'+id+'|t" value="'+esc(c.t||"")+'"></label><div class="fields"><label>Marca<input type="text" data-cf="'+id+'|m" value="'+esc(c.m)+'"></label><label>Valor (R$)<input type="text" inputmode="decimal" data-cf="'+id+'|v" value="'+esc(c.v||"")+'"></label><label>Postagem<input type="date" data-cf="'+id+'|d" value="'+esc(c.d)+'"></label><label>Envio p/ aprovação (se a marca definiu)<input type="date" data-cf="'+id+'|env" value="'+esc(c.env||"")+'"></label><label>NF emitida em<input type="date" data-cf="'+id+'|nf" value="'+esc(c.nf||"")+'"></label></div>';
+      cfg().etapas.forEach(function(e){var dn=(c.done||{})[e.id],dt=ds[e.id];
+        h+='<div class="row'+(dn?' chkd':'')+'"><input type="checkbox" id="cd-'+id+e.id+'" data-cdone="'+id+'|'+e.id+'"'+(dn?' checked':'')+'><label for="cd-'+id+e.id+'">'+esc(e.label)+' <span class="note">('+esc(e.quem)+' · '+fd(dt)+')</span> '+stBadge(dt,dn)+'</label></div>';
+      });
+      h+='<label class="lab">Anotações da campanha (briefing, cupom, link, combinados)<textarea data-cf="'+id+'|nota">'+esc(c.nota||"")+'</textarea></label>';
+      var r=c.rep||{};
+      h+='<h3>Resultado</h3><div class="fields"><label>Alcance<input type="text" data-cf="'+id+'|rep.alc" value="'+esc(r.alc||"")+'"></label><label>Visualizações<input type="text" data-cf="'+id+'|rep.vis" value="'+esc(r.vis||"")+'"></label><label>Interações<input type="text" data-cf="'+id+'|rep.int" value="'+esc(r.int||"")+'"></label><label>Cliques no link<input type="text" data-cf="'+id+'|rep.cli" value="'+esc(r.cli||"")+'"></label></div>'
+       +'<label class="lab">O que funcionou e o que aprendeu<textarea data-cf="'+id+'|rep.apr">'+esc(r.apr||"")+'</textarea></label>'
+       +'<div class="btns"><button class="btn small" data-campx="rel|'+id+'">Montar relatório (PDF)</button><button class="btn ghost small" data-campx="roteiro|'+id+'">Escrever roteiro</button><button class="btn ghost small" data-campx="del|'+id+'">Remover campanha</button></div>'
+       +'<p class="note">Os números são só os que você digitar. O que ficar vazio sai como [PREENCHER] no relatório.</p>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="btns"><button class="btn ghost small" data-tg="edEtapas">'+(state.edEtapas?'Fechar ajuste de etapas':'Ajustar etapas e prazos')+'</button></div>';
+  if(state.edEtapas)h+=etapasEditor();
+  return h;
+}
+function campAdd(m,t,d,env){var id="c"+Date.now(),o={m:m,t:t,d:d,env:env||"",v:"",nf:"",done:{},rep:{}};state.camp[id]=o;campSave(id);return id}
+/* ---- roteiro de publi ---- */
+function guiaTxt(m){var g=cfg().marcas[m];if(!g)return "(sem guia desta marca: siga só o briefing)";return "Ângulo: "+g.ang+"\nUsar: "+(g.usar.join("; ")||"-")+"\nEvitar: "+(g.evitar.join("; ")||"-")+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+(g.temas.join("; ")||"-")}
+function pubRoteiro(){
+  var r=state.pr,h='<div><h2>Roteiro de publi</h2><p class="sub">Cole o briefing da marca. O app escreve nos 5 blocos de publi, na sua voz, e você edita.</p></div>';
+  if(!S)return h+'<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão.</div>';
+  if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
+  if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
+  h+='<div class="card"><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
+   +'<label class="lab">Briefing da marca (cole aqui)<textarea data-pr="pb" style="min-height:140px" placeholder="Entregáveis, mensagem principal, termos obrigatórios, o que evitar, cupom, link...">'+esc(r.briefing)+'</textarea></label>'
+   +'<label class="lab">Sua ideia ou ângulo (opcional)<input type="text" data-pr="po" value="'+esc(r.obj)+'" placeholder="Ex.: contar o dia em que quase vendi sem conferir o estoque"></label>'
+   +'<p class="note">Não cole aqui o briefing confidencial de marcas que pediram sigilo.</p><div class="btns"><button class="btn" data-pra="gerar">Escrever roteiro</button></div></div>';
+  if(r.res){
+    var x=r.res;
+    h+='<div class="card"><h3>Roteiro</h3><label class="lab">Título<input type="text" data-pr="pt" value="'+esc(x.titulo)+'"></label>';
+    x.blocos.forEach(function(b,i){h+='<label class="lab"><b style="color:var(--ink)">'+esc(b.nome)+'</b> <span class="note">'+esc(b.tempo)+'</span><textarea data-pr="pf'+i+'" placeholder="Fala">'+esc(b.fala)+'</textarea><textarea data-pr="ps'+i+'" placeholder="Na tela">'+esc(b.tela)+'</textarea></label>'});
+    h+='<label class="lab">Legenda<textarea data-pr="pl">'+esc(x.legenda)+'</textarea></label>'
+     +'<label class="lab">Para confirmar antes de gravar (um por linha)<textarea data-pr="pc">'+esc((x.confirmar||[]).join("\n"))+'</textarea></label>'
+     +'<label class="lab">Ajuste extra (opcional)<input type="text" data-pr="pa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais direto, mais animado"></label>'
+     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button></div></div>'
+     +'';
+  }
+  h+='<div class="card"><h3>Antes de postar</h3>'+cfg().pck.map(function(t,i){return '<div class="row'+(r.ck[i]?' chkd':'')+'"><input type="checkbox" id="pk'+i+'" data-prck="'+i+'"'+(r.ck[i]?' checked':'')+'><label for="pk'+i+'">'+esc(t)+'</label></div>'}).join('')+'<div class="btns"><button class="btn ghost small" data-tg="edPck">'+(state.edPck?'Fechar edição':'Editar checklist')+'</button></div>'+(state.edPck?'<label class="lab">Um item por linha<textarea style="min-height:200px" data-ed="pck" data-lines="1">'+esc(cfg().pck.join("\n"))+'</textarea></label>':'')+'</div>';
+  {
+  }
+  return h;
+}
+function normPr(x,old){
+  var bl=(x.blocos||[]).slice(0,5).map(function(b,i){var o=(old&&old.blocos&&old.blocos[i])||{};return {nome:String(b.nome||o.nome||""),tempo:String(b.tempo||o.tempo||""),fala:String(b.fala||""),tela:String(b.tela||"")}});
+  while(bl.length<5)bl.push({nome:"",tempo:"",fala:"",tela:""});
+  return {titulo:String(x.titulo||(old&&old.titulo)||""),blocos:bl,legenda:String(x.legenda||""),confirmar:(x.confirmar||[]).map(String)};
+}
+async function prRun(label,fn){var r=state.pr;r.busy=label;r.err="";savePr();render();try{await fn()}catch(e){r.err=crErr(e)}r.busy="";savePr();render()}
+function prMat(r){
+  var x=r.res;
+  return {titulo:x.titulo||"Roteiro de publi",subtitulo:r.marca,intro:"Roteiro para aprovação da marca. Confira os pontos marcados como [PREENCHER].",fechamento:"",secoes:x.blocos.map(function(b){return {titulo:b.nome+(b.tempo?" ("+b.tempo+")":""),corpo:"Fala: "+b.fala+"\nNa tela: "+b.tela,itens:[]}}).concat([{titulo:"Legenda",corpo:x.legenda,itens:[]},{titulo:"Para confirmar antes de gravar",corpo:"",itens:x.confirmar}])};
+}
+function pubRoteiroAction(a,el){
+  var r=state.pr;
+  if(a==="gerar"){
+    if(!r.briefing.trim()&&!r.obj.trim()){r.err="Cole o briefing ou escreva a sua ideia.";render();return}
+    prRun("Escrevendo o roteiro...",async function(){
+      var p=RULES+"\n\nTarefa: roteiro de Reels de publicidade (parceria paga) com a marca "+r.marca+". Estrutura obrigatória, em 5 blocos: 1. GANCHO (0-3s): frase que para o dedo, com situação, número real ou pergunta; 2. HISTÓRIA (3-15s): o que aconteceu com ela ou com a seguidora; 3. VIRADA (15-25s): o que mudou, a solução prática; 4. MARCA (25-40s): onde a ferramenta entrou, com tela real e sem dados de clientes; 5. CTA (últimos 5s): uma ação só, cupom na legenda. A marca entra numa situação real: primeiro a história, depois a ferramenta. Nunca invente valores, descontos, resultados ou condições: use [PREENCHER]. Inclua selo de parceria paga e #publi na legenda. A Mari não usa palavrão, evita lista de erros sem solução e não fala de rotina escolar do filho.\n\nGuia da marca:\n"+guiaTxt(r.marca)+"\n\nBriefing da marca:\n"+(r.briefing||"(não informado)")+"\n\nIdeia da Mari: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"blocos\":[{\"nome\":\"1. Gancho\",\"tempo\":\"0-3s\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]} com exatamente 5 blocos.";
+      r.res=normPr(await S.json(p,{modelTier:"default"}));r.ck={};
+    });return;
+  }
+  if(a==="voz"){
+    if(!(state.voz||"").trim()&&!(r.instr||"").trim()){r.err="Cole um texto seu em “Meu jeito de falar” (em Criar material) ou escreva um ajuste.";render();return}
+    prRun("Reescrevendo no seu jeito...",async function(){
+      var x=await S.json(RULES+"\n\n"+vozGuia(r.instr||"")+"\n\nMantenha fatos, sentido, estrutura de 5 blocos e os trechos [PREENCHER]. Roteiro atual:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.",{modelTier:"default"});
+      r.res=normPr(x,r.res);
+    });return;
+  }
+  if(a==="copy"){var t=r.res.titulo+"\n"+r.marca+"\n\n"+r.res.blocos.map(function(b){return b.nome+" ("+b.tempo+")\nFala: "+b.fala+"\nNa tela: "+b.tela}).join("\n\n")+"\n\nLegenda: "+r.res.legenda+"\n\nConfirmar: "+(r.res.confirmar||[]).join("; ");copyText(t,el);return}
+  if(a==="draft"){pushDraft({tipo:"proteiro",titulo:r.res.titulo||"Roteiro de publi",data:JSON.parse(JSON.stringify(r))});el.textContent="Salvo em Rascunhos";return}
+  if(a==="pdf"){pubOpenMat("roteiro",prMat(r));return}
+}
+function pubOpenMat(tipo,mat){
+  var c=state.cr;
+  if(c.material)pushDraft({tipo:c.tipo,titulo:c.material.titulo,data:JSON.parse(JSON.stringify(c))});
+  state.cr=crNew(tipo);state.cr.material=mat;state.cr.step=3;state.cr.view="edit";state.pub="mat";saveCr();render();window.scrollTo(0,0);
+}
+/* ---- fit ---- */
+function fitVerdict(){
+  var f=state.fit,C2=cfg(),ks=C2.fit.map(function(c){return c[0]}).filter(function(k){return k!=="val"}),sv=function(k){return f.s[k]||3};
+  var avg=ks.length?ks.reduce(function(a,k){return a+sv(k)},0)/ks.length:3;
+  var words=String(C2.lim.recusa||"").toLowerCase().split(",").map(function(x){return x.trim()}).filter(Boolean),cat=(f.cat||"").toLowerCase();
+  var bad=words.some(function(w){return cat.indexOf(w)>=0});
+  var v,cls;
+  if(bad){v="Recusar: categoria que a Mari não faz.";cls="bad"}
+  else if(!f.agora&&!f.depois){v="Recusar ou rever: não gera dinheiro agora nem valor para a marca depois.";cls="bad"}
+  else if(avg>=4){v=(f.s.val||3)<=2?"Fit alto, mas o valor está baixo. Aceite só com valor melhor.":"Aceitar.";cls="ok"}
+  else if(avg>=3){v="Negociar: ajuste o ângulo, o formato ou o valor antes de aceitar.";cls="t"}
+  else{v="Recusar, mesmo que o valor seja alto. Orçamento não substitui fit.";cls="bad"}
+  return {avg:avg,v:v,cls:cls,conf:(f.s.conf||5)<=2};
+}
+function pubFit(){
+  var f=state.fit,r=fitVerdict(),C2=cfg();
+  var h='<div><h2>Vale aceitar essa proposta?</h2><p class="sub">Dê uma nota de 1 a 5. Orçamento não substitui fit.</p></div><div class="card">'
+   +'<label class="lab">Marca e produto<input type="text" data-fitcat="1" value="'+esc(f.cat)+'" placeholder="Ex.: marca X, produto Y"></label>';
+  C2.fit.forEach(function(c){h+='<label class="lab">'+esc(c[1])+'<select data-fit="'+c[0]+'">'+[1,2,3,4,5].map(function(n){return '<option'+((f.s[c[0]]||3)===n?' selected':'')+'>'+n+'</option>'}).join('')+'</select></label>'});
+  h+='<div class="row"><input type="checkbox" id="fa" data-fitck="agora"'+(f.agora?' checked':'')+'><label for="fa">Gera dinheiro agora</label></div><div class="row"><input type="checkbox" id="fb" data-fitck="depois"'+(f.depois?' checked':'')+'><label for="fb">Aumenta o valor da marca para depois</label></div></div>'
+   +'<div class="card"><h3 id="fit-res">Resultado: '+esc(r.v)+'</h3><p class="note">Média de fit (sem contar valor): '+r.avg.toFixed(1)+' de 5.</p>'+(r.conf?'<p class="note" style="color:var(--bad)">Atenção ao conflito com marca fixa. Verifique exclusividade antes.</p>':'')+'<p class="note">Categorias que ela recusa: '+esc(C2.lim.recusa||"nenhuma")+'.</p></div>';
+  h+='<div class="btns"><button class="btn ghost small" data-tg="edFit">'+(state.edFit?'Fechar edição':'Editar critérios e limites')+'</button></div>';
+  if(state.edFit){
+    h+='<div class="card"><h3>Critérios e limites</h3>'+C2.fit.map(function(c,i){return '<div class="btns" style="flex-wrap:nowrap"><input type="text" data-ed="fit|'+i+'|1" value="'+esc(c[1])+'"><button class="btn ghost small" data-cfx="fit-del|'+i+'" aria-label="Remover critério">×</button></div>'}).join('')
+     +'<div class="btns"><button class="btn ghost small" data-cfx="fit-add">Adicionar critério</button></div>'
+     +'<div class="fields"><label>Contratos por mês (limite)<input type="text" inputmode="numeric" data-ed="lim|contratos" data-num="1" value="'+esc(C2.lim.contratos)+'"></label><label>Meta por mês (R$)<input type="text" inputmode="decimal" data-ed="lim|meta" data-num="1" value="'+esc(C2.lim.meta)+'"></label></div>'
+     +'<label class="lab">Categorias que ela recusa (separe por vírgula)<input type="text" data-ed="lim|recusa" value="'+esc(C2.lim.recusa)+'"></label><p class="note">O critério “valor” (o último, por padrão) não entra na média de fit.</p></div>';
+  }
+  return h;
+}
+/* ---- marcas + documento ---- */
+function pubMarcas(){
+  var M=cfg().marcas,h='<div><h2>Marcas</h2><p class="sub">O que usar, o que evitar e o que funciona com cada marca. Edite e acrescente do seu jeito.</p></div>'
+   +'<div class="card"><h3>Documento para marcas</h3><p class="sub">Para enviar quando uma marca pedir parceria. Você edita o texto e pode salvar como o seu modelo.</p><div class="btns"><button class="btn" data-campx="doc">Montar o documento</button>'+(cfg().doc?'<button class="btn ghost small" data-cfx="doc-restore">Voltar ao modelo original</button>':'')+'</div>'+(cfg().doc?'<p class="note">Usando o seu modelo salvo.</p>':'')+'</div>';
+  Object.keys(M).forEach(function(m){var g=M[m],ed=state.edMarca===m,pm='marcas|'+m+'|';
+    h+='<div class="card"><h3>'+esc(m)+'</h3>';
+    if(!ed){
+      h+='<p>'+esc(g.ang)+'</p>'
+       +(g.usar.length?'<p><span class="tag l">Usar</span> '+g.usar.map(esc).join('; ')+'</p>':'')
+       +(g.evitar.length?'<p><span class="tag t">Evitar</span> '+g.evitar.map(esc).join('; ')+'</p>':'')
+       +(g.visual?'<p><span class="tag m">Visual</span> '+esc(g.visual)+'</p>':'')
+       +(g.temas.length?'<p class="note"><b>Temas:</b> '+g.temas.map(esc).join(', ')+'</p>':'')
+       +'<div class="btns"><button class="btn ghost small" data-cfx="marca-edit|'+esc(m)+'">Editar</button></div>';
+    }else{
+      h+='<label class="lab">Nome da marca<input type="text" data-edname="'+esc(m)+'" value="'+esc(m)+'"></label>'
+       +'<label class="lab">Ângulo<textarea data-ed="'+esc(pm)+'ang">'+esc(g.ang)+'</textarea></label>'
+       +'<label class="lab">Usar (um por linha)<textarea data-ed="'+esc(pm)+'usar" data-lines="1">'+esc(g.usar.join("\n"))+'</textarea></label>'
+       +'<label class="lab">Evitar (um por linha)<textarea data-ed="'+esc(pm)+'evitar" data-lines="1">'+esc(g.evitar.join("\n"))+'</textarea></label>'
+       +'<label class="lab">Visual<input type="text" data-ed="'+esc(pm)+'visual" value="'+esc(g.visual||"")+'"></label>'
+       +'<label class="lab">Temas que funcionam (um por linha)<textarea data-ed="'+esc(pm)+'temas" data-lines="1">'+esc(g.temas.join("\n"))+'</textarea></label>'
+       +'<div class="btns"><button class="btn small" data-cfx="marca-edit|">Pronto</button><button class="btn ghost small" data-cfx="marca-del|'+esc(m)+'">Remover marca</button></div>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="card"><h3>Nova marca</h3><input type="text" id="nm-n" placeholder="Nome da marca"><div class="btns"><button class="btn small" data-cfx="marca-add">Adicionar marca</button></div></div>';
+  return h+'<p class="note">Briefings confidenciais ficam fora do app.</p>';
+}
+function docMarcas(){if(cfg().doc)return clone(cfg().doc);return docDefault()}
+function docDefault(){
+  return {titulo:"Mariana Leal · Parcerias com marcas",subtitulo:"Apresentação, público, formatos, prazos e pagamento",
+   intro:"Este documento reúne como a Mari trabalha com marcas, do primeiro contato ao pagamento. Itens em [PREENCHER] precisam ser confirmados antes do envio.",
+   secoes:[
+    {titulo:"Quem é a Mari",corpo:"Mariana Leal (@mariana.leaal) é influenciadora e dona da Loyall, loja de roupas com cerca de 7 anos de história, e do Estoque Crescente, produto digital para lojistas. Ela mostra o processo real de construir empresa, marca e vida, sem esperar o caso terminar. Tom brincalhão e direto, com valores de ética, lealdade e transparência.\n[PREENCHER: confirmar número atual de seguidores, hoje cerca de 127 mil]",itens:[]},
+    {titulo:"Quem acompanha a Mari",corpo:"Donas de loja e empreendedoras em início de caminho, muitas ainda sem grande faturamento, que querem aprender gestão de um jeito simples.\n[PREENCHER: dados do media kit (link da plataforma de métricas): faixa etária, cidades, alcance mensal]",itens:[]},
+    {titulo:"No que ela é boa",corpo:"",itens:["Contar a marca dentro de uma situação real da loja, em vez de anúncio de catálogo","Explicar gestão, estoque, frete, pagamento e loja virtual em linguagem simples","Vlogs de bastidor e de viagem de compras, que já geraram picos de visualização [PREENCHER: confirmar números]","Reels, Stories e carrossel com chamada para uma ação só"]},
+    {titulo:"Formatos",corpo:"",itens:["Reels","Reels em collab","Stories (sequência com enquete, prova e chamada)","TikTok","Conteúdo para uso da marca","Fotos","Pacotes mensais"]},
+    {titulo:"Valores",corpo:"[PREENCHER: tabela de valores por formato ou “sob consulta”]",itens:[]},
+    {titulo:"Fluxo e prazos",corpo:"Os prazos contam a partir do briefing completo.",itens:["Briefing final da marca: 7 a 10 dias antes da publicação","Roteiro da Mari: 2 a 3 dias após o briefing","Aprovação do roteiro pela marca: até 48 horas","Gravação: pelo menos 3 dias antes de postar","Aprovação do vídeo pela marca: até 48 horas","Postagem na data combinada, com selo de parceria paga e #publi","Relatório com prints de alcance, interações e cliques: 3 a 7 dias depois"]},
+    {titulo:"Cobrança e pagamento",corpo:"",itens:["A nota fiscal é emitida após a postagem","A marca paga a nota em até 30 dias após a emissão","[PREENCHER: dados para emissão da nota e forma de pagamento]"]},
+    {titulo:"Direitos adicionais",corpo:"Negociados à parte, com prazo e território em contrato.",itens:["Uso de imagem","Impulsionamento (mídia paga) e whitelisting","Uso em site ou e-commerce","Exclusividade e período de utilização"]},
+    {titulo:"Como a Mari trabalha",corpo:"",itens:["A marca entra numa situação real, e a Mari propõe uma conversa a partir da rotina dela","Briefing engessado rende menos: a Mari ajusta a fala para soar como ela","Alterações depois da gravação são exceção e podem exigir nova gravação e mudar o cronograma","Nada é prometido além do que foi confirmado: valores, descontos e resultados vêm da marca","Não faz parcerias com emagrecedores nem com Gummy Hair"]},
+    {titulo:"Marcas com quem já trabalhou",corpo:"[PREENCHER: confirmar quais marcas autorizam ser citadas: Bling, Melhor Envio, Tray, Ton, 99 Food]",itens:[]},
+    {titulo:"Contato",corpo:"[PREENCHER: e-mail ou WhatsApp para propostas]",itens:[]}
+   ],fechamento:"Vamos construir algo com a cara da sua marca e da Mari."};
+}
+function relMat(id){
+  var c=state.camp[id],r=c.rep||{};function v(x){return x||"[PREENCHER]"}
+  return {titulo:"Relatório · "+c.m,subtitulo:(c.t||"Campanha")+" · postagem em "+fd(c.d),intro:"Resumo dos resultados da campanha, para envio à marca.",
+   secoes:[{titulo:"Resultados",corpo:"Dados do Instagram, conforme os prints anexados.",itens:["Alcance: "+v(r.alc),"Visualizações: "+v(r.vis),"Interações: "+v(r.int),"Cliques no link: "+v(r.cli)]},
+    {titulo:"O que funcionou",corpo:v(r.apr),itens:[]},
+    {titulo:"Prints",corpo:"[PREENCHER: anexar prints de alcance, interações e cliques]",itens:[]},
+    {titulo:"Próximos passos",corpo:"[PREENCHER: sugestão de renovação ou ajuste]",itens:[]}],
+   fechamento:"Relatório preparado por Mariana Leal (@mariana.leaal)."};
+}
+/* ---- Tray ---- */
+var D_TRAY=[
+ {t:"Semana 1 · encerrada em 25/10",m:[["w1-0","3 stories ou vídeos com o link e o criativo",0],["w1-1","Link em grupo ou lista com 20+ pessoas",0],["w1-2","Responder 5 interações relevantes",0],["w1-3","Vídeo educativo de até 45s",0],["w1-4","Fechar com 3 stories + CTA",0]]},
+ {t:"Semana 2 · hora de converter · 26/10 a 01/11",m:[["w2-0","3 stories ou vídeos curtos retomando a oportunidade",6],["w2-1","Vídeo de conversão: Reels, TikTok ou Shorts",8],["w2-2","Responder a uma objeção real em vídeo",7],["w2-3","Criar um criativo divulgando a campanha",7],["w2-4","Produzir conteúdo de quebra de objeção",7],["w2-5","Vídeo curto com CTA",8],["w2-6","Fechar a semana com 4 stories + última chamada de urgência",8]]},
+ {t:"Semana 3 · reta final · 02/11 a 09/11",m:[["w3-0","Vídeo com contagem regressiva",6],["w3-1","Vídeo com 3 motivos para aproveitar a oferta",8],["w3-2","Compartilhar um case ou depoimento de lojista Tray",7],["w3-3","Caixinha de perguntas com pelo menos 3 dúvidas sobre a Tray",7],["w3-4","Produzir conteúdo de quebra de objeção",7],["w3-5","Vídeo de última chamada",8],["w3-6","Encerrar a corrida com 3 stories",8]]}
+];
+function trayPts(){var p=0;cfg().tray.forEach(function(w){w.m.forEach(function(m){if(state.checks["tray-"+m[0]])p+=parseNum(m[2])})});return p}
+function updTray(){var n=parseNum(T("tray.clientes","")),o=$("#tray-out");if(o)o.innerHTML='<b>'+brl(n*500)+'</b> de bonificação ('+n+' cliente(s) novo(s) na oferta × R$ 500) · pontos: <b>'+(trayPts()+n*30)+'</b> <span class="note">(missões marcadas + 30 por cliente novo confirmado)</span>'}
+function pubTray(){
+  var T2=cfg().tray,h='<div><h2>Corrida Tray</h2><p class="sub">Desafio Influencers Black Friday: 20/10 a 10/11, apuração em 13/11. Conversão pesa mais que volume.</p></div>'
+   +'<div class="card"><h3>Oferta de 10/11</h3><p>Loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.</p><p class="note">Prêmio do 1º lugar: viagem a Punta Cana para ela e um acompanhante. Cliente novo confirmado vale +30 pontos e há bônus de eficiência de +10. Sempre com link exclusivo e selo de parceria paga.</p></div>';
+  T2.forEach(function(w,wi){
+    h+='<div class="card">';
+    if(state.edTray){
+      h+='<input type="text" data-ed="tray|'+wi+'|t" value="'+esc(w.t)+'">';
+      w.m.forEach(function(m,mi){h+='<div class="btns" style="flex-wrap:nowrap"><input type="text" data-ed="tray|'+wi+'|m|'+mi+'|1" value="'+esc(m[1])+'"><input type="text" inputmode="numeric" style="width:64px" data-ed="tray|'+wi+'|m|'+mi+'|2" data-num="1" value="'+esc(m[2])+'" aria-label="Pontos"><button class="btn ghost small" data-cfx="tray-delm|'+wi+'|'+mi+'" aria-label="Remover missão">×</button></div>'});
+      h+='<div class="btns"><button class="btn ghost small" data-cfx="tray-addm|'+wi+'">Adicionar missão</button><button class="btn ghost small" data-cfx="tray-delw|'+wi+'">Remover esta semana</button></div>';
+    }else{
+      h+='<h3>'+esc(w.t)+'</h3>'+w.m.map(function(m){return chk("tray-"+m[0],m[1]+(parseNum(m[2])?" (+"+m[2]+")":""))}).join('');
+    }
+    h+='</div>';
+  });
+  if(state.edTray)h+='<div class="btns"><button class="btn ghost small" data-cfx="tray-addw">Adicionar semana</button></div>';
+  h+='<div class="btns"><button class="btn ghost small" data-tg="edTray">'+(state.edTray?'Fechar edição':'Editar missões')+'</button></div>';
+  h+='<div class="card"><h3>Clientes novos na oferta</h3><label class="lab">Quantos clientes novos confirmados?<input type="text" inputmode="numeric" data-tool="tray.clientes" value="'+esc(T("tray.clientes",""))+'"></label><p id="tray-out"></p><p class="note">R$ 500 por cliente novo na oferta (1 cliente R$ 500, 2 clientes R$ 1.000, 5 clientes R$ 2.500).</p></div>';
+  return h;
+}
+/* ---- eventos ---- */
+function pubClick(el){
+  var tg=el.closest("[data-tg]");if(tg){state[tg.dataset.tg]=!state[tg.dataset.tg];render();return true}
+  var p=el.closest("[data-pub]");if(p){state.pub=p.dataset.pub;render();window.scrollTo(0,0);return true}
+  var co=el.closest("[data-campopen]");if(co){state.campOpen=state.campOpen===co.dataset.campopen?null:co.dataset.campopen;render();return true}
+  var cx=el.closest("[data-campx]");
+  if(cx){var a=cx.dataset.campx;
+    if(a==="add"){var t=$("#cp-t").value.trim()||"Campanha",d=$("#cp-d").value;if(!d)return true;state.campOpen=campAdd($("#cp-m").value,t,d);render();return true}
+    if(a==="seed"){state.campOpen=campAdd("Bling","Carrossel Black Friday","2026-11-09","2026-11-05");render();return true}
+    if(a==="doc"){pubOpenMat("midia",docMarcas());return true}
+    if(a.indexOf("rel|")===0){pubOpenMat("relatorio",relMat(a.slice(4)));return true}
+    if(a.indexOf("roteiro|")===0){var c=state.camp[a.slice(8)];state.pr.marca=marcaList().indexOf(c.m)>=0?c.m:"Outra marca";savePr();state.pub="roteiro";render();window.scrollTo(0,0);return true}
+    if(a.indexOf("del|")===0){var id=a.slice(4);delete state.camp[id];savePub();dbSet("camp",id,{del:true,at:Date.now()},"Removida");state.campOpen=null;render();return true}
+  }
+  var cf=el.closest("[data-cfx]");
+  if(cf){var q=cf.dataset.cfx.split("|"),a2=q[0],C2=cfg();
+    if(a2==="etapa-add")C2.etapas.push({id:"x"+Date.now(),label:"Nova etapa",quem:"Mari",ref:"post",off:0});
+    else if(a2==="etapa-del"){var ix=parseInt(q[1],10),rid=C2.etapas[ix]&&C2.etapas[ix].id;if(["e7","e9","e10"].indexOf(rid)<0){C2.etapas.splice(ix,1);Object.keys(state.camp).forEach(function(id){var cc=state.camp[id];if(cc.done&&cc.done[rid]){delete cc.done[rid];campSave(id)}})}}
+    else if(a2==="etapa-reset")C2.etapas=clone(D_ETAPAS);
+    else if(a2==="fit-add")C2.fit.splice(Math.max(0,C2.fit.length-1),0,["k"+Date.now(),"Novo critério"]);
+    else if(a2==="fit-del")C2.fit.splice(parseInt(q[1],10),1);
+    else if(a2==="marca-edit")state.edMarca=q[1]||null;
+    else if(a2==="marca-del"){delete C2.marcas[q[1]];state.edMarca=null}
+    else if(a2==="marca-add"){var nm=($("#nm-n").value||"").trim();if(!nm||C2.marcas[nm])return true;C2.marcas[nm]={ang:"",usar:[],evitar:[],visual:"",temas:[]};state.edMarca=nm}
+    else if(a2==="doc-restore")C2.doc=null;
+    else if(a2==="tray-addw")C2.tray.push({t:"Nova semana",m:[]});
+    else if(a2==="tray-delw")C2.tray.splice(parseInt(q[1],10),1);
+    else if(a2==="tray-addm")C2.tray[parseInt(q[1],10)].m.push(["m"+Date.now(),"Nova missão",0]);
+    else if(a2==="tray-delm")C2.tray[parseInt(q[1],10)].m.splice(parseInt(q[2],10),1);
+    else if(a2==="reset-all"){if(!state.confirmReset){state.confirmReset=true;render();return true}CF=cfgDef();state.confirmReset=false}
+    cfgSave();render();return true}
+  var pa=el.closest("[data-pra]");if(pa){pubRoteiroAction(pa.dataset.pra,pa);return true}
+  var di=el.closest("[data-idel]");if(di){var iid=di.dataset.idel;state.ideas=state.ideas.filter(function(x){return x.id!==iid});dbSet("ideas",iid,{del:true,at:Date.now()},"Ideia apagada");render();return true}
+  var pd=el.closest("[data-pldel]");if(pd){var pi=pd.dataset.pldel;delete state.plano[pi];savePlano();dbSet("plano",pi,{del:true,at:Date.now()},"Removido");render();return true}
+  return false;
+}
+function pubChange(el){
+  if(el.dataset.cdone){var q=el.dataset.cdone.split("|"),c=state.camp[q[0]];if(c){c.done=c.done||{};c.done[q[1]]=el.checked;campSave(q[0]);render()}return true}
+  if(el.dataset.cf){var q2=el.dataset.cf.split("|"),c2=state.camp[q2[0]];if(!c2)return true;var k=q2[1];
+    if(k.indexOf("rep.")===0){c2.rep=c2.rep||{};c2.rep[k.slice(4)]=el.value}else c2[k]=el.value;
+    campSave(q2[0]);if(el.type==="date")render();return true}
+  if(el.dataset.fit){state.fit.s[el.dataset.fit]=parseInt(el.value,10);render();return true}
+  if(el.dataset.fitck){state.fit[el.dataset.fitck]=el.checked;render();return true}
+  if(el.dataset.prck){state.pr.ck[el.dataset.prck]=el.checked;savePr();render();return true}
+  if(el.dataset.pr==="pm"){state.pr.marca=el.value;savePr();return true}
+  if(el.dataset.ed&&el.tagName==="SELECT"){setPath(cfg(),el.dataset.ed,el.value);cfgSave();render();return true}
+  if(el.dataset.edname){var old=el.dataset.edname,nn=el.value.trim(),M=cfg().marcas;if(nn&&nn!==old&&!M[nn]&&M[old]){var o={};Object.keys(M).forEach(function(k2){o[k2===old?nn:k2]=M[k2]});cfg().marcas=o;state.edMarca=nn;Object.keys(state.camp).forEach(function(id){if(state.camp[id].m===old){state.camp[id].m=nn;campSave(id)}});cfgSave();render()}return true}
+  if(el.dataset.plf){var pq=el.dataset.plf.split("|"),pp=state.plano[pq[0]];if(pp){pp[pq[1]]=el.value;savePlano();dbSet("plano",pq[0],pp,"Calendário salvo")}return true}
+  if(el.dataset.ide){var it=state.ideas.filter(function(x){return x.id===el.dataset.ide})[0];if(it){it.text=el.value;dbSet("ideas",it.id,{text:it.text,at:it.at},"Ideia salva")}return true}
+  return false;
+}
+function pubInput(el){
+  if(el.dataset.ed&&el.tagName!=="SELECT"){var v=el.value;if(el.dataset.num)v=parseNum(v);if(el.dataset.lines)v=v.split("\n").map(function(x){return x.trim()}).filter(Boolean);setPath(cfg(),el.dataset.ed,v);cfgSaveSoon();return true}
+  if(el.dataset.cfg){cfg()[el.dataset.cfg]=el.value;cfgSaveSoon();return true}
+  if(el.dataset.fitcat){state.fit.cat=el.value;var fr=$("#fit-res");if(fr)fr.textContent="Resultado: "+fitVerdict().v;return true}
+  if(el.dataset.pr){var k=el.dataset.pr,r=state.pr,v2=el.value;
+    if(k==="pb")r.briefing=v2;else if(k==="po")r.obj=v2;else if(k==="pa")r.instr=v2;
+    else if(r.res){var x=r.res;if(k==="pt")x.titulo=v2;else if(k==="pl")x.legenda=v2;else if(k==="pc")x.confirmar=v2.split("\n").filter(function(s2){return s2.trim()});
+      else if(k.slice(0,2)==="pf")x.blocos[parseInt(k.slice(2),10)].fala=v2;else if(k.slice(0,2)==="ps")x.blocos[parseInt(k.slice(2),10)].tela=v2}
+    savePr();return true}
+  return false;
+}
+function htmlAjustes(){
+  var C2=cfg();
+  return '<div><h2>Ajustes</h2><p class="sub">Tudo aqui é seu. Mude e o app passa a usar do seu jeito.</p></div>'
+   +'<div class="card"><h3>Minhas regras</h3><p class="note">Vale para tudo que o Claude escrever no app: o que você nunca faz, expressões que ama, limites. Exemplo: “nunca falar de rotina escolar do filho”.</p><textarea data-cfg="regras" placeholder="Escreva uma regra por linha...">'+esc(C2.regras||"")+'</textarea></div>'
+   +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (legenda, roteiro, áudio transcrito). Fica neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea></div>'
+   +'<div class="card"><h3>Limites das publis</h3><div class="fields"><label>Contratos por mês<input type="text" inputmode="numeric" data-ed="lim|contratos" data-num="1" value="'+esc(C2.lim.contratos)+'"></label><label>Meta por mês (R$)<input type="text" inputmode="decimal" data-ed="lim|meta" data-num="1" value="'+esc(C2.lim.meta)+'"></label></div><label class="lab">Categorias que você recusa (separe por vírgula)<input type="text" data-ed="lim|recusa" value="'+esc(C2.lim.recusa)+'"></label></div>'
+   +'<div class="card"><h3>Voltar ao padrão</h3><p class="note">Desfaz as suas edições de marcas, etapas, critérios, checklist, Tray, regras e modelo de documento. Campanhas, ideias e calendário não são apagados.</p><div class="btns"><button class="btn ghost small" data-cfx="reset-all">'+(state.confirmReset?'Toque de novo para confirmar':'Voltar tudo ao padrão')+'</button></div></div>';
+}
+
+/* ============ PDF dentro do app (texto vetorial, via jsPDF) ============ */
+function pdfSafe(s){return String(s==null?"":s).replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,"...").replace(/[–—]/g,"-").replace(/[•·]/g,"-").replace(/ /g," ").replace(/[^\n\x20-\x7e¡-ÿ]/g,"")}
+function crName(m){return (m.titulo||"material").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"material"}
+function pdfLabel(tipo,i,n){return tipo==="ebook"?"CAPÍTULO "+(i+1):(tipo==="guia"?"PASSO "+(i+1):(i+1)+" DE "+n)}
+function makePdf(m,tipo){
+  var J=window.jspdf;if(!J||!J.jsPDF)return null;
+  var doc=new J.jsPDF({unit:"mm",format:"a4"}),W=210,H=297,M=18,CW=W-2*M,y=0,RED="#D22B1F";
+  function rgb(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+  function fill(h){var c=rgb(h);doc.setFillColor(c[0],c[1],c[2])}
+  function line(h){var c=rgb(h);doc.setDrawColor(c[0],c[1],c[2])}
+  function ink(h){var c=rgb(h);doc.setTextColor(c[0],c[1],c[2])}
+  function op(v){try{doc.setGState(new doc.GState({opacity:v}))}catch(e){}}
+  /* capa */
+  fill("#15101A");doc.rect(0,0,W,H,"F");
+  if(CAPA){
+    try{
+      doc.addImage(CAPA,"JPEG",0,0,W,H);
+      fill("#15101A");
+      var N=60,y1=H*0.12,hh=(H-y1)/N;op(0.045);
+      for(var i=0;i<N;i++){doc.rect(0,y1+i*hh,W,H-(y1+i*hh),"F")}
+      op(1);
+    }catch(e){op(1)}
+  }
+  doc.setFont("helvetica","bold");
+  var tl,sl,tag=pdfSafe(tipoLabel(tipo)).toUpperCase();
+  doc.setFontSize(30);tl=doc.splitTextToSize(pdfSafe(m.titulo).toUpperCase(),CW);
+  doc.setFont("helvetica","normal");doc.setFontSize(13);sl=doc.splitTextToSize(pdfSafe(m.subtitulo),CW);
+  var total=8+10+tl.length*12.5+(sl.length?sl.length*6+8:0)+10+14;
+  y=Math.min(H-34-total,H*0.62);
+  var pt="@MARIANA.LEAAL";doc.setFont("helvetica","bold");doc.setFontSize(9);
+  var pw=doc.getTextWidth(pt)+10;line("#FFFFFF");doc.setLineWidth(0.4);doc.roundedRect(M,y,pw,8,4,4,"S");ink("#FFFFFF");doc.text(pt,M+5,y+5.3);
+  y+=10+10;doc.setFontSize(30);doc.text(tl,M,y);y+=tl.length*12.5-2;
+  if(sl.length){doc.setFont("helvetica","normal");doc.setFontSize(13);ink("#F0E4EA");doc.text(sl,M,y+4);y+=sl.length*6+8}
+  y+=8;doc.setFont("helvetica","bold");doc.setFontSize(11);
+  var tw=doc.getTextWidth(tag)+12;fill(RED);doc.rect(M,y,tw,10,"F");ink("#FFFFFF");doc.text(tag,M+6,y+6.7);
+  fill(RED);doc.rect(0,H-14,W,14,"F");ink("#FFFFFF");doc.setFontSize(9);doc.text("ESTOQUE CRESCENTE",M,H-5.6);
+  /* páginas de conteúdo */
+  function newPage(){doc.addPage();fill("#FBF7F9");doc.rect(0,0,W,H,"F");fill(RED);doc.rect(0,0,W,4,"F");y=M+6}
+  function need(h){if(y+h>H-M-8)newPage()}
+  function para(text,size,font,col,lh){
+    doc.setFont("helvetica",font);doc.setFontSize(size);ink(col);
+    var ls=doc.splitTextToSize(pdfSafe(text),CW),step=size*0.3528*lh;
+    ls.forEach(function(l){need(step);doc.text(l,M,y+size*0.3528);y+=step});
+  }
+  function box(text,bg,fg){
+    doc.setFont("helvetica","normal");doc.setFontSize(11);
+    var ls=doc.splitTextToSize(pdfSafe(text),CW-12),h=ls.length*5.6+10;need(h+4);
+    fill(bg);doc.roundedRect(M,y,CW,h,3,3,"F");ink(fg);
+    ls.forEach(function(l,i){doc.text(l,M+6,y+7+i*5.6)});y+=h+7;
+  }
+  newPage();
+  if(m.intro)box(m.intro,"#FFF0B8","#2A2118");
+  var secs=m.secoes||[];
+  secs.forEach(function(s,i){
+    need(36);
+    var lab=pdfSafe(pdfLabel(tipo,i,secs.length));
+    doc.setFont("helvetica","bold");doc.setFontSize(9);
+    var lw=doc.getTextWidth(lab)+10;fill(RED);doc.rect(M,y,lw,7,"F");ink("#FFFFFF");doc.text(lab,M+5,y+4.9);y+=11;
+    para((s.titulo||"").toUpperCase(),16,"bold","#1F1A20",1.2);
+    fill("#FBCFE0");doc.rect(M,y+1,14,1.2,"F");y+=5;
+    if(s.corpo){para(s.corpo,10.5,"normal","#1F1A20",1.5);y+=2}
+    (s.itens||[]).forEach(function(t){
+      doc.setFont("helvetica","normal");doc.setFontSize(10.5);
+      var ls=doc.splitTextToSize(pdfSafe(t),CW-9),h=ls.length*5.4;need(h+2);
+      if(tipo==="midia"||tipo==="relatorio"){fill(RED);doc.rect(M+0.6,y+1.6,1.8,1.8,"F")}else{line(RED);doc.setLineWidth(0.5);doc.rect(M,y+0.6,3.6,3.6,"S")}ink("#1F1A20");
+      ls.forEach(function(l,k){doc.text(l,M+8,y+3.8+k*5.4)});y+=h+2.6;
+    });
+    y+=8;
+  });
+  if(m.fechamento)box(m.fechamento,"#FFF0B8","#2A2118");
+  var n=doc.getNumberOfPages();
+  for(var p=2;p<=n;p++){doc.setPage(p);doc.setFont("helvetica","normal");doc.setFontSize(8);ink("#8A7D86");doc.text("@mariana.leaal  ·  Estoque Crescente",M,H-10);fill(RED);doc.rect(W-M-9,H-15,9,7,"F");doc.setFont("helvetica","bold");ink("#FFFFFF");doc.text(String(p-1),W-M-4.5,H-10.2,{align:"center"})}
+  return doc;
+}
+
+/* ============ EVENTOS ============ */
+function avisoTexto(d){
+  var its=trackItems(d).filter(function(x){return x.n&&stOf(x.id)==="rec"});
+  var nums=its.map(function(x){return x.n});
+  var t="Oi Laila! "+(nums.length?"Gravei os stories "+nums.join(", ")+" de "+d.title+".":"Ainda não gravei os stories de "+d.title+".");
+  var fs=stOf(d.id+"-f");if(fs==="rec")t+=" O vídeo do feed também está gravado.";
+  if(state.notes[d.id])t+="\nRecado: "+state.notes[d.id];
+  return t+"\nPode puxar os vídeos quando quiser.";
+}
+document.addEventListener("click",function(e){
+  var el=e.target;
+  if(pubClick(el))return;
+  var hb=el.closest("[data-hub]");if(hb){hubGo(hb.dataset.hub);return}
+  var rf=el.closest("[data-rotfmt]");if(rf){state.rot.formato=rf.dataset.rotfmt;saveRot();render();return}
+  var ra=el.closest("[data-rot]");if(ra){rotAction(ra.dataset.rot,ra);return}
+  if(el.id==="pl-add"){var pt=$("#pl-t").value.trim();if(!pt)return;var pid="p"+Date.now(),po2={d:$("#pl-d").value,f:$("#pl-f").value,t:pt,s:"fazer"};state.plano[pid]=po2;savePlano();dbSet("plano",pid,po2,"Calendário salvo");render();return}
+  var pdl=el.closest("[data-pldel]");if(pdl){var pi=pdl.dataset.pldel;delete state.plano[pi];savePlano();dbSet("plano",pi,{del:true,at:Date.now()},"Removido");render();return}
+  var dop=el.closest("[data-dopen]");if(dop){var dr=state.drafts.filter(function(x){return x.id===dop.dataset.dopen})[0];if(dr){if(dr.tipo==="proteiro"){state.pr=dr.data;state.pr.busy="";savePr();state.tab="pub";state.pub="roteiro"}else if(dr.tipo==="roteiro"&&dr.data.formato){state.rot=dr.data;state.rot.busy="";state.hub="roteiro";state.tab="criar"}else{state.cr=dr.data;state.cr.busy="";if(dr.tipo==="midia"||dr.tipo==="relatorio"||dr.tipo==="roteiro"){state.tab="pub";state.pub="mat"}else{state.tab="criar";state.hub=dr.tipo==="guia"?"guia":"material"}saveCr()}saveRot();render();window.scrollTo(0,0)}return}
+  var ddl=el.closest("[data-ddel]");if(ddl){state.drafts=state.drafts.filter(function(x){return x.id!==ddl.dataset.ddel});saveDrafts();dbSet("drafts",ddl.dataset.ddel,{del:true,at:Date.now()},"Rascunho apagado");render();return}
+  var t=el.closest("[data-tab]");if(t){if(t.dataset.tab==="criar"&&state.tab==="criar")state.hub="inicio";state.tab=t.dataset.tab;if(state.tab!=="produtos")state.pOpen=null;render();window.scrollTo(0,0);return}
+  var dy=el.closest("[data-day]");if(dy){state.sel=dy.dataset.day;state.rec=0;render();return}
+  var rd=el.closest("[data-recdone]");if(rd){var id=rd.dataset.recdone;if(stOf(id)==="todo"){state.st[id]="rec";dbSet("st",id,{s:"rec",at:Date.now()})}state.rec++;render();return}
+  var rn=el.closest("[data-recnav]");if(rn){state.rec+=parseInt(rn.dataset.recnav,10);render();return}
+  var rs=el.closest("[data-rest]");if(rs){var k="rest-"+state.sel,on=rs.dataset.rest==="1";state.checks[k]=on;dbSet("checks",k,{done:on,at:Date.now()});render();return}
+  var cl=el.closest("[data-copylegenda]");if(cl){copyText(dayById(cl.dataset.copylegenda).feed.legenda,cl);return}
+  var mo=el.closest("[data-more]");if(mo){state.more=mo.dataset.more;render();return}
+  var po=el.closest("[data-popen]");if(po){state.pOpen=po.dataset.popen;state.chap=0;render();window.scrollTo(0,0);return}
+  if(el.closest("[data-pback]")){state.pOpen=null;render();return}
+  var ch=el.closest("[data-chap]");if(ch){state.chap=Math.max(0,Math.min(EBOOK.length-1,state.chap+parseInt(ch.dataset.chap,10)));render();return}
+  var cg=el.closest("[data-chapgo]");if(cg){state.chap=parseInt(cg.dataset.chapgo,10);render();return}
+  var la=el.closest("[data-ladd]");if(la){var key=la.dataset.ladd,tx=$("#l-"+key+"-t").value.trim(),ju=$("#l-"+key+"-j").value.trim();if(!tx)return;var arr=T("listas."+key,[]).slice();arr.push({t:tx,j:ju});setT("listas."+key,arr);render();return}
+  var ld=el.closest("[data-ldel]");if(ld){var pr=ld.dataset.ldel.split(":"),a2=T("listas."+pr[0],[]).slice();a2.splice(parseInt(pr[1],10),1);setT("listas."+pr[0],a2);render();return}
+  var cx=el.closest("[data-crx]");if(cx){crAction(cx.dataset.crx,cx);return}
+  var ct=el.closest("[data-crtipo]");if(ct){state.cr.tipo=ct.dataset.crtipo;saveCr();render();return}
+  if(el.id==="avisar"){copyText(avisoTexto(dayById(state.sel)),el);return}
+  if(el.id==="copyficha"){copyText(fichaText(),el);return}
+  if(el.id==="savenote"){var v=$("#note").value;state.notes[state.sel]=v;dbSet("notes",state.sel,{text:v,at:Date.now()},"Recado salvo");render();return}
+  if(el.id==="saveres"){var o={alc:$("#r-alc").value,cur:$("#r-cur").value,res:$("#r-res").value,sal:$("#r-sal").value,apr:$("#r-apr").value,at:Date.now()};state.results[state.sel]=o;dbSet("results",state.sel,o,"Resultado salvo");render();return}
+  if(el.id==="addidea"){var tx2=$("#idea").value.trim();if(!tx2)return;var id2="i"+Date.now(),o2={text:tx2,at:Date.now()};state.ideas.push({id:id2,text:tx2,at:o2.at});dbSet("ideas",id2,o2,"Ideia guardada");render();return}
+});
+document.addEventListener("input",function(e){
+  var el=e.target;
+  if(pubInput(el))return;
+  if(el.dataset&&el.dataset.cr){var k=el.dataset.cr,c=state.cr,v=el.value;
+    if(k.charAt(0)==="q"){var r0=state.rot,mp={qi:"ideia",qo:"obj",qa:"instr"},mq={qt:"titulo",qg:"gancho",qr:"roteiro",ql:"legenda",qc:"cta"};if(mp[k])r0[mp[k]]=v;else if(mq[k]&&r0.res)r0.res[mq[k]]=v;saveRot();return}
+    if(k.charAt(0)==="g"){var g0=gOf(c),mg={gt:"titulo",gf:"formato",gd:"diretriz",ga:"arquivos",gl:"legenda"};if(mg[k])g0[mg[k]]=v;else if(k.slice(0,2)==="gu")g0.refs[parseInt(k.slice(2),10)].url=v;else if(k.slice(0,2)==="gn")g0.refs[parseInt(k.slice(2),10)].nota=v;saveCr();return}
+    if(k==="voz"){state.voz=v;try{localStorage.setItem("hoje-voz",v)}catch(_){}return}
+    if(k==="instr"){c.instr=v;saveCr();return}
+    if(k.charAt(0)==="m"){var m=c.material;if(k==="mt")m.titulo=v;else if(k==="ms")m.subtitulo=v;else if(k==="mi")m.intro=v;else if(k==="mf")m.fechamento=v;else if(k.slice(0,3)==="mst")m.secoes[parseInt(k.slice(3),10)].titulo=v;else if(k.slice(0,3)==="msc")m.secoes[parseInt(k.slice(3),10)].corpo=v;else if(k.slice(0,3)==="msi")m.secoes[parseInt(k.slice(3),10)].itens=v.split("\n").filter(function(x){return x.trim()});saveCr();return}
+    if(k==="ideia")c.ideia=v;else if(k==="publico")c.publico=v;else if(k==="ot")c.outline.titulo=v;else if(k==="os")c.outline.subtitulo=v;
+    else if(k.charAt(0)==="r")c.respostas[parseInt(k.slice(1),10)]=v;
+    else if(k.slice(0,2)==="st")c.outline.secoes[parseInt(k.slice(2),10)].titulo=v;
+    else if(k.slice(0,2)==="si")c.outline.secoes[parseInt(k.slice(2),10)].itens=v.split("\n").filter(function(x){return x.trim()});
+    saveCr();return}
+  if(!el.dataset||!el.dataset.tool)return;
+  setT(el.dataset.tool,el.value);
+  if(el.dataset.tool==="tray.clientes")updTray();
+  if(el.dataset.tool.indexOf("calc.")===0)updateCalc();
+  if(el.dataset.tool.indexOf("ficha.")===0)updateFicha();
+});
+document.addEventListener("change",function(e){
+  var el=e.target;if(!el.dataset)return;
+  if(pubChange(el))return;
+  if(el.dataset.gfile){var fl=Array.prototype.slice.call(el.files||[]);el.value="";if(fl.length)handleFiles(el.dataset.gfile,fl);return}
+  if(el.dataset.plst){var pp=state.plano[el.dataset.plst];if(pp){pp.s=el.value;savePlano();dbSet("plano",el.dataset.plst,pp,"Calendário salvo")}return}
+  if(el.dataset.chk){var id=el.dataset.chk,on=el.checked;state.checks[id]=on;dbSet("checks",id,{done:on,at:Date.now()});render();return}
+  if(el.dataset.st){var i2=el.dataset.st;state.st[i2]=el.value;dbSet("st",i2,{s:el.value,at:Date.now()});render();return}
+  if(el.dataset.toolchk){setT(el.dataset.toolchk,el.checked);render();return}
+  if(el.dataset.tool&&el.tagName==="SELECT"){setT(el.dataset.tool,el.value);updateFicha();return}
+  if(el.dataset.pst){var pid=el.dataset.pst,g=getProd(pid);g={s:el.value,preco:g.preco};state.prod[pid]=g;dbSet("prod",pid,{s:g.s,preco:g.preco,at:Date.now()});render();return}
+  if(el.dataset.price){var pid2=el.dataset.price,g2=getProd(pid2);g2={s:g2.s,preco:el.value};state.prod[pid2]=g2;dbSet("prod",pid2,{s:g2.s,preco:g2.preco,at:Date.now()});return}
+  if(el.id==="core"){state.core=el.checked;state.rec=0;render()}
+});
+
+/* ============ INÍCIO ============ */
+loadLocal();state.sel=pickDay();render();
+function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
+function listen(name,apply){
+  C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
+}
+(async function(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    var db=await window.claude.use("db");if(!db)return;
+    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts"].forEach(function(n){C[n]=db.collection(n)});
+    listen("checks",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.done)o[d.id]=true});state.checks=o});
+    listen("st",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.s)o[d.id]=x.s});state.st=o});
+    listen("notes",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.text)o[d.id]=x.text});state.notes=o});
+    listen("results",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x)o[d.id]=x});state.results=o});
+    listen("prod",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.s)o[d.id]={s:x.s,preco:x.preco||""}});state.prod=o});
+    listen("plano",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&!x.del&&x.t)o[d.id]=x});state.plano=o;savePlano()});
+    listen("camp",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&!x.del&&x.m)o[d.id]=x});state.camp=o;savePub()});
+    listen("cfg",function(s){s.docs.forEach(function(d){if(d.id==="main"){try{var j=JSON.parse(d.data().json);CF=cfgMerge(j);try{localStorage.setItem("hoje-cfg",JSON.stringify(CF))}catch(e){}}catch(e){}}});applyRegras()});
+    listen("drafts",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=state.drafts.filter(function(d){return !ids[d.id]});loc.forEach(draftSync);a=a.concat(loc);a.sort(function(p,q){return (q.at||0)-(p.at||0)});state.drafts=a.slice(0,50);saveDrafts()});
+    listen("ideas",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,text:x.text,at:x.at||0})});state.ideas=a});
+  }catch(e){}
+})();
+(async function(){
+  try{if(!window.claude||!window.claude.use){D={save:function(o){return new Promise(function(res,rej){try{var b=o.data instanceof Blob?o.data:new Blob([o.data],{type:/\.pdf$/.test(o.filename)?"application/pdf":"text/html"});var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);res()}catch(e){rej(e)}})}};return}
+    try{S=await window.claude.use("sample")}catch(e){}
+    try{D=await window.claude.use("downloads")}catch(e){}
+    try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){LIM=null}
+    if((state.tab==="produtos"||state.tab==="criar")&&!typing())render();
+  }catch(e){}
+})();
+</script>
+
+</body></html>
