@@ -680,9 +680,9 @@ function renderCanais(){
    +'<div class="card"><h3>Papel de cada canal</h3><p><span class="tag m">Melhores Amigos</span> proximidade, bastidor real, votação e aviso antes de todo mundo.</p><p><span class="tag m">Assinatura</span> profundidade: ficha, exercício, aula curta e modelo para usar.</p><p class="note">Só anuncie o que estiver pronto. Não misture acesso à assinatura com acesso ao app antes de definir o que cada um inclui.</p></div>';
   h+='<div class="block"><h3>Melhores Amigos · série semanal</h3>';
   MAWEEKS.forEach(function(w){h+='<div class="item"><div class="row"><div class="txt"><b>Semana de '+w[0]+'</b></div></div>'+MASERIE.map(function(t,k){return chk('ma-'+w[1]+'-'+k,t)}).join('')+'</div>'});
-  h+='</div><div class="block"><h3>Assinatura · entrega da semana</h3>'+ASSIN.map(function(a){return '<div class="card"><div><span class="date">'+a[0]+'</span></div><p>'+esc(a[1])+'</p></div>'}).join('')+'</div>';
-  h+='<div class="block"><h3>Banco de ideias · Melhores Amigos</h3>'+IDEIAS_MA.map(function(a){return '<div class="card"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p></div>'}).join('')+'</div>';
-  h+='<div class="block"><h3>Banco de ideias · Assinatura</h3>'+IDEIAS_AS.map(function(a){return '<div class="card"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p></div>'}).join('')+'</div>';
+  h+='</div><div class="block"><h3>Assinatura · entrega da semana</h3>'+ASSIN.map(function(a,i){return '<div class="card tap" role="button" tabindex="0" data-addmd="'+i+'"><div><span class="date">'+a[0]+'</span></div><p>'+esc(a[1])+'</p><p class="note">Toque para pôr no Meu dia</p></div>'}).join('')+'</div>';
+  h+='<div class="block"><h3>Banco de ideias · Melhores Amigos</h3>'+IDEIAS_MA.map(function(a,i){return '<div class="card tap" role="button" tabindex="0" data-addidea="ma|'+i+'"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p><p class="note">Toque para guardar em Ideias</p></div>'}).join('')+'</div>';
+  h+='<div class="block"><h3>Banco de ideias · Assinatura</h3>'+IDEIAS_AS.map(function(a,i){return '<div class="card tap" role="button" tabindex="0" data-addidea="as|'+i+'"><b>'+esc(a[0])+'</b><p class="note">'+esc(a[1])+'</p><p class="note">Toque para guardar em Ideias</p></div>'}).join('')+'</div>';
   h+='<p class="note">As entregas marcadas como proposta ainda precisam da decisão da Mari. As ideias que pedem um exemplo real só entram se ela puder contar.</p></div>';
   $("#view").innerHTML=h;
 }
@@ -702,7 +702,7 @@ function htmlPrazos(){
   PRAZOS.forEach(function(x){
     var n=daysUntil(x.date),dd=x.date.slice(8,10)+"/"+x.date.slice(5,7);
     var c=n<0?"passou há "+(-n)+" dia"+(n===-1?"":"s"):(n===0?"é hoje":(n===1?"é amanhã":"faltam "+n+" dias"));
-    h+='<div class="card"><div><span class="date">'+dd+'</span> <span class="tag'+(x.brand==="Loyall"?' l':'')+'">'+esc(x.brand)+'</span> <span class="count'+(n>=0&&n<=2?' hot':'')+'">'+c+'</span></div><h3>'+esc(x.t)+'</h3><p class="sub">'+esc(x.d)+'</p></div>';
+    h+='<div class="card tap" role="button" tabindex="0" data-przgo="'+PRAZOS.indexOf(x)+'"><div><span class="date">'+dd+'</span> <span class="tag'+(x.brand==="Loyall"?' l':'')+'">'+esc(x.brand)+'</span> <span class="count'+(n>=0&&n<=2?' hot':'')+'">'+c+'</span></div><h3>'+esc(x.t)+'</h3><p class="sub">'+esc(x.d)+'</p><p class="note">Toque para abrir</p></div>';
   });
   var done=APPMS.filter(function(m){return state.checks[m[0]]}).length;
   h+='<div class="block"><h3>Lançamento do app Estoque Crescente · '+done+'/'+APPMS.length+'</h3><div class="item">'+APPMS.map(function(m){return chk(m[0],m[1])}).join("")+'</div></div>';
@@ -721,8 +721,8 @@ function htmlEquipe(){
   var venda=PRODS.filter(function(p){return getProd(p.id).s==="venda"}).length,and=PRODS.filter(function(p){var s=getProd(p.id).s;return s==="roteiro"||s==="feito"}).length;
   return '<div><h2>Visão da equipe</h2><p class="sub">Onde cada entrega está, os resultados que a Mari registrou e os recados.</p></div>'
    +'<div class="scroll"><table><thead><tr><th>Dia</th><th>Entregas</th><th>Resultado e recado</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-   +'<div class="card"><h3>App Estoque Crescente</h3><p>'+done+' de '+APPMS.length+' marcos concluídos.</p></div>'
-   +'<div class="card"><h3>Mini produtos</h3><p>'+venda+' à venda, '+and+' em andamento, de '+PRODS.length+'.</p></div>'
+   +'<div class="card tap" role="button" tabindex="0" data-go="tab=mais;more=prazos"><h3>App Estoque Crescente</h3><p>'+done+' de '+APPMS.length+' marcos concluídos.</p><p class="note">Toque para ver os marcos</p></div>'
+   +'<div class="card tap" role="button" tabindex="0" data-go="tab=criar"><h3>Mini produtos</h3><p class="note">Toque para ir para Criar</p><p>'+venda+' à venda, '+and+' em andamento, de '+PRODS.length+'.</p></div>'
    +'<p class="note">Briefings confidenciais das marcas não aparecem aqui. Ficam no quadro interno.</p>';
 }
 function htmlIdeias(){
@@ -1344,7 +1344,7 @@ function pubMarcas(){
   var M=cfg().marcas,h=(MXMSG?'<div class="draft">'+esc(MXMSG)+'</div>':'')+'<div><h2>Marcas</h2><p class="sub">O que usar, o que evitar e o que funciona com cada marca. Edite e acrescente do seu jeito.</p></div>'
    +'<div class="card"><h3>Documento para marcas</h3><p class="sub">Para enviar quando uma marca pedir parceria. Você edita o texto e pode salvar como o seu modelo.</p><div class="btns"><button class="btn" data-campx="doc">Montar o documento</button>'+(cfg().doc?'<button class="btn ghost small" data-cfx="doc-restore">Voltar ao modelo original</button>':'')+'</div>'+(cfg().doc?'<p class="note">Usando o seu modelo salvo.</p>':'')+'</div>';
   Object.keys(M).forEach(function(m){var g=M[m],ed=state.edMarca===m,pm='marcas|'+m+'|';
-    h+='<div class="card"><h3>'+esc(m)+'</h3>';
+    h+='<div class="card'+(ed?'':' tap')+'"'+(ed?'':' role="button" tabindex="0" data-cfx="marca-edit|'+esc(m)+'"')+'><h3>'+esc(m)+'</h3>';
     if(!ed){
       h+='<p>'+esc(g.ang)+'</p>'
        +(g.usar.length?'<p><span class="tag l">Usar</span> '+g.usar.map(esc).join('; ')+'</p>':'')
@@ -1919,8 +1919,8 @@ document.addEventListener("click",function(e){var g=e.target.closest&&e.target.c
 function mdFmt(iso){return new Date(iso+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"2-digit"})}
 function mdItem(it){
   var p=it.parc?parcGet(it.parc):null,done=it.st==="feito",tl=(MDT.filter(function(x){return x[0]===it.tipo})[0]||[0,"Tarefa"])[1];
-  var h='<div class="item'+(done?' done':'')+'" data-mdid="'+it.id+'"><div class="row"><div class="txt"><span class="tag">'+esc(it.tipo==="assessoria"?"Pedido":tl)+'</span>'+(it.quem!=="Mari"?'<span class="tag m">'+esc(it.quem)+'</span>':'')+(p?'<span class="tag l">'+esc(p.marca)+'</span>':'')+'<br><b>'+esc(it.t)+'</b>'+(it.hora?' · '+esc(it.hora):'')+'</div></div>';
-  if(!done){if(it.ini)h+='<p class="note" style="margin:6px 14px"><b>Começar:</b> '+esc(it.ini)+'</p>';if(it.fim)h+='<p class="note" style="margin:6px 14px"><b>Terminar:</b> '+esc(it.fim)+'</p>';if(it.nota)h+='<p class="note" style="margin:6px 14px">'+esc(it.nota)+'</p>'}
+  var h='<div class="item'+(done?' done':'')+'" data-mdid="'+it.id+'"><div class="row"><div class="txt tap" role="button" tabindex="0" data-mdb="edit"><span class="tag">'+esc(it.tipo==="assessoria"?"Pedido":tl)+'</span>'+(it.quem!=="Mari"?'<span class="tag m">'+esc(it.quem)+'</span>':'')+(p?'<span class="tag l">'+esc(p.marca)+'</span>':'')+'<br><b>'+esc(it.t)+'</b>'+(it.hora?' · '+esc(it.hora):'')+'</div></div>';
+  if(!done){if(it.ini)h+='<p class="note tap" role="button" tabindex="0" data-mdb="edit" style="margin:6px 14px"><b>Começar:</b> '+esc(it.ini)+'</p>';if(it.fim)h+='<p class="note tap" role="button" tabindex="0" data-mdb="edit" style="margin:6px 14px"><b>Terminar:</b> '+esc(it.fim)+'</p>';if(it.nota)h+='<p class="note" style="margin:6px 14px">'+esc(it.nota)+'</p>'}
   h+='<div class="meta" style="flex-wrap:wrap;gap:6px">';
   if(!it.d)h+='<button class="btn small" data-mdb="hoje">Fazer hoje</button><button class="btn small ghost" data-mdb="amanha">Amanhã</button>';
   else h+=done?'<button class="btn small ghost" data-mdb="undo">Desfazer</button>':'<button class="btn small" data-mdb="done">Feito</button><button class="btn small ghost" data-mdb="amanha">Adiar para amanhã</button>';
@@ -1966,6 +1966,21 @@ function mdHtml(){
 }
 function renderMeuDia(){$("#view").innerHTML='<div class="stack">'+mdHtml()+'</div>'}
 document.addEventListener("click",function(e){
+  var t0=e.target,go=t0.closest&&t0.closest("[data-go],[data-przgo],[data-addmd],[data-addidea]");
+  if(go&&!(t0.closest("button,a,input,select,textarea,label,summary"))){
+    if(go.dataset.go){go.dataset.go.split(";").forEach(function(kv){var q=kv.split("=");state[q[0]]=q[1]});render();window.scrollTo(0,0);return}
+    if(go.dataset.przgo!=null){var x=PRAZOS[+go.dataset.przgo];if(!x)return;
+      if(x.brand==="Tray"){state.tab="pub";state.pub="tray"}
+      else{var pp=PARC.items.filter(function(q){return q.marca===x.brand})[0];state.tab="pub";state.pub="parc";if(pp)PCUI.open=pp.id;
+        if(!pp&&x.brand==="Loyall"){state.tab="mais";state.more="canais"}}
+      render();window.scrollTo(0,0);return}
+    if(go.dataset.addmd!=null){var a=ASSIN[+go.dataset.addmd],m=String(a[0]).match(/(\d{2})\/(\d{2})/);
+      MD.items.push(mdNew({t:"Assinatura: "+a[1],tipo:"gravar",d:m?"2026-"+m[2]+"-"+m[1]:""}));mdLocal();
+      var n1=go.querySelector(".note");if(n1)n1.textContent="Adicionado ao Meu dia";return}
+    if(go.dataset.addidea!=null){var q2=go.dataset.addidea.split("|"),a2=(q2[0]==="ma"?IDEIAS_MA:IDEIAS_AS)[+q2[1]],tx=a2[0]+": "+a2[1],id2="i"+Date.now(),o2={text:tx,at:Date.now()};
+      state.ideas.push({id:id2,text:tx,at:o2.at});dbSet("ideas",id2,o2,"Ideia guardada");
+      var n2=go.querySelectorAll(".note");if(n2.length)n2[n2.length-1].textContent="Guardada em Ideias";return}
+  }
   var hm=e.target.closest&&e.target.closest("[data-hm]");
   if(hm){state.hmode=hm.dataset.hm;state.tab="hoje";render();window.scrollTo(0,0);return}
   var b=e.target.closest&&e.target.closest("[data-mdb]");if(!b)return;
@@ -2134,7 +2149,7 @@ function pubParc(){
     PCUI.open=null;parcAdopt();
     h+='<div><h2>Parcerias</h2><p class="sub">Cada parceria tem um painel: do briefing ao pagamento. Aqui você vê o que precisa de atenção.</p></div>';
     var rec=0,atr=0,prod=0;PARC.items.forEach(function(x){parcFix(x);var c=x.campId&&state.camp[x.campId];if(c&&c.done&&c.done.e9&&!c.done.e10){rec+=parseNum(c.v);if(c.d&&daysUntil(etapaDate(c,"e10"))<0)atr++}if(x.status==="Em produção")prod++});
-    h+='<div class="card"><div class="fields"><div><div class="note">A receber</div><h3>'+brl(rec)+'</h3></div><div><div class="note">Em produção</div><h3>'+prod+'</h3></div></div>'+(atr?'<p class="note" style="color:var(--bad)">'+atr+' pagamento(s) com prazo vencido.</p>':'')+'</div>';
+    h+='<div class="card tap" role="button" tabindex="0" data-go="tab=pub;pub=camp"><div class="fields"><div><div class="note">A receber</div><h3>'+brl(rec)+'</h3></div><div><div class="note">Em produção</div><h3>'+prod+'</h3></div></div>'+(atr?'<p class="note" style="color:var(--bad)">'+atr+' pagamento(s) com prazo vencido.</p>':'')+'</div>';
     h+='<div class="card"><h3>Nova parceria</h3><label class="lab">Marca<select id="pc-m">'+marcaList().map(function(m){return '<option'+(m===PCUI.mc?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
      +'<label class="lab">Nome da parceria (opcional)<input type="text" id="pc-n" value="'+esc(PCUI.nm)+'" placeholder="Ex.: Black Friday, Reels de novembro"></label>'
      +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button><button class="btn ghost small" data-pcb="avulso">Roteiro avulso</button></div></div>';
@@ -2425,6 +2440,7 @@ D=fallbackD();
     if(!typing())render();
   }catch(e){}
 })();
+document.addEventListener("keydown",function(e){var t=e.target;if((e.key==="Enter"||e.key===" ")&&t&&t.getAttribute&&t.getAttribute("role")==="button"&&t.tagName!=="BUTTON"){e.preventDefault();t.click()}});
 </script>
 
 
