@@ -4,7 +4,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hoje com a Mari">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Pinyon+Script&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: uma coluna de celular, barra de navegação fixa embaixo, dias no topo só em Hoje e Gravar. */
 :root{
@@ -302,6 +302,43 @@ body::after{content:"";position:fixed;left:0;right:0;top:0;height:300px;z-index:
 .agora .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-weight:700;color:var(--gold-ink,var(--accent));font-size:13px}
 .ckcard .row{padding:2px 0;gap:10px;min-height:0}.ckcard .row label{font-size:15px;line-height:1.3}.ckcard .row input[type=checkbox]{width:20px;height:20px;flex:0 0 auto}
 body.simple .adv{display:none!important}
+
+/* ===== v31: claro, papel, escrita romântica ===== */
+:root{--bg:#F6EEE2;--surface:#FFFBF5;--ink:#3B2B2F;--muted:#7C6B67;--line:#E5D6C3;--accent:#8A2C3D;--accent-soft:#F4E1E1;--accent-ink:#FFFFFF;--gold:#B08D57;--gold-ink:#8A6A3A;--gold-soft:#F1E6D2;--hero:#FFF8EE;--hero-ink:#3B2B2F;--glass:rgba(255,251,245,.93);--shadow:0 1px 0 rgba(255,255,255,.8) inset,0 14px 30px -22px rgba(90,50,40,.35);--tex:.55;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#F6EEE2;--surface:#FFFBF5;--ink:#3B2B2F;--muted:#7C6B67;--line:#E5D6C3;--accent:#8A2C3D;--accent-soft:#F4E1E1;--accent-ink:#FFFFFF;--gold:#B08D57;--gold-ink:#8A6A3A;--gold-soft:#F1E6D2;--hero:#FFF8EE;--hero-ink:#3B2B2F;--glass:rgba(255,251,245,.93);--shadow:0 1px 0 rgba(255,255,255,.8) inset,0 14px 30px -22px rgba(90,50,40,.35);--tex:.55;color-scheme:light}}
+:root[data-theme="dark"]{--bg:#F6EEE2;--surface:#FFFBF5;--ink:#3B2B2F;--muted:#7C6B67;--line:#E5D6C3;--accent:#8A2C3D;--accent-soft:#F4E1E1;--accent-ink:#FFFFFF;--gold:#B08D57;--gold-ink:#8A6A3A;--gold-soft:#F1E6D2;--hero:#FFF8EE;--hero-ink:#3B2B2F;--glass:rgba(255,251,245,.93);--shadow:0 1px 0 rgba(255,255,255,.8) inset,0 14px 30px -22px rgba(90,50,40,.35);--tex:.55;color-scheme:light}
+body{background-color:var(--bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.011' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .72 0 0 0 0 .55 0 0 0 0 .38 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .04' numOctaves='2' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .24 0 0 0 .3 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");background-size:520px 520px,220px 220px;color:var(--ink)}
+body::after{background:radial-gradient(70% 100% at 95% 0%,rgba(176,141,87,.16),transparent 70%),radial-gradient(60% 80% at 0% 0%,rgba(138,44,61,.06),transparent 70%)}
+.script{font-family:'Pinyon Script','Cormorant Garamond',cursive;font-weight:400;letter-spacing:0}
+.brand{font-family:'Pinyon Script','Cormorant Garamond',cursive;font-weight:400;font-size:30px;letter-spacing:0;color:var(--accent)}
+h2,h3{font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;font-weight:600}
+h3{font-size:21px}
+.stack>div>h2{font-style:italic;color:var(--accent);font-size:32px;border-bottom:1px solid rgba(176,141,87,.45)}
+.greet{display:flex;flex-direction:column;gap:2px;padding:6px 2px 0}
+.greet .script{font-size:44px;line-height:1.05;color:var(--accent)}
+.greet .note{letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold-ink)}
+.hero2{background:radial-gradient(120% 90% at 100% 0%,rgba(176,141,87,.18),transparent 55%),radial-gradient(90% 70% at 0% 100%,rgba(138,44,61,.07),transparent 60%),linear-gradient(160deg,#FFFCF6,#F6EADB);color:var(--ink);border:1px solid rgba(176,141,87,.6);outline:1px solid rgba(176,141,87,.38);outline-offset:-9px;box-shadow:var(--shadow)}
+.hero2::before{opacity:.55}
+.hero2::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:multiply;opacity:.45}
+.hero2 .pilltag{color:var(--gold-ink);border:1px solid rgba(176,141,87,.7);background:transparent}
+.hero2 h2{color:var(--accent);font-family:'Pinyon Script','Cormorant Garamond',cursive;font-weight:400;font-size:48px;line-height:1.05;letter-spacing:0;text-shadow:none}
+.hero2.compact h2{font-size:40px}
+.hero2 h2::after{background:var(--gold)}
+.hero2 p{color:var(--muted)}
+.hero2 p::after{color:rgba(176,141,87,.16)}
+.hero{background:radial-gradient(120% 90% at 100% 0%,rgba(176,141,87,.16),transparent 55%),linear-gradient(160deg,#FFFCF6,#F6EADB);color:var(--ink);border:1px solid rgba(176,141,87,.6);outline:1px solid rgba(176,141,87,.35);outline-offset:-8px;box-shadow:var(--shadow)}
+.hero .kicker{color:var(--gold-ink)}
+.hero h2{color:var(--accent);font-style:italic;font-weight:600}
+.hero p{color:var(--muted)}
+.ring b{color:var(--accent)}
+.card,.item{background-color:var(--surface);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(180deg,rgba(176,141,87,.06),transparent 40%);background-size:160px 160px,auto;box-shadow:var(--shadow)}
+.tile{background-image:radial-gradient(rgba(176,141,87,.28) 1px,transparent 1.6px),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:14px 14px,160px 160px}
+.det>summary{background-color:var(--surface);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .32 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px}
+.seg{background:rgba(255,251,245,.7)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.btn:not(.ghost){background-color:var(--accent);color:#fff}
+#view::after{content:"feito com carinho para a Mari";font-family:'Pinyon Script','Cormorant Garamond',cursive;font-size:26px;letter-spacing:0;text-transform:none;color:var(--accent);opacity:.85;border-top:1px solid rgba(176,141,87,.4)}
+.brand{font-size:27px;white-space:nowrap}
 </style>
 
 <div class="wrap">
@@ -600,7 +637,7 @@ function renderHoje(){
   if((state.hmode||"meu")==="meu"){renderMeuDia();return}
   var d=dayById(state.sel),p=dayProgress(d),pc=Math.round(p.n/p.t*100);
   var needsDone=d.needs.filter(function(_,k){return state.checks[d.id+"-n"+k]}).length;
-  var h='<div class="stack"><div class="btns"><button class="btn ghost small" data-hm="meu">← Meu dia</button></div>';
+  var h='<div class="stack">'+(SIMPLE?greetHtml():'<div class="btns"><button class="btn ghost small" data-hm="meu">← Meu dia</button></div>');
   if(isRest(d)){
     h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>Dia de pausa</p></div></div>'
       +'<div class="rest"><h3>Hoje é dia de pausa</h3><p>Nada para gravar. Descansar também faz parte do plano. Se mudar de ideia, é só voltar.</p><div class="btns"><button class="btn" data-rest="0">Voltar ao dia</button></div></div></div>';
@@ -609,6 +646,7 @@ function renderHoje(){
   h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>'+esc(d.theme)+'</p><p>'+(p.n===p.t?'Dia completo':'Faltam '+(p.t-p.n)+' entregas')+' · pedidos para você: '+needsDone+'/'+d.needs.length+'</p></div>'+ringSvg(pc)+'</div>';
   if(d.urgent)h+='<div class="alert"><b>Atenção</b>'+esc(d.urgent)+'</div>';
   h+='<div class="card"><p><b>Começar:</b> '+esc(d.start)+'</p><p><b>Terminar:</b> '+esc(d.finish)+'</p></div>';
+  if(SIMPLE)h+=ckHtml(isoToday());
   var fid=d.id+"-f";
   h+='<div class="block"><h3>Feed principal</h3><div class="item'+(stOf(fid)==="posted"?' done':'')+'"><div class="row"><div class="txt"><span class="tag">'+esc(d.feed.kind)+'</span><br>'+esc(d.feed.title)+'</div></div><div class="meta">'+stSelect(fid)+'</div>'
     +'<details><summary>Ver roteiro</summary><div class="in"><p>'+esc(d.feed.body)+'</p></div></details>'
@@ -637,6 +675,7 @@ function renderHoje(){
     +'<label class="lab">O que eu aprendi hoje<textarea id="r-apr" placeholder="O que funcionou, o que não funcionou...">'+esc(r.apr||"")+'</textarea></label>'
     +'<div class="btns"><button class="btn small" id="saveres">Salvar resultado</button></div></div>';
   h+='<div class="block"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia..." aria-label="Recado para a equipe">'+esc(state.notes[d.id]||"")+'</textarea><div class="btns"><button class="btn small ghost" id="savenote">Salvar recado</button><button class="btn small ghost" data-rest="1">Hoje vou descansar</button></div></div>';
+  if(SIMPLE)h+=qiBox();
   h+='<p class="note">Roteiros completos e briefings das marcas ficam no <a class="link" href="'+TRELLO+'" target="_blank" rel="noopener">Trello Operação Marketing</a>.</p></div>';
   $("#view").innerHTML=h;
 }
@@ -1161,7 +1200,7 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
 /* ============ v30: MODO SIMPLES ============ */
 var SIMPLE=true;try{SIMPLE=localStorage.getItem("hoje-modo")!=="completo"}catch(e){}
 function sx(x){return SIMPLE?'':x}
-function setSimple(v){SIMPLE=v;try{localStorage.setItem("hoje-modo",v?"simples":"completo")}catch(e){}document.body.classList.toggle("simple",v);if(v){state.tab="hoje";state.hmode="meu"}render();window.scrollTo(0,0)}
+function setSimple(v){SIMPLE=v;try{localStorage.setItem("hoje-modo",v?"simples":"completo")}catch(e){}document.body.classList.toggle("simple",v);if(v){state.tab="hoje";state.hmode="plano"}render();window.scrollTo(0,0)}
 try{document.body.classList.toggle("simple",SIMPLE)}catch(e){}
 var QI={txt:"",msg:"",rec:null};
 function qiBox(){return '<div class="card"><h3>Anotar uma ideia</h3><textarea id="qi-t" aria-label="Nova ideia" placeholder="Escreva ou fale. Depois você decide o que fazer com ela." style="min-height:84px">'+esc(QI.txt)+'</textarea><div class="btns"><button class="btn" data-qi="save">Guardar</button>'+(SRC?'<button class="btn small ghost" data-qi="mic">'+(QI.rec?'Ouvindo… toque para parar':'Falar')+'</button>':'')+'</div>'+(QI.msg?'<p class="note">'+esc(QI.msg)+'</p>':'')+'<div class="btns"><button class="btn small ghost" data-gob="tab=criar;hub=ideias">Minhas ideias ('+state.ideas.length+')</button><button class="btn small ghost" data-gob="tab=criar;hub=roteiro">Escrever um roteiro</button></div></div>'}
@@ -1182,6 +1221,10 @@ function atalhosHtml(){
   var h='<div><h2>Mais</h2><p class="sub">Tudo o que não é do dia a dia fica aqui.</p></div>'+L.map(function(x){return'<div class="card tap" role="button" tabindex="0" data-go="'+x[2]+'"><h3>'+x[0]+'</h3><p class="note">'+x[1]+'</p></div>'}).join('');
   h+='<div class="card"><h3>Modo do app</h3><p class="note">'+(SIMPLE?'Agora você vê só o essencial: Hoje, Calendário e Criar. O modo completo mostra tudo de uma vez.':'Agora você vê tudo. O modo simples deixa só Hoje, Calendário e Criar.')+'</p><div class="btns"><button class="btn small" data-simple="'+(SIMPLE?'off':'on')+'">'+(SIMPLE?'Mostrar tudo (modo completo)':'Voltar ao modo simples')+'</button></div></div>';
   return h}
+
+
+function greetHtml(){var hr=new Date().getHours();return '<div class="greet"><span class="script">'+(hr<12?"Bom dia":hr<18?"Boa tarde":"Boa noite")+', Mari</span><span class="note">'+acFmt(isoToday())+' · o que fazer hoje</span></div>'}
+if(SIMPLE)state.hmode="plano";
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
@@ -1238,9 +1281,9 @@ function render(){
 }
 
 function addSeg(){
-  var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;if(SIMPLE&&t==="hoje")return;
+  var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
   var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
-  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Roteiro de hoje</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
+  $("#view").insertAdjacentHTML("afterbegin",(SIMPLE&&t==="hoje")?'<div class="seg" role="tablist"><button data-hm="plano" aria-pressed="'+pr(hm==="plano")+'">Plano do dia</button><button data-hm="meu" aria-pressed="'+pr(hm!=="plano")+'">Tarefas e ideias</button></div>':'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Roteiro de hoje</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
 }
 function addHero(){
   var t=state.tab,H=null;
@@ -1363,7 +1406,7 @@ function crAction(a,el){
   }
   if(a==="save"){
     var m=c.material,name=(m.titulo||"material").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"material";
-    var doc='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(m.titulo)+'</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"><style>body{margin:0;padding:16px;background:#F6F1F3}'+MAT_CSS+'</style></head><body>'+materialHtml(m,c.tipo)+'</body></html>';
+    var doc='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(m.titulo)+'</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Pinyon+Script&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"><style>body{margin:0;padding:16px;background:#F6F1F3}'+MAT_CSS+'</style></head><body>'+materialHtml(m,c.tipo)+'</body></html>';
     if(!D){el.textContent="Salvar não está disponível aqui";return}
     D.save({filename:name+".html",data:doc}).then(function(){el.textContent="Arquivo salvo"},function(e){el.textContent=(e&&e.code==="declined")?"Salvar cancelado":"Não consegui salvar"});
     return;
