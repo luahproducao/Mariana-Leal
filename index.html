@@ -347,6 +347,18 @@ h3{font-size:21px}
 .ed-note{margin-top:6px;color:var(--accent);font-style:italic;font-size:14px}
 .ed{border-top:2px solid var(--gold)}
 .ed textarea,.ed input{width:100%}
+
+.cp{margin-top:8px}
+.cp summary{cursor:pointer;color:var(--accent);font-weight:600}
+.cp .cpb{display:grid;gap:10px;padding:10px 0 2px}
+.cp .cpr{display:grid;gap:2px}
+.cp .cpl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cp .cpt{white-space:pre-wrap}
+.cp .stk{border:1px dashed var(--accent);border-radius:12px;padding:10px;background:var(--accent-soft,transparent)}
+.cp .stk b{color:var(--accent)}
+.cp .dst{border-left:3px solid var(--accent);padding-left:10px}
+.stg summary{cursor:pointer;color:var(--accent);font-weight:600}
+.stg ul{margin:6px 0 0;padding-left:18px}
 </style>
 
 <div class="wrap">
@@ -666,12 +678,12 @@ function renderHoje(){
   shown.forEach(function(x){
     h+='<div class="item'+(stOf(x.id)==="posted"?' done':'')+'"><div class="row"><span class="s-num">'+x.n+'</span><div class="txt tap" role="button" tabindex="0" data-ed="s'+x.n+'">'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'<div>'+esc(x.text).replace(/\n/g,'<br>')+'</div>'+edNote(d,"s"+x.n)+'</div></div>'
       +(x.tray?'<div class="meta"><span class="note">Use o link exclusivo da Tray e escreva “Parceria paga”.</span></div>':'')
-      +'<div class="meta">'+stSelect(x.id)+'</div>'+edHtml(d,"s"+x.n)+'</div>';
+      +'<div class="meta">'+stSelect(x.id)+'</div>'+edHtml(d,"s"+x.n)+cpHtml(d,"s"+x.n)+'</div>';
   });
-  h+='</div>';
+  h+=stickerGuide()+'</div>';
   h+='<div class="block"><h3>Canais extras</h3>'
-    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ma"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div>'+edNote(d,"ma")+'</div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div>'+edHtml(d,"ma")+'</div>'
-    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ass"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div>'+edNote(d,"ass")+'</div></div><div class="meta">'+stSelect(d.id+"-as")+'</div>'+edHtml(d,"ass")+'</div></div>';
+    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ma"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div>'+edNote(d,"ma")+'</div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div>'+edHtml(d,"ma")+cpHtml(d,"ma")+'</div>'
+    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ass"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div>'+edNote(d,"ass")+'</div></div><div class="meta">'+stSelect(d.id+"-as")+'</div>'+edHtml(d,"ass")+cpHtml(d,"ass")+'</div></div>';
   if(d.funnel)h+='<div class="block"><h3>Antes de qualquer chamada para a assinatura</h3><div class="item">'+d.funnel.map(function(t,k){return chk(d.id+"-fun"+k,t)}).join("")+'</div></div>';
   if(!SIMPLE)h+=avisoHtml(d)+resultHtml(d)+recadoHtml(d);
   if(SIMPLE)h+=qiBox();
@@ -1135,10 +1147,10 @@ function metHtml(it){
    +'<div class="fields"><label>Salvamentos<input type="number" inputmode="numeric" data-cif="msv" value="'+esc(it.msv||"")+'"></label><label>Alcance<input type="number" inputmode="numeric" data-cif="mal" value="'+esc(it.mal||"")+'"></label></div>'
    +'<label class="lab">O que funcionou ou não funcionou<textarea data-cif="func" style="min-height:70px" placeholder="Ex.: o gancho do primeiro segundo segurou; a legenda longa não.">'+esc(it.func||"")+'</textarea></label>'
    +'<div class="btns"><button class="btn small ghost" data-rvx="learn|'+it.id+'">Guardar aprendizado na minha base</button></div>'}
-var CALTPL={"Feed principal":"GANCHO (1º segundo): \nPROBLEMA OU HISTÓRIA: \nO QUE EU FAÇO NA PRÁTICA: \nCHAMADA FINAL (um passo só): \nTAKES: rosto + mão/tela + detalhe do produto\nTEXTO NA TELA: ",
-"Stories":"STORY 1 (abertura, rosto): \nSTORY 2 (o conteúdo, tela ou bastidor): \nSTORY 3 (enquete, caixinha ou link): \nADESIVO: \nSE FOR PUBLI: link rastreável e “Parceria paga” visíveis",
-"Melhores Amigos":"ABERTURA (como se falasse com uma amiga): \nBASTIDOR OU OPINIÃO QUE NÃO VAI NO FEED: \nPERGUNTA PARA ELAS RESPONDEREM: \nO QUE QUERO SABER DELAS: ",
-"Assinatura":"PROMESSA DO CONTEÚDO (o que a assinante leva): \nPASSO A PASSO OU BASTIDOR: \nMATERIAL EXTRA (planilha, modelo, áudio): \nCHAMADA PARA RESPONDER OU PERGUNTAR: ",
+var CALTPL={"Feed principal":"GANCHO (1º segundo): \nPROBLEMA OU HISTÓRIA: \nO QUE EU FAÇO NA PRÁTICA: \nCHAMADA FINAL (um passo só): \nTAKES: rosto + mão/tela + detalhe do produto\nTEXTO NA TELA: \nLEGENDA (primeira linha forte + chamada): \nDESTAQUE (se vale guardar): ",
+"Stories":"STORY 1 (abertura, rosto)\nFALA: \nTELA: \nSTICKER: \n\nSTORY 2 (o conteúdo, tela ou bastidor)\nFALA: \nTELA: \nSTICKER: \n\nSTORY 3 (pergunta ou enquete)\nFALA: \nSTICKER: caixinha de perguntas ou enquete com 2 opções\n\nDESTAQUE: nome e capa\nSE FOR PUBLI: link rastreável e “Parceria paga” visíveis",
+"Melhores Amigos":"ABERTURA (como se falasse com uma amiga): \nBASTIDOR OU OPINIÃO QUE NÃO VAI NO FEED: \nPASSO 1: \nPASSO 2: \nPASSO 3: \nPERGUNTA PARA ELAS RESPONDEREM: \nSTICKER: caixinha de perguntas ou enquete\nO QUE QUERO SABER DELAS: ",
+"Assinatura":"PROMESSA DO CONTEÚDO (o que a assinante leva): \nABERTURA: \nPASSO A PASSO OU BASTIDOR: \nMATERIAL EXTRA (planilha, modelo, áudio): \nCHAMADA PARA RESPONDER OU PERGUNTAR: \nSTICKER: caixinha de perguntas ou enquete\nDESTAQUE (se a assinatura tiver): ",
 "Reels teste":"HIPÓTESE (o que quero testar): \nGANCHO A: \nGANCHO B: \nMEDIR: salvamentos e retenção até 3s\nDECISÃO: se passar da média, vira Reels de feed"};
 function tplBtn(it){return CALTPL[it.canal]?'<div class="btns"><button class="btn small ghost" data-rvx="tpl|'+it.id+'">Usar modelo de '+esc(it.canal)+'</button></div>':''}
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-rvx]");if(!x)return;var q=x.dataset.rvx.split("|"),a=q[0];
@@ -1287,6 +1299,123 @@ function recadoHtml(d){var h='';
 function resultCal(){var d=DAYS.filter(function(x){return x.date===CAL.sel})[0];if(!d)return '';var r=state.results[d.id];return detHtml("rd","Depois de postar · resultado do dia"+(r?" (anotado)":""),resultHtml(d))}
 function equipeAlinhar(){var d=dayById(state.sel);if(!d)return '';return '<div class="card"><h3>Alinhar com a equipe · '+esc(d.title)+'</h3><p class="note">Monte o aviso para a Laila com o que já foi gravado e deixe um recado. O dia vem da faixa de dias do plano.</p><div class="pills" role="group" aria-label="Dia">'+DAYS.map(function(x){return '<button class="pill" data-eqday="'+x.id+'" aria-pressed="'+(x.id===d.id)+'">'+x.w+' '+x.n+'</button>'}).join('')+'</div></div>'+avisoHtml(d)+recadoHtml(d)}
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-eqday]");if(x){state.sel=x.dataset.eqday;render()}});
+
+
+/* ============ v34: COPY dos roteiros (fala, tela, take, sticker, destaque) ============ */
+var COPYROWS=[
+/* [dia, item, fala, tela, take, stickerTipo, stickerTexto, stickerOpcoes, destaque] */
+["d1030","s1","Bom dia, gente! Hoje o look é esse aqui, e o link das peças está aqui embaixo pra quem quiser ver.","Look do dia","Rosto e corpo inteiro, luz da janela ou da loja, 6 a 8s","Link","Ver o look","",""],
+["d1030","s2","Gente, a esquenta da Black começou aqui na Loyall. Olha como funciona: [PREENCHER: o que é a ação], vale até [PREENCHER: data] e, pra participar, é só [PREENCHER: como participar].","Esquenta da Black Loyall","Você falando para a câmera, 15s, com o cartaz ou a arara da ação ao fundo","Lembrete","Esquenta da Black","","Crie o destaque “Black Loyall” e guarde aqui este story e os próximos da ação. Capa: a palavra BLACK em letra grande sobre a cor da marca."],
+["d1030","s3","Vem comigo ver como está a loja. Olha as araras da ação, olha esse cantinho aqui.","Dentro da loja","Vídeo andando pela loja, câmera na altura do peito, 10 a 15s sem cortes","Enquete","Qual arara você quer ver de perto?","Araras da ação|Novidades","Black Loyall"],
+["d1030","s4","Pra participar é simples: [PREENCHER: passo 1] e [PREENCHER: passo 2]. Qualquer dúvida, me chama no WhatsApp da loja.","Como participar","Fundo liso com texto grande, ou você de frente, 8s","Link","WhatsApp da loja","","Black Loyall (deixe este como último story do destaque)"],
+["d1030","s5","Gente, eu mostrei um pouco do que essa viagem realmente significou. Vai lá no Reel e me conta o que achou.","Novo Reel: por trás da curadoria","Compartilhe o Reel do feed no story e adicione sua reação de 3s","Controle deslizante","Quanto você gostou dos bastidores?","emoji 🔥","Crie o destaque “Curadoria” para guardar os bastidores das escolhas de compra."],
+["d1030","s6","Uma pergunta rápida pra você que tem loja: você costuma planejar as compras ou decide na hora?","Planeja ou decide na hora?","Você de frente ou fundo liso, 5s","Enquete","Você costuma planejar as compras ou decide na hora?","Planejo|Decido na hora","Crie o destaque “Para lojistas” e guarde aqui as enquetes e as dicas."],
+["d1030","s7","Bastidor do dia: [PREENCHER: o que você está organizando]. Hoje é dia de pegar o que eu aprendi e transformar em plano.","Organizando o dia","Mãos em cena (caderno, planilha ou peças), 6 a 10s. Sem nome de fornecedor visível","Música","Uma trilha leve","",""],
+["d1030","s8","Faltam 28 dias pra Black! A gente está só começando.","Faltam 28 dias","Fundo da loja, você sorrindo, 5s","Contagem regressiva","Black Loyall","Termina em 27/11",""],
+["d1030","ma","Abertura, como quem conversa com uma amiga: “Meninas, vou contar uma coisa que não vai pro feed: como eu pensei a ação da Black da Loyall.”\nPasso 1: por que escolhi essa ação (uma frase).\nPasso 2: o que ela precisa cobrir, que é margem e estoque, em palavras simples e só com o que você quiser mostrar.\nPasso 3: o que deu mais trabalho.\nFecho: “E você, o que mais te trava na hora de montar uma ação?”","Só para Melhores Amigos","3 stories de 15s, você de frente, voz natural, sem edição","Caixinha de perguntas","O que mais te trava na hora de montar uma ação?","",""],
+["d1030","ass","Abertura da série: “Esta é a série que vai te levar da esquenta até a Black, passo a passo.”\nSemana 1: antecipação (avisar as clientes e organizar o estoque da ação).\nSemana 2: preparação (preço mínimo e margem).\nSemana 3: execução (operação, embalagem e envio).\nSemana 4: pós Black (balanço e aprendizados).\nFecho: “Qual semana você mais precisa? Me conta aqui.”","Série: Esquenta de Black para lojistas","Post com o calendário em 4 linhas, ou áudio de 2 minutos. Entregue só o que estiver pronto","Caixinha de perguntas","Qual semana você mais precisa?","","Se a assinatura tiver destaque, crie “Série Black” e guarde a abertura da série."],
+
+["d1031","s1","Bom dia, gente! Sábado de look novo e de loja com novidade. O link das peças está aqui.","Look do sábado","Rosto e corpo inteiro, luz natural, 6s","Link","Ver o look","",""],
+["d1031","s2","Essa aqui entra na esquenta da Black. Olha o caimento. [PREENCHER: o que faz essa peça entrar na ação].","Peça da esquenta","Uma peça só, você vestindo ou segurando, giro de 360 graus, 10s","Enquete","Você levaria?","Levaria|Quero ver mais","Black Loyall"],
+["d1031","s3","Olha o que uma cliente mandou pra gente. [PREENCHER: só use se for um retorno real e se ela tiver autorizado].","Retorno de cliente","Print ou vídeo, com nome e dados borrados. Só publique com autorização","Menção","@ da cliente, só com autorização","","Clientes Loyall (somente retornos reais e autorizados)"],
+["d1031","s4","Pergunta pra quem compra mercadoria pra revender: o que pesa mais na sua decisão, a peça ou os números?","A peça ou os números?","Você de frente, 5s","Enquete","O que pesa mais na sua decisão?","A peça|Os números","Para lojistas"],
+["d1031","s5","Salva esse carrossel! São 5 critérios pra avaliar um fornecedor antes de comprar. Vale ler com calma.","Salve o checklist","Compartilhe o carrossel no story e aponte para o botão de salvar","Controle deslizante","Quanto você já avalia isso antes de comprar?","emoji 📝","Para lojistas"],
+["d1031","s6","Me conta: qual a sua maior dificuldade ao negociar com fornecedores? Responde na caixinha, que eu vou usar as respostas nos próximos conteúdos.","Sua maior dificuldade","Você de frente, 8s","Caixinha de perguntas","Qual sua maior dificuldade ao negociar com fornecedores?","","Perguntas respondidas (guarde as respostas que você responder em vídeo)"],
+["d1031","s7","Faltam 27 dias pra Black! Passa na loja ou me chama no WhatsApp pra saber como participar.","Faltam 27 dias","Fundo da loja, 5s","Contagem regressiva","Black Loyall","Termina em 27/11",""],
+["d1031","ma","Abertura: “Meninas, hoje eu vou mostrar como eu organizo as opções antes da Black.”\nPasso 1: o que entra na ação e por quê.\nPasso 2: o que fica de fora e por quê.\nPasso 3: um critério seu para decidir (uma frase simples).\nCuidado: sem contatos privados, endereços ou preços que você não autorizou.\nFecho: “Você faria diferente?”","Só para Melhores Amigos","3 stories de 15s, com as peças ou a lista na tela","Enquete","Você faria diferente?","Sim|Não",""],
+["d1031","ass","Semana 1 da série para lojistas: “Esquenta de Black, o que fazer agora.”\nPasso 1: avise suas clientes antes (modelo de mensagem curto).\nPasso 2: organize o estoque da ação.\nPasso 3: defina o preço mínimo de cada peça (custo + frete + taxas + a margem que você quer).\nFecho: “Qual desses você já fez?”\nEntregue só o que estiver pronto.","Semana 1: esquenta de Black","Post de texto ou carrossel simples, ou áudio de 3 minutos","Enquete","Você já avisou suas clientes?","Já avisei|Ainda não",""],
+
+["d1101","s1","Domingo é dia de parar um pouquinho. Empreender também é olhar para o que aconteceu e organizar o próximo passo.","Reflexão de domingo","Você de frente, voz calma, 15s, luz suave","Controle deslizante","Como foi a sua semana?","emoji 🙂",""],
+["d1101","s2","Bastidor de domingo: caderno e calendário na mão, planejando a semana.","Planejando a semana","Mão escrevendo no caderno e close no calendário, 6s","Música","Uma trilha calma","",""],
+["d1101","s3","Me conta: o que você quer organizar na sua loja esta semana?","Sua semana","Você de frente ou fundo liso, 5s","Enquete","O que você quer organizar na sua loja esta semana?","Estoque|Conteúdo e vendas","Para lojistas"],
+["d1101","s4","Passando para lembrar: a oferta da Tray está prevista para 10/11.","Oferta da Tray: prevista para 10/11 · Parceria paga","Você de frente, 6s. Escreva “Parceria paga” visível na tela","Nenhum","","","Tray (guarde os 4 stories da missão, com “Parceria paga” visível)"],
+["d1101","s5","O material divulga loja pronta em até 30 dias e um ano de plano Avançado. Consulte os requisitos nas informações oficiais.","Loja pronta em até 30 dias · 1 ano de plano Avançado · Consulte os requisitos · Parceria paga","Texto grande em fundo liso ou você de frente, 8s","Nenhum","","","Tray"],
+["d1101","s6","Também são divulgados investimento em Meta Ads pela Tray e bônus extras, sujeitos às condições oficiais.","Sujeito às condições oficiais · Parceria paga","Texto grande em fundo liso, 8s. Não prometa resultado","Nenhum","","","Tray"],
+["d1101","s7","Quer receber as informações? Acesse meu link exclusivo e faça seu cadastro. Parceria paga.","Meu link exclusivo · Parceria paga","Você de frente apontando para o link, 6s","Link","Link exclusivo da Tray","","Tray"],
+["d1101","s8","Boa noite! Semana começando e a esquenta da Black segue aqui na Loyall. Quem ainda não viu, passa na loja ou me chama no WhatsApp.","Boa semana","Fundo da loja, 6s","Link","WhatsApp da loja","",""],
+["d1101","ma","Abertura: “Meninas, como foi montar a esquenta da Black na loja.”\nPasso 1: o que deu certo.\nPasso 2: o que ainda está sendo ajustado.\nPasso 3: uma coisa que você faria diferente.\nSó experiências reais, nada inventado.\nFecho: “Quer que eu mostre o próximo ajuste?”","Só para Melhores Amigos","2 a 3 stories de 15s, voz natural","Enquete","Quer que eu mostre o próximo ajuste?","Quero|Depois",""],
+["d1101","ass","Post de abertura da semana: “Nesta semana, vamos aprofundar escolhas de compra e organização de estoque.”\nListe só o que de fato será entregue (por exemplo: uma aula curta, uma ficha e um exercício), com o dia de cada um.\nFecho: “Qual dessas entregas você quer primeiro?”","Semana: escolhas de compra e estoque","Post de texto simples com 3 linhas","Caixinha de perguntas","O que você quer ver primeiro nesta semana?","",""],
+
+["d1102","s1","Bom dia, gente! Hoje é feriado, então a loja funciona assim: [PREENCHER: abre ou não, e o horário]. O link do look está aqui.","Look do dia · Horário do feriado","Rosto e corpo inteiro, 6s, com o horário em texto grande","Link","Ver o look","",""],
+["d1102","s2","A esquenta da Black segue aqui. Quem ainda não aproveitou, olha como funciona. Vale até [PREENCHER: data].","Esquenta da Black segue","Você de frente, 10s, com a arara ao fundo","Lembrete","Esquenta da Black","","Black Loyall"],
+["d1102","s3","Você já comprou algo lindo e depois teve dificuldade para vender?","Peça bonita nem sempre vende","Fundo liso, 5s","Enquete","Você já comprou algo lindo e teve dificuldade para vender?","Já|Ainda não","Para lojistas"],
+["d1102","s4","Calma, a ideia não é julgar ninguém. É aprender com os dados, porque todo mundo já errou numa compra.","Sem julgamento","Você de frente, 8s, tom leve","Nenhum","","",""],
+["d1102","s5","Gravei um Reel sobre isso. Vai lá ver: uma peça linda pode não ser uma boa compra.","Novo Reel","Compartilhe o Reel no story, 3s de reação","Controle deslizante","Isso já aconteceu com você?","emoji 😅","Para lojistas"],
+["d1102","s6","Dica prática: antes de repor, olhe as vendas, o estoque parado e as perguntas que suas clientes fazem. Essas três coisas já mostram muito.","Antes de repor: 3 olhares","Texto grande em 3 linhas, uma por vez, 10s","Nenhum","","","Para lojistas"],
+["d1102","s7","Faltam 8 dias para a oferta da Tray. Acesse meu link exclusivo para receber as informações. Parceria paga.","Faltam 8 dias · Oferta da Tray · Parceria paga","Você de frente, 8s. Não prometa resultado","Contagem regressiva","Oferta da Tray","10/11","Tray"],
+["d1102","s8","Me manda por resposta aqui no story a sua maior dúvida sobre comprar mercadoria. Eu respondo as que mais aparecerem.","Sua maior dúvida","Você de frente, 6s","Caixinha de perguntas","Qual sua maior dúvida sobre comprar mercadoria?","","Perguntas respondidas"],
+["d1102","ma","Abertura: “Meninas, como eu defini o que entra na ação da Black e o que ficou de fora.”\nPasso 1: o critério principal (uma frase).\nPasso 2: um exemplo do que entrou.\nPasso 3: um exemplo do que ficou de fora e por quê.\nSó experiências reais.\nFecho: “E você, qual é o seu critério?”","Só para Melhores Amigos","3 stories de 15s","Caixinha de perguntas","Qual é o seu critério para escolher o que comprar?","",""],
+["d1102","ass","Áudio ou aula curta: “Como transformar a escolha de mercadoria em um processo, não em impulso.”\nRoteiro: 1) público, 2) histórico de vendas, 3) estoque atual, 4) custo total, 5) margem, 6) objetivo da compra.\nExercício de 5 minutos: escolha uma peça que você pensa em comprar e responda os 6 pontos.\nSomado à linha do calendário da esquenta: semana 2, preço mínimo e margem.\nSó anuncie como entregue depois de publicar.","Aula: escolha de mercadoria como processo","Áudio de 5 a 8 minutos ou vídeo curto com ficha na tela","Caixinha de perguntas","Qual peça você vai avaliar com os 6 pontos?","","Se houver destaque da assinatura, crie “Aulas” e guarde esta."],
+
+["d1103","s1","Bom dia, gente! Terça de look novo. O link está aqui.","Look do dia","Rosto e corpo inteiro, 6s","Link","Ver o look","",""],
+["d1103","s2","Olha o que está entrando na esquenta da Black. [PREENCHER: peças]. E pra participar é só [PREENCHER: como participar].","Peças da esquenta","Mostre 2 ou 3 peças com um corte de 3s cada","Enquete","Qual peça você quer ver de perto?","Primeira|Segunda","Black Loyall"],
+["d1103","s3","Vou mostrar um exemplo de lista, com dados fictícios, só pra você entender: repor, observar e não comprar agora.","Exemplo fictício: repor, observar, não comprar agora","Tela com 3 colunas escritas à mão ou no celular. Avise que os dados são fictícios","Nenhum","","","Para lojistas"],
+["d1103","s4","Você acompanha o que está parado no seu estoque?","Estoque parado: você acompanha?","Fundo liso, 5s","Enquete","Você acompanha o que está parado no estoque?","Toda semana|Preciso melhorar","Para lojistas"],
+["d1103","s5","Antes de dar desconto, descubra seu preço mínimo: custo, mais frete, mais taxas, mais a margem que você quer. Sem isso, o desconto vira prejuízo.","Preço mínimo = custo + frete + taxas + margem","Texto grande em passos, 10s. Não use números reais da Loyall","Nenhum","","","Para lojistas"],
+["d1103","s6","Fiz um carrossel com 4 verificações pra fazer antes de comprar mais mercadoria. Salva pra consultar depois.","Carrossel: 4 verificações","Compartilhe o carrossel no story","Controle deslizante","Quanto você já faz isso?","emoji ✅","Para lojistas"],
+["d1103","s7","Me conta: qual parte da gestão de estoque mais te trava?","O que mais te trava no estoque?","Você de frente, 6s","Caixinha de perguntas","Qual parte da gestão de estoque mais te trava?","","Perguntas respondidas"],
+["d1103","s8","O Estoque Crescente hoje é [PREENCHER: o que ele oferece de fato agora]. Quando tiver novidade, eu aviso aqui. Sem promessa antes da hora.","Estoque Crescente","Você de frente, 10s. Não fale preço nem lançamento do app","Link","Conhecer o Estoque Crescente","",""],
+["d1103","ma","Abertura: “Meninas, uma decisão de reposição que eu tomei pra Black.”\nPasso 1: o que eu reponho.\nPasso 2: o que eu só observo.\nPasso 3: por que eu decidi assim.\nSem números que você não queira expor.\nFecho: “O que você repõe sem pensar duas vezes?”","Só para Melhores Amigos","3 stories de 15s","Caixinha de perguntas","O que você repõe sem pensar duas vezes?","",""],
+["d1103","ass","Exercício das 3 listas aplicado à Black.\nLista 1: repor.\nLista 2: testar com cautela.\nLista 3: não comprar agora.\nPara cada item, uma justificativa em uma linha.\nMostre o que entra na ação e o que não entra, e por quê.\nFecho: “Monte as suas 3 listas e me mostre.”","Exercício: as 3 listas da Black","Ficha na tela ou PDF simples, com áudio de 3 minutos explicando","Caixinha de perguntas","Qual item foi mais difícil de classificar?","",""],
+
+["d1104","s1","Bom dia, gente! Quarta com look novo. O link está aqui.","Look do dia","Rosto e corpo inteiro, 6s","Link","Ver o look","",""],
+["d1104","s2","A esquenta da Black segue. [PREENCHER: o que mais saiu até agora, só se você souber de fato] e, pra participar, é só [PREENCHER: como participar].","Esquenta da Black","Você de frente, 10s. Não invente números","Lembrete","Esquenta da Black","","Black Loyall"],
+["d1104","s3","Recebi uma dúvida muito boa: [PREENCHER: a dúvida real, sem nome e sem foto]. Vou responder agora.","Dúvida da comunidade","Print da dúvida com nome e foto borrados, e você respondendo em 15s","Nenhum","","","Perguntas respondidas"],
+["d1104","s4","Gravei um Reel respondendo essa dúvida. Vai lá ver e me conta se ajudou.","Novo Reel de resposta","Compartilhe o Reel no story","Controle deslizante","Isso ajudou você?","emoji 💛","Perguntas respondidas"],
+["d1104","s5","Qual tema você quer ver mais: fornecedores ou gestão de estoque?","Próximo tema","Fundo liso, 5s","Enquete","Qual tema vem primeiro?","Fornecedores|Gestão de estoque","Para lojistas"],
+["d1104","s6","O que eu estou revisando no meu estoque antes da Black: o que vendeu, o que está parado e o que está faltando.","Antes da Black: o que vendeu, o que parou, o que falta","Mostre o caderno ou a planilha, 10s, sem números que você não queira expor","Nenhum","","","Para lojistas"],
+["d1104","s7","Na assinatura vou aprofundar [PREENCHER: o que já está confirmado]. Quem assina recebe isso lá dentro.","O que vem na assinatura","Você de frente, 10s. Só cite o que já está pronto","Link","Assinatura","",""],
+["d1104","s8","Quer receber o material? Me manda a palavra [PREENCHER: palavra-chave] no direct. Só ative depois de testar o caminho completo.","Palavra-chave no direct","Você de frente, 6s","Link","Mandar mensagem","",""],
+["d1104","ma","Abertura: “Meninas, o bastidor da semana da Black na loja.”\nPasso 1: o que cansou.\nPasso 2: o que surpreendeu.\nPasso 3: o que ainda precisa ser resolvido.\nFecho: “Qual foi a maior surpresa da sua semana?”","Só para Melhores Amigos","3 stories de 15s, bastidor sem produção","Caixinha de perguntas","Qual foi a maior surpresa da sua semana?","",""],
+["d1104","ass","Aprofundamento: “Como comparar fornecedores sem olhar só para o preço.”\nRoteiro: qualidade, consistência, pedido mínimo, custo total, prazo, troca, comunicação e adequação ao público.\nEntregue uma aula curta e a ficha de avaliação de fornecedor.\nSó anuncie depois de publicar os materiais.\nFecho: “Avalie um fornecedor com a ficha e me conte o resultado.”","Aula: comparar fornecedores","Aula de 5 a 8 minutos e a ficha em PDF","Caixinha de perguntas","Qual fornecedor você vai avaliar primeiro?","",""],
+
+["d1105","s1","Bom dia, gente! Quinta de look novo. O link está aqui.","Look do dia","Rosto e corpo inteiro, 6s","Link","Ver o look","",""],
+["d1105","s2","Lembrete da esquenta da Black na Loyall: pra participar, é só [PREENCHER: como participar], e vale até [PREENCHER: data].","Esquenta da Black: como participar","Você de frente, 10s, com suas palavras","Lembrete","Esquenta da Black","","Black Loyall"],
+["d1105","s3","O que eu confiro antes da Black: estoque cadastrado, embalagem, etiquetas e coleta combinada. Olha o canto da expedição.","Antes da Black: operação","Mostre o canto da expedição, 10 a 15s, sem dados de clientes","Nenhum","","","Para lojistas"],
+["d1105","s4","Está pensando em criar sua loja virtual? Deixa sua dúvida sobre a Tray aqui que eu vou reunir as principais informações. Link exclusivo na tela. Parceria paga.","Dúvidas sobre a Tray · Parceria paga","Você de frente, 8s. Não prometa resultado","Caixinha de perguntas","Qual sua dúvida sobre a Tray?","","Tray"],
+["d1105","s5","Um spoiler da coleção de fim de ano: esta peça aqui. O resto eu só mostro nos Melhores Amigos.","Spoiler: coleção de fim de ano","1 peça só, close nos detalhes, 8s","Nenhum","","","Coleção de fim de ano"],
+["d1105","s6","Qual novidade você quer ver primeiro?","Qual novidade primeiro?","Duas peças lado a lado, 5s","Enquete","Qual novidade você quer ver primeiro?","[PREENCHER: peça ou categoria A]|[PREENCHER: peça ou categoria B]","Coleção de fim de ano"],
+["d1105","s7","Olha uma dúvida da caixinha: [PREENCHER: dúvida real, sem nome]. A resposta é [PREENCHER: só com base no material oficial da Tray].","Resposta da caixinha","Print da dúvida com nome e foto borrados, você respondendo em 15s","Nenhum","","","Tray"],
+["d1105","s8","Faltam 22 dias pra Black! Obrigada por estar aqui comigo.","Faltam 22 dias","Fundo da loja, você sorrindo, 5s","Contagem regressiva","Black Loyall","Termina em 27/11",""],
+["d1105","ma","Abertura: “Meninas, o bastidor da coleção de fim de ano.”\nMostre o que pode: cadastro das peças, etiquetas e organização do estoque.\nPasso 1: como eu cadastro.\nPasso 2: como eu etiqueto.\nPasso 3: como eu organizo.\nFecho: “Quer ver a próxima etapa?”","Só para Melhores Amigos","3 stories de 15s, só o que pode ser mostrado","Enquete","Quer ver a próxima etapa?","Quero|Depois",""],
+["d1105","ass","Continuação da série: “Esquenta de Black para lojistas”, semana 2.\nTema: preparar a operação (estoque, embalagem e envio).\nPasso 1: confira o estoque cadastrado.\nPasso 2: teste a embalagem com uma peça.\nPasso 3: combine a coleta e o prazo com a transportadora.\nEntregue só o que estiver pronto.\nFecho: “Qual desses passos você já fez?”","Semana 2: preparar a operação","Post de texto ou carrossel simples, ou áudio de 3 minutos","Enquete","Qual passo você já fez?","Estoque|Embalagem",""]
+];
+var CPF=[["fala","Fala / roteiro","textarea",150],["tela","Texto na tela","input"],["take","Take (como gravar)","textarea",64],["stt","Sticker: tipo","input"],["stx","Sticker: texto","input"],["sto","Sticker: opções (separe com |)","input"],["dest","Destaque","textarea",64]];
+(function(){COPYROWS.forEach(function(r){var d=DAYS.filter(function(x){return x.id===r[0]})[0];if(!d)return;d.copy=d.copy||{};d.copy[r[1]]={fala:r[2],tela:r[3],take:r[4],stt:r[5],stx:r[6],sto:r[7],dest:r[8]}})})();
+var _ovPath=ovPath;
+ovPath=function(d,k){var m=k.match(/^c\.(\w+)\.(\w+)$/);if(m){return d.copy&&d.copy[m[1]]?[d.copy[m[1]],m[2]]:null}return _ovPath(d,k)};
+var _edFields=edFields;
+edFields=function(d,key){var f=_edFields(d,key);if(!(d.copy&&d.copy[key]))return f;
+  var add=CPF.map(function(c){return ["c."+key+"."+c[0],(key==="ma"||key==="ass")&&c[0]==="fala"?"Roteiro completo":c[1],c[2],c[3]]});
+  var notes=f.filter(function(x){return x[0].indexOf("n.")===0}),rest=f.filter(function(x){return x[0].indexOf("n.")!==0});
+  if(key==="ma"||key==="ass")rest=[];
+  return rest.concat(add,notes)};
+var _ovReset=ovReset;
+ovReset=function(d,key){_ovReset(d,key);if(d.copy&&d.copy[key]){CPF.forEach(function(c){var k="c."+key+"."+c[0],kk=d.id+"|"+k;if(kk in ORIGV){var p=ovPath(d,k);if(p)p[0][p[1]]=ORIGV[kk]}delete OVR[kk]});ovSave()}};
+function cpOpts(c){return (c.sto||"").split("|").map(function(x){return x.trim()}).filter(Boolean)}
+function cpText(d,key){var c=d.copy&&d.copy[key];if(!c)return "";var o=[];
+  o.push((key==="ma"||key==="ass"?"Roteiro":"Fala")+":\n"+c.fala);
+  if(c.tela)o.push("Texto na tela: "+c.tela);
+  if(c.take)o.push("Take: "+c.take);
+  if(c.stt&&c.stt!=="Nenhum")o.push("Sticker: "+c.stt+(c.stx?" · "+c.stx:"")+(cpOpts(c).length?" ("+cpOpts(c).join(" / ")+")":""));
+  if(c.dest)o.push("Destaque: "+c.dest);
+  return o.join("\n\n")}
+function cpHtml(d,key){var c=d.copy&&d.copy[key];if(!c)return '';var id="cp-"+d.id+"-"+key;var ma=(key==="ma"||key==="ass");
+  var h='<details class="cp det" data-det="'+id+'"'+(HK[id]?' open':'')+'><summary>Roteiro completo e sticker</summary><div class="cpb">';
+  h+='<div class="cpr"><span class="cpl">'+(ma?"Roteiro":"Fala")+'</span><span class="cpt">'+esc(c.fala)+'</span></div>';
+  if(c.tela)h+='<div class="cpr"><span class="cpl">Texto na tela</span><span class="cpt">'+esc(c.tela)+'</span></div>';
+  if(c.take)h+='<div class="cpr"><span class="cpl">Take</span><span class="cpt">'+esc(c.take)+'</span></div>';
+  if(c.stt&&c.stt!=="Nenhum"){var o=cpOpts(c);h+='<div class="stk"><span class="cpl">Sticker sugerido</span><div><b>'+esc(c.stt)+'</b>'+(c.stx?': '+esc(c.stx):'')+'</div>'+(o.length?'<div class="note">Opções: '+o.map(esc).join(' · ')+'</div>':'')+'</div>'}
+  else h+='<div class="note">Sem sticker neste story. Fale direto para a câmera.</div>';
+  if(c.dest)h+='<div class="cpr dst"><span class="cpl">Destaque</span><span class="cpt">'+esc(c.dest)+'</span></div>';
+  h+='<div class="btns"><button class="btn small ghost" data-cpcopy="'+key+'">Copiar roteiro</button><button class="btn small ghost" data-cped="'+key+'">Editar</button></div></div></details>';
+  return h}
+function stickerGuide(){return '<details class="stg det" data-det="stg"'+(HK.stg?' open':'')+'><summary>Quando usar cada sticker</summary><ul><li><b>Enquete</b>: opinião rápida entre duas opções. Fácil de responder.</li><li><b>Caixinha de perguntas</b>: juntar dúvidas reais. As respostas viram conteúdo e destaque.</li><li><b>Controle deslizante</b>: reação a um Reel ou a uma novidade.</li><li><b>Contagem regressiva</b>: data certa de ação ou oferta. Só com data confirmada.</li><li><b>Lembrete</b>: quem quer ser avisada no dia.</li><li><b>Link</b>: sempre com um motivo claro. Em publi, só o link exclusivo e “Parceria paga”.</li></ul></details>'}
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-cpcopy]");
+  if(b){var d=dayById(state.sel);if(d)copyText(cpText(d,b.dataset.cpcopy),b);return}
+  var g=e.target.closest&&e.target.closest("[data-cped]");
+  if(g){var d2=dayById(state.sel);if(!d2)return;ED.open=d2.id+"|"+g.dataset.cped;render();var el=document.querySelector(".ed");if(el)el.scrollIntoView({block:"center"})}});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
