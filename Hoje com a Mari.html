@@ -301,6 +301,7 @@ body::after{content:"";position:fixed;left:0;right:0;top:0;height:300px;z-index:
 .agora .cal-i{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(176,141,87,.2)}
 .agora .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-weight:700;color:var(--gold-ink,var(--accent));font-size:13px}
 .ckcard .row{padding:2px 0;gap:10px;min-height:0}.ckcard .row label{font-size:15px;line-height:1.3}.ckcard .row input[type=checkbox]{width:20px;height:20px;flex:0 0 auto}
+body.simple .adv{display:none!important}
 </style>
 
 <div class="wrap">
@@ -468,7 +469,7 @@ var NAV=[
  ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
  ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
 ];
-var MORE=[["prazos","Prazos"],["canais","Melhores Amigos"],["produtos","Mini produtos"],["equipe","Equipe"],["ajustes","Ajustes"]];
+var MORE=[["atalhos","Início"],["prazos","Prazos"],["canais","Melhores Amigos"],["produtos","Mini produtos"],["equipe","Equipe"],["ajustes","Ajustes"]];
 
 /* ============ PRODUTOS ============ */
 var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
@@ -540,7 +541,7 @@ var IDEIAS_AS=[
 /* ============ ESTADO ============ */
 var $=function(s,r){return (r||document).querySelector(s)};
 var esc=function(s){var d=document.createElement('div');d.textContent=s==null?"":String(s);return d.innerHTML};
-var state={checks:{},st:{},notes:{},results:{},prod:{},ideas:[],tool:{},tab:"hoje",hub:"inicio",more:"prazos",sel:null,core:false,rec:0,pOpen:null,chap:0,cr:null};
+var state={checks:{},st:{},notes:{},results:{},prod:{},ideas:[],tool:{},tab:"hoje",hub:"inicio",more:"atalhos",sel:null,core:false,rec:0,pOpen:null,chap:0,cr:null};
 var C={};
 function loadLocal(){try{var j=JSON.parse(localStorage.getItem("hoje-mari-2")||"{}");["checks","st","notes","results","prod"].forEach(function(k){state[k]=j[k]||{}});state.ideas=j.ideas||[];state.tool=JSON.parse(localStorage.getItem("hoje-tools")||"{}");state.cr=JSON.parse(localStorage.getItem("hoje-cr")||"null");state.voz=localStorage.getItem("hoje-voz")||""}catch(e){}if(!state.cr)state.cr=crNew();loadHub();loadPub();cfgLoad()}
 function saveLocal(){try{localStorage.setItem("hoje-mari-2",JSON.stringify({checks:state.checks,st:state.st,notes:state.notes,results:state.results,prod:state.prod,ideas:state.ideas}))}catch(e){}}
@@ -585,7 +586,7 @@ function renderChrome(){
     var sub=isRest(d)?"pausa":(full?"feito":p.n+"/"+p.t);
     return '<button class="day'+(full?' full':'')+'" data-day="'+d.id+'" aria-pressed="'+(state.sel===d.id)+'"><div class="w">'+d.w+'</div><div class="n">'+d.n+'</div><div class="p">'+sub+'</div></button>';
   }).join("");
-  $("#bottomin").innerHTML=NAV.map(function(n){return '<button class="nb" data-tab="'+n[0]+'"'+((state.tab===n[0]||(n[0]==="hoje"&&state.tab==="gravar"))?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+n[2]+'</svg>'+n[1]+'</button>'}).join("");
+  $("#bottomin").innerHTML=NAV.filter(function(n){return !SIMPLE||n[0]!=="pub"}).map(function(n){return '<button class="nb" data-tab="'+n[0]+'"'+((state.tab===n[0]||(n[0]==="hoje"&&state.tab==="gravar"&&!SIMPLE)||(SIMPLE&&n[0]==="mais"&&(state.tab==="pub"||state.tab==="gravar")))?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+n[2]+'</svg>'+n[1]+'</button>'}).join("");
 }
 function stSelect(id){
   var v=stOf(id);
@@ -811,24 +812,24 @@ function calEditor(it){
    +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
    +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+calLbl(s)+'</button>'}).join('')+'</div>'
    +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
-   +'<div class="fields"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
-   +'<label class="lab">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
+   +'<div class="fields adv"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
+   +'<label class="lab adv">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
    +'<label class="lab">Roteiro, takes e anotações<textarea data-cif="nota" style="min-height:140px" placeholder="Escreva o roteiro, os takes e o que lembrar. Ou peça uma primeira versão à IA.">'+esc(it.nota)+'</textarea></label>'
    +(it.nota?'':tplBtn(it))
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
-   +'<label class="lab">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
+   +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+'<div class="adv">'+metHtml(it)+'</div>'
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
    +(calNext(it.st)?'<div class="btns"><button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button></div>':'')
-   +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost" data-calx="copy|'+it.id+'">Copiar</button>'
-   +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
-   +'<button class="btn small ghost" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
+   +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
+   +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost adv" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
+   +'<button class="btn small ghost adv" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
   return h;
 }
 function calHtml(){
   var today=isoToday();if(!CAL.m)CAL.m=today.slice(0,7);if(!CAL.sel)CAL.sel=today;
   var y=+CAL.m.slice(0,4),mo=+CAL.m.slice(5,7),first=new Date(y,mo-1,1).getDay(),nd=new Date(y,mo,0).getDate();
-  var h='<p class="sub">Feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p>'+acStrip()+rvHtml()+plBox()+ornHtml()
-   +'<div class="pills">'+CALK.map(function(k){return'<button class="pill" data-calf="'+k[0]+'" aria-pressed="'+(CAL.f===k[0])+'">'+k[1]+'</button>'}).join('')+'</div>'
+  var h=sx('<p class="sub">Feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p>'+acStrip()+rvHtml()+plBox()+ornHtml()
+   +'<div class="pills">'+CALK.map(function(k){return'<button class="pill" data-calf="'+k[0]+'" aria-pressed="'+(CAL.f===k[0])+'">'+k[1]+'</button>'}).join('')+'</div>')
    +'<div class="cal-h"><button class="btn small ghost" data-calx="prev" aria-label="Mês anterior">‹</button><b>'+CALMES[mo-1]+' '+y+'</b><button class="btn small ghost" data-calx="next" aria-label="Próximo mês">›</button><button class="btn small ghost" data-calx="today">Hoje</button></div>'
    +'<div class="cal-g">'+["D","S","T","Q","Q","S","S"].map(function(x){return'<span class="cal-w">'+x+'</span>'}).join('');
   for(var i=0;i<first;i++)h+='<span></span>';
@@ -842,7 +843,7 @@ function calHtml(){
    +((sel<today&&CALD.items.some(function(z){return z.d===sel&&z.st!=="Publicado"}))?'<div class="btns"><button class="btn small ghost" data-calx="pubday">Marcar o dia como publicado</button></div>':'')
    +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
    +'<label class="lab">Onde<select id="cal-k">'+Object.keys(CALKIND).map(function(c){return'<option>'+c+'</option>'}).join('')+'<option value="tarefa">Tarefa só para mim (Meu dia)</option></select></label>'
-   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>'+resHtml();
+   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>'+sx(resHtml());
   return h;
 }
 function renderCal(){$("#view").innerHTML='<div class="stack">'+calHtml()+'</div>'}
@@ -1114,6 +1115,7 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
   if(a==="learn"){var tx=(it.func||"").trim();if(!tx){CAL.msg="Escreva o que funcionou antes de guardar.";render();return}brAdd("aprend",it.canal+" · "+it.t+": "+tx);CAL.msg="Guardado na minha base.";render();return}
 });
 function onbHtml(){var d=false;try{d=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(d)return '';
+  if(SIMPLE)return '<div class="card onb"><h3>Como usar</h3><ol><li><b>Hoje</b>: o que fazer agora e o checklist.</li><li><b>Anotar uma ideia</b>: escreva ou fale e guarde. Decida depois.</li><li><b>Calendário</b>: o que vai ao ar em cada dia. Toque no dia para ver.</li><li><b>Criar</b>: suas ideias e seus roteiros.</li><li><b>Mais</b>: publis, prazos e o resto.</li></ol><div class="btns"><button class="btn small" data-onb="1">Entendi</button></div></div>';
   return '<div class="card onb"><h3>Como usar o app</h3><ol><li><b>Hoje</b> mostra o que fazer agora, o que vai ao ar no dia e o checklist.</li><li><b>Calendário</b> guarda tudo: feed, stories, assinatura, Melhores Amigos e publis. Toque num dia para abrir.</li><li><b>O que estou planejando</b> (em Hoje, dentro de “Campanhas e planejamento”): escreva ou fale do seu jeito e o texto vai para o lugar certo.</li><li><b>Publis</b> tem cada marca, a corrida Tray e os PDFs de briefing.</li><li><b>Criar &gt; Minha base</b> é onde o app aprende sobre você. Quanto mais você acrescenta, melhor ele escreve.</li><li>Cada conteúdo anda por etapas: ideia, roteiro, gravado, editado e postado. Avance no calendário.</li></ol><div class="btns"><button class="btn small" data-onb="1">Entendi</button></div></div>'}
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-onb]");if(!x)return;try{localStorage.setItem("hoje-onb","1")}catch(er){}render()});
 function instHtml(){return '<div class="card"><h3>Instalar na tela inicial</h3><p><b>iPhone (Safari):</b> toque em Compartilhar e depois em “Adicionar à Tela de Início”.</p><p><b>Android (Chrome):</b> menu ⋮ e depois “Instalar app” ou “Adicionar à tela inicial”.</p><p class="note">Instalado, ele abre em tela cheia, como um app. Avisos e lembretes no celular não funcionam em app web; use o alarme do celular para os horários importantes.</p></div>'}
@@ -1155,12 +1157,39 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
   else if(a==="base"){brAdd("decisao",it.text)}
   state.ideas=state.ideas.filter(function(z){return z.id!==id});dbSet("ideas",id,{del:true,at:Date.now()},"Ideia movida");saveLocal();render();window.scrollTo(0,0)});
 
+
+/* ============ v30: MODO SIMPLES ============ */
+var SIMPLE=true;try{SIMPLE=localStorage.getItem("hoje-modo")!=="completo"}catch(e){}
+function sx(x){return SIMPLE?'':x}
+function setSimple(v){SIMPLE=v;try{localStorage.setItem("hoje-modo",v?"simples":"completo")}catch(e){}document.body.classList.toggle("simple",v);if(v){state.tab="hoje";state.hmode="meu"}render();window.scrollTo(0,0)}
+try{document.body.classList.toggle("simple",SIMPLE)}catch(e){}
+var QI={txt:"",msg:"",rec:null};
+function qiBox(){return '<div class="card"><h3>Anotar uma ideia</h3><textarea id="qi-t" aria-label="Nova ideia" placeholder="Escreva ou fale. Depois você decide o que fazer com ela." style="min-height:84px">'+esc(QI.txt)+'</textarea><div class="btns"><button class="btn" data-qi="save">Guardar</button>'+(SRC?'<button class="btn small ghost" data-qi="mic">'+(QI.rec?'Ouvindo… toque para parar':'Falar')+'</button>':'')+'</div>'+(QI.msg?'<p class="note">'+esc(QI.msg)+'</p>':'')+'<div class="btns"><button class="btn small ghost" data-gob="tab=criar;hub=ideias">Minhas ideias ('+state.ideas.length+')</button><button class="btn small ghost" data-gob="tab=criar;hub=roteiro">Escrever um roteiro</button></div></div>'}
+function mdSimple(){var D=isoToday();return onbHtml()+agoraHtml(D)+qiBox()+ckHtml(D)+calHoje(D)}
+document.addEventListener("input",function(e){if(e.target&&e.target.id==="qi-t")QI.txt=e.target.value});
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-qi]");if(!x)return;var a=x.dataset.qi;
+  if(a==="save"){var tx=String(QI.txt||"").trim();if(!tx){QI.msg="Escreva a ideia primeiro.";render();return}var id="i"+Date.now()+Math.floor(Math.random()*1000),o={text:tx,at:Date.now()};state.ideas.push({id:id,text:tx,at:o.at});dbSet("ideas",id,o,"Ideia guardada");saveLocal();QI.txt="";QI.msg="Guardada. Ela está em Criar > Ideias.";render();return}
+  if(a==="mic"){if(QI.rec){try{QI.rec.stop()}catch(er){}return}
+    try{var r=new SRC();r.lang="pt-BR";r.interimResults=false;r.onresult=function(ev){var t=Array.prototype.map.call(ev.results,function(z){return z[0].transcript}).join(" ");QI.txt=(QI.txt?QI.txt+" ":"")+t;render()};r.onend=function(){QI.rec=null;render()};r.onerror=function(){QI.msg="Não consegui usar o microfone. Digite o texto.";QI.rec=null;render()};r.start();QI.rec=r;render()}catch(er){QI.msg="O microfone não está disponível aqui.";render()}}
+});
+document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-gob]");if(g){g.dataset.gob.split(";").forEach(function(kv){var q=kv.split("=");state[q[0]]=q[1]});render();window.scrollTo(0,0)}});
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-simple]");if(x){setSimple(x.dataset.simple==="on");return}
+  var k=e.target.closest&&e.target.closest("[data-hkall]");if(k){HK.all=!HK.all;render()}});
+function hubS(html){if(!SIMPLE||HK.all)return html;var p=html.split('<button class="card click tile"'),keep=[p[0]];p.slice(1).forEach(function(z){if(z.indexOf('data-hub="ideias"')>=0||z.indexOf('data-hub="roteiro"')>=0)keep.push(z)});return keep.join('<button class="card click tile"')+'</div><div class="btns"><button class="btn ghost small" data-hkall="1">Mais ferramentas</button></div>'}
+function backBtn(){if(SIMPLE&&state.tab==="pub")$("#view").insertAdjacentHTML("afterbegin",'<div class="btns"><button class="btn ghost small" data-tab="mais">← Mais</button></div>')}
+function atalhosHtml(){
+  var L=[["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Quem faz o quê","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
+  var h='<div><h2>Mais</h2><p class="sub">Tudo o que não é do dia a dia fica aqui.</p></div>'+L.map(function(x){return'<div class="card tap" role="button" tabindex="0" data-go="'+x[2]+'"><h3>'+x[0]+'</h3><p class="note">'+x[1]+'</p></div>'}).join('');
+  h+='<div class="card"><h3>Modo do app</h3><p class="note">'+(SIMPLE?'Agora você vê só o essencial: Hoje, Calendário e Criar. O modo completo mostra tudo de uma vez.':'Agora você vê tudo. O modo simples deixa só Hoje, Calendário e Criar.')+'</p><div class="btns"><button class="btn small" data-simple="'+(SIMPLE?'off':'on')+'">'+(SIMPLE?'Mostrar tudo (modo completo)':'Voltar ao modo simples')+'</button></div></div>';
+  return h}
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
   var inner="";
+  if(state.more==="atalhos"){$("#view").innerHTML='<div class="stack">'+(SIMPLE?'':pillsMais())+atalhosHtml()+'</div>';return}
   if(state.more==="produtos"){renderProdutos();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
-  if(state.more==="cerebro"||state.more==="ideias"){state.tab="criar";state.hub=state.more==="cerebro"?"cerebro":"ideias";state.more="prazos";render();return}
+  if(state.more==="cerebro"||state.more==="ideias"){state.tab="criar";state.hub=state.more==="cerebro"?"cerebro":"ideias";state.more="atalhos";render();return}
   if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+instHtml()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlPrazos();
@@ -1205,11 +1234,11 @@ function render(){
   renderChrome();
   var t=state.tab;
   if(t==="pub")renderPub();else if(t==="criar")renderHub();else if(t==="hoje")renderHoje();else if(t==="gravar")renderGravar();else if(t==="cal")renderCal();else if(t==="produtos"){state.tab="mais";state.more="produtos";renderMais()}else if(t==="canais")renderCanais();else renderMais();
-  addSeg();addHero();
+  addSeg();backBtn();addHero();
 }
 
 function addSeg(){
-  var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
+  var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;if(SIMPLE&&t==="hoje")return;
   var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
   $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Roteiro de hoje</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
 }
@@ -1448,13 +1477,13 @@ function renderHub(){
   if(hb==="guia"||hb==="material"){renderCriar();return}
   if(hb==="inicio"){
     var np=Object.keys(state.plano||{}).length;
-    $("#view").innerHTML='<div class="tiles">'
+    $("#view").innerHTML=hubS('<div class="tiles">'
      +hubCard("cerebro","Minha base",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo")
      +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
      +hubCard("roteiro","Roteiro de conteúdo","Para o seu conteúdo, sem marca: Reels, Story ou Carrossel na sua voz.")
      +hubCard("guia","Guia de captação e edição","Monte o direcionamento para a editora com suas referências e envie em PDF junto com os arquivos.","Novo")
      +hubCard("material","Material digital","eBook, checklist, ficha ou exercício, com a identidade da Mari e PDF.")
-     +hubCard("rascunhos","Rascunhos",state.drafts.length?state.drafts.length+" salvo(s).":"Seus trabalhos salvos aparecem aqui.")+'</div>';
+     +hubCard("rascunhos","Rascunhos",state.drafts.length?state.drafts.length+" salvo(s).":"Seus trabalhos salvos aparecem aqui.")+'</div>');
     return;
   }
   var back='<div class="btns"><button class="btn ghost small" data-hub="inicio">← Criar</button></div>';
@@ -2426,6 +2455,7 @@ function mdItem(it){
   return h+'</div>';
 }
 function mdHtml(){
+  if(SIMPLE)return mdSimple();
   var today=isoToday();if(!MDUI.date)MDUI.date=today;var D=MDUI.date;
   MD.items.forEach(function(x){var fm=x.id.match(/^tks-(.+)-f$/);if(fm&&x.st!=="feito"&&state.st[fm[1]+"-f"]==="posted")x.st="feito"});
   var live=MD.items.filter(function(x){return x.st!=="cancelado"});
