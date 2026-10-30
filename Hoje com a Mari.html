@@ -1410,10 +1410,133 @@ var D_TRAY=[
  {t:"Semana 2 · hora de converter · 26/10 a 01/11",m:[["w2-0","3 stories ou vídeos curtos retomando a oportunidade",6],["w2-1","Vídeo de conversão: Reels, TikTok ou Shorts",8],["w2-2","Responder a uma objeção real em vídeo",7],["w2-3","Criar um criativo divulgando a campanha",7],["w2-4","Produzir conteúdo de quebra de objeção",7],["w2-5","Vídeo curto com CTA",8],["w2-6","Fechar a semana com 4 stories + última chamada de urgência",8]]},
  {t:"Semana 3 · reta final · 02/11 a 09/11",m:[["w3-0","Vídeo com contagem regressiva",6],["w3-1","Vídeo com 3 motivos para aproveitar a oferta",8],["w3-2","Compartilhar um case ou depoimento de lojista Tray",7],["w3-3","Caixinha de perguntas com pelo menos 3 dúvidas sobre a Tray",7],["w3-4","Produzir conteúdo de quebra de objeção",7],["w3-5","Vídeo de última chamada",8],["w3-6","Encerrar a corrida com 3 stories",8]]}
 ];
+
+/* ---- Tray: direção completa por missão ---- */
+var TRAY_BASE={
+ sempre:["Link exclusivo da Tray em todo conteúdo: clique você mesma antes de postar e confira se abre.","Ativar o selo “Parceria paga” no Instagram (Stories e Reels).","Oferta que abre em 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Conversão pesa mais que volume: cada conteúdo precisa terminar mandando para o link."],
+ tom:"Voz da Mari: brincalhona e direta. Pode usar “gente”, “oxe”, “é mole?”, “me poupe”. Nada de lista de erros sem solução e nada de promessa de ganho garantido. Filho só nos stories, sem rotina escolar."
+};
+var TRAYDIR={
+ "w2-0":{obj:"Reabrir o assunto depois da semana 1 e levar para o link.",fmt:"3 stories (ou 3 vídeos curtos), sequência no mesmo dia",dur:"10 a 15s cada",
+  roteiro:[["Story 1 · Gancho","Gente, passou a primeira semana da corrida da Tray e eu ainda não contei o que mais me chamou atenção nessa oferta.","Texto: “Corrida Tray · semana 2” + figurinha de enquete “Você tem loja virtual?”"],
+   ["Story 2 · Virada","Eu tenho a Loyall há 7 anos. O Instagram me traz cliente, mas a loja virtual é a porta que fica aberta até quando eu estou dormindo, entendeu?","Texto na tela: “Instagram traz o cliente. A loja fecha a venda.”"],
+   ["Story 3 · Oferta e CTA","A oferta abre dia 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus. O link tá aqui embaixo, dá uma olhada.","Sticker de link com o link exclusivo + seta apontando"]],
+  takes:["Take 1: você falando para a câmera frontal, ambiente da loja ao fundo.","Take 2: mostrando a tela do celular com o Instagram e depois o site.","Take 3: take de apoio da Loyall (embalando pedido, cabides, balcão) por 2 a 3s.","Take 4: dedo apontando para o link no final."],
+  leg:"Texto de tela do story 3: “Link exclusivo · oferta abre 10/11”. Se publicar em vídeo no feed: “Black Friday começa na loja que já está pronta. A oferta da Tray abre dia 10/11 e o link tá na bio e nos stories. #publi”",
+  cta:"Clique no link e veja a oferta.",stickers:["Enquete: “Você tem loja virtual?”","Link exclusivo","Caixinha: “O que te impede de ter um site?” (usa na missão w3-3)"],
+  evitar:["Prometer venda ou faturamento.","Esquecer o selo de parceria paga.","Falar de preço sem ter conferido na página da oferta."],dica:"Grave os 3 de uma vez, com a mesma roupa. Postar em horários diferentes do dia rende mais alcance."},
+ "w2-1":{obj:"Vídeo que converte: tirar a pessoa do ‘um dia eu faço’ para ‘vou ver o link’.",fmt:"Reels (também pode ir para TikTok e Shorts)",dur:"30 a 45s",
+  roteiro:[["Gancho (0 a 3s)","Quem vende só pelo Instagram precisa ouvir isso antes da Black Friday.","Texto grande: “Só Instagram? Cuidado.”"],
+   ["Problema (3 a 12s)","Se o Instagram cai, ou o algoritmo muda, ou o direct enche, o seu cliente não tem onde comprar sozinho. E você fica respondendo ‘qual o valor?’ o dia inteiro.","Cortes rápidos: direct cheio, você respirando fundo"],
+   ["Solução (12 a 30s)","A loja virtual vende enquanto você atende, produz e dorme. E a Tray tá com uma oferta que abre dia 10/11: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Texto em lista curta: loja pronta · plano Avançado · Meta Ads · bônus"],
+   ["CTA (30 a 40s)","Quer ver como funciona? O link exclusivo tá na legenda e nos stories. Vai lá antes que acabe a corrida.","Seta para o link, selo de parceria paga"]],
+  takes:["Take 1: close no rosto, olhando para a câmera, tom de ‘vou te contar’.","Take 2: tela do direct lotado de ‘valor?’ (cubra nomes dos clientes).","Take 3: você na rotina da loja (caixa, etiqueta, embalagem).","Take 4: tela do site da Tray com o link exclusivo.","Take 5: encerramento sorrindo com a mão apontando para baixo."],
+  leg:"Instagram é vitrine, a loja virtual é o caixa que não fecha. 🛍️ A oferta de Black Friday da Tray abre dia 10/11 e o link exclusivo tá aqui na legenda: [LINK EXCLUSIVO]. #publi #parceriapaga",
+  cta:"Clique no link e veja a oferta antes de 10/11.",stickers:["Link exclusivo nos stories repostando o reels","Contagem regressiva para 10/11"],
+  evitar:["Criticar quem vende só no Instagram: fale como quem já passou por isso.","Mais de uma ideia no mesmo vídeo.","Vídeo acima de 45s."],dica:"Se o vídeo for bem, repostar nos stories com o link no mesmo dia."},
+ "w2-2":{obj:"Responder uma objeção real que chegou para você, em vídeo.",fmt:"Reels ou stories em vídeo (a pergunta aparece na tela)",dur:"20 a 40s",
+  roteiro:[["Abertura","Uma menina me mandou no direct: “Mari, eu não tenho dinheiro para investir em site agora.” Oxe, vamos conversar.","Print da pergunta (sem nome) na tela"],
+   ["Resposta","Eu entendo, porque eu também comecei sem folga. Só que o site não é gasto à toa: ele é mais um lugar da loja vender. E nessa oferta da Tray tem plano Avançado por 1 ano, loja pronta em até 30 dias e R$ 1.200 em Meta Ads.","Texto na tela: “Site não é gasto, é mais um canal”"],
+   ["Fechamento","Se fizer sentido para você, o link exclusivo tá aqui embaixo. Se não fizer, tudo bem, mas conhece antes de decidir.","Sticker de link"]],
+  takes:["Take 1: print da pergunta real (troque o nome).","Take 2: você respondendo olhando para a câmera, voz calma.","Take 3: apoio com a loja ou o estoque."],
+  leg:"Pergunta real que chegou no direct. 💬 Se você pensa assim também, vem ver a oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",
+  cta:"Veja a oferta e tire sua dúvida no link.",stickers:["Link exclusivo","Caixinha: “Qual é a sua dúvida sobre ter site?”"],
+  evitar:["Inventar a pergunta: use uma objeção que realmente chegou.","Tom de bronca com quem tem a dúvida.","Prometer retorno financeiro."],dica:"Procure no direct: “não tenho tempo”, “não sei mexer”, “é caro”. Escolha a que mais se repete."},
+ "w2-3":{obj:"Criar um criativo que divulga a campanha (a marca pode usar em anúncio).",fmt:"Vídeo vertical curto no estilo criativo de anúncio",dur:"15 a 30s",
+  roteiro:[["Hook","Se a sua loja só vende no Instagram, para um minutinho.","Texto: “Loja só no Instagram?”"],
+   ["Prova","Eu tenho loja há 7 anos e aprendi que quem tem site não depende de uma rede só.","Cortes de loja, pedidos, embalagem"],
+   ["Oferta","Tray, Black Friday: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Textos sobrepostos aparecendo um a um"],
+   ["CTA","Link na legenda. Corre que a corrida acaba em 10/11.","Texto final: “Clique no link”"]],
+  takes:["Gravar 3 aberturas diferentes (hook A, B e C) para a Tray testar.","Take de loja sem música ao fundo para a edição escolher.","Take final olhando para a câmera com o CTA."],
+  leg:"Criativo da corrida Tray. Combine com a Tray se vão editar, e envie os takes brutos na pasta combinada. #publi",
+  cta:"Clique no link da oferta.",stickers:["Não usar stickers: o criativo vai limpo para a marca editar."],
+  evitar:["Música com direitos autorais.","Texto muito pequeno.","Gravar na horizontal."],dica:"Quanto mais variação de abertura (3 hooks), mais a marca consegue testar."},
+ "w2-4":{obj:"Quebrar a objeção ‘vai dar muito trabalho montar minha loja’.",fmt:"Reels ou carrossel de stories",dur:"30 a 40s",
+  roteiro:[["Gancho","“Mari, mas montar loja virtual é muito difícil, né?”","Texto: “Dá trabalho? É mole?”"],
+   ["Quebra","A oferta da Tray vem com loja pronta em até 30 dias. Você não precisa virar programadora para sair do zero.","Corte de você rindo e respirando aliviada"],
+   ["Passo a passo","A ideia é simples: você conhece a oferta, escolhe o plano, e a loja vem pronta. Depois é cadastrar produto, foto e preço.","3 textos curtos: 1 conhece · 2 escolhe · 3 cadastra"],
+   ["CTA","Link exclusivo aqui. Vai lá ver como funciona antes de decidir.","Seta para o link"]],
+  takes:["Take 1: você sentada no computador ou celular, cara de ‘eu também tinha medo’.","Take 2: tela mostrando a página da oferta.","Take 3: você cadastrando um produto da Loyall (se tiver acesso a plataforma, mostre uma tela real)."],
+  leg:"Loja pronta em até 30 dias para quem não quer perder tempo montando do zero. 😮‍💨 Oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",
+  cta:"Veja como funciona no link.",stickers:["Link exclusivo","Quiz: “Dá mais trabalho montar loja ou responder direct?”"],
+  evitar:["Mostrar telas que você não conferiu na plataforma.","Dizer que ‘é sem esforço’."],dica:"Se você já usou a plataforma, conte o que achou fácil e o que achou difícil. Isso dá confiança."},
+ "w2-5":{obj:"Vídeo curto só para empurrar para o link.",fmt:"Reels curto ou story em vídeo",dur:"10 a 15s",
+  roteiro:[["Único bloco","Última dica antes de 10/11: o link exclusivo da oferta da Tray tá aqui. Loja pronta em até 30 dias, plano Avançado por 1 ano e R$ 1.200 em Meta Ads. Vai ver e me conta o que achou.","Texto: “Oferta Tray · 10/11” + selo de parceria paga"]],
+  takes:["Take único, frontal, energia alta.","Apoio de 2s: dedo clicando no link."],
+  leg:"Link da oferta da Tray: [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique no link e veja a oferta.",
+  stickers:["Link exclusivo","Contagem regressiva"],evitar:["Mais de 15s.","Explicar demais: o vídeo é só CTA."],dica:"Esse é o vídeo ‘coringa’: grave agora e use quando o dia estiver corrido."},
+ "w2-6":{obj:"Fechar a semana com urgência e levar ao link.",fmt:"4 stories",dur:"10s cada",
+  roteiro:[["Story 1","Gente, hoje fecha a semana 2 da corrida Tray.","Texto: “Último dia da semana 2”"],
+   ["Story 2","Se você ainda não viu a oferta, é agora: loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.","Lista curta na tela"],
+   ["Story 3","A oferta abre dia 10/11. Quem já entrou no link vai receber o aviso primeiro.","Contagem regressiva"],
+   ["Story 4 · Urgência","Último aviso: o link exclusivo tá aqui. Qualquer dúvida, manda no direct que eu respondo.","Link exclusivo + selo parceria paga"]],
+  takes:["Mesmo cenário dos 4 stories, trocar só a posição.","Take de apoio com a loja."],
+  leg:"Último dia da semana 2 da corrida Tray. 🏁",cta:"Clique no link antes da meia-noite.",
+  stickers:["Contagem regressiva","Link exclusivo","Enquete: “Já viu a oferta?”"],
+  evitar:["Postar sem o selo de parceria paga.","Esquecer de conferir o link antes."],dica:"Hoje é 30/10. A semana fecha em 01/11, então grave e agende para amanhã e sábado."},
+ "w3-0":{obj:"Criar expectativa para 10/11.",fmt:"Reels ou story em vídeo",dur:"15 a 20s",
+  roteiro:[["Abertura","Faltam poucos dias para abrir a oferta da Tray.","Contador na tela"],["Meio","Loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus.","Textos animados"],["CTA","O link exclusivo tá aqui para você conhecer antes de abrir.","Sticker de link"]],
+  takes:["Take frontal com calendário ao fundo ou na mão.","Take de apoio: tela com 10/11 destacado."],
+  leg:"Contagem regressiva para a oferta da Tray. ⏳ [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Veja a oferta no link.",stickers:["Contagem regressiva até 10/11","Link exclusivo"],evitar:["Contar dias errados: confira a data."],dica:"Atualize o número de dias restantes no dia em que for postar."},
+ "w3-1":{obj:"Dar 3 razões práticas para aproveitar a oferta.",fmt:"Reels",dur:"30 a 40s",
+  roteiro:[["Gancho","3 motivos para você aproveitar a oferta da Tray antes de 10/11.","Texto: “3 motivos”"],["Motivo 1","Loja pronta em até 30 dias.","Número 1 na tela"],["Motivo 2","1 ano de plano Avançado.","Número 2 na tela"],["Motivo 3","R$ 1.200 em Meta Ads e bônus.","Número 3 na tela"],["CTA","Link exclusivo aqui. Vai ver se faz sentido para a sua loja.","Seta para o link"]],
+  takes:["Um take curto por motivo, mudando de ângulo.","Take de fechamento sorrindo."],
+  leg:"3 motivos práticos para olhar a oferta da Tray. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Veja os detalhes no link.",stickers:["Link exclusivo"],evitar:["Mais de 3 motivos.","Dizer ‘vai vender’."],dica:"Se a Tray mandar o detalhe dos bônus, troque o ‘bônus’ por o nome real."},
+ "w3-2":{obj:"Mostrar um caso real de lojista Tray (prova social).",fmt:"Stories ou Reels",dur:"20 a 40s",
+  roteiro:[["Abertura","Quero te mostrar um caso real de uma lojista que usa a Tray.","Texto: “Caso real”"],["Meio","[PREENCHER: o que ela vendia, o que mudou, em quanto tempo, com autorização dela]","Print ou vídeo enviado por ela"],["CTA","Se você quer ver como funciona, o link exclusivo tá aqui.","Link exclusivo"]],
+  takes:["Vídeo ou áudio da lojista (com autorização).","Print de depoimento sem dado sensível.","Você comentando em take frontal."],
+  leg:"Caso real de uma lojista que usa a Tray. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Conheça a oferta no link.",stickers:["Link exclusivo"],
+  evitar:["Usar caso inventado ou sem autorização.","Citar números sem fonte."],dica:"Peça o caso para a Tray. Se não vier, use o seu: conte o que você mesma percebeu na plataforma."},
+ "w3-3":{obj:"Coletar dúvidas reais e responder ao vivo.",fmt:"Caixinha de perguntas + respostas nos stories",dur:"3 ou mais respostas",
+  roteiro:[["Story da caixinha","Me manda sua dúvida sobre ter loja virtual. Pode perguntar tudo.","Sticker de perguntas"],["Respostas","[PREENCHER com as dúvidas que chegarem. Responda 1 por story]","Pergunta aparece na tela"],["Fechamento","Se ainda sobrou dúvida, o link exclusivo da Tray tá aqui e eu continuo respondendo no direct.","Link exclusivo"]],
+  takes:["Respostas em take frontal, 10 a 15s cada."],leg:"Dúvidas sobre loja virtual respondidas. [LINK EXCLUSIVO] #publi",cta:"Veja a oferta e tire dúvidas.",stickers:["Perguntas","Link exclusivo"],
+  evitar:["Responder o que não sabe: diga ‘vou confirmar com a Tray’."],dica:"Abra a caixinha pela manhã e responda no fim do dia."},
+ "w3-4":{obj:"Mais uma quebra de objeção (use a que mais apareceu).",fmt:"Reels",dur:"30 a 40s",
+  roteiro:[["Gancho","A desculpa que mais escuto: “depois eu vejo isso de site”.","Texto: “Depois eu vejo”"],["Meio","O depois é caro: toda semana sem loja virtual é semana vendendo só quando você está online.","Cortes da rotina"],["Oferta","Na oferta da Tray tem loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus.","Textos curtos"],["CTA","Link exclusivo aqui.","Seta"]],
+  takes:["Take frontal, tom de conversa.","Takes de rotina da loja."],leg:"O ‘depois’ pode custar caro. [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique no link.",stickers:["Link exclusivo"],evitar:["Culpar a pessoa."],dica:"Troque a frase de abertura pela objeção que mais apareceu no seu direct."},
+ "w3-5":{obj:"Última chamada antes de abrir.",fmt:"Reels curto + stories",dur:"15 a 20s",
+  roteiro:[["Único bloco","É a última chamada: a oferta da Tray abre dia 10/11. Loja pronta em até 30 dias, plano Avançado por 1 ano, R$ 1.200 em Meta Ads e bônus. O link tá aqui.","Texto: “Última chamada”"]],
+  takes:["Take frontal com energia alta.","Take de apoio: dedo no link."],leg:"Última chamada da corrida Tray. 🏁 [LINK EXCLUSIVO] #publi #parceriapaga",cta:"Clique agora no link.",stickers:["Contagem regressiva","Link exclusivo"],evitar:["Mudar a oferta: use sempre a mesma descrição."],dica:"Poste de manhã e repita nos stories à noite."},
+ "w3-6":{obj:"Encerrar a corrida com 3 stories e agradecer.",fmt:"3 stories",dur:"10s cada",
+  roteiro:[["Story 1","Obrigada por ter acompanhado a corrida da Tray comigo.","Texto: “Fim da corrida”"],["Story 2","Se você ainda não viu a oferta, o link exclusivo tá aqui. Ela abre dia 10/11.","Link exclusivo"],["Story 3","O resultado da corrida sai em 13/11, e eu volto aqui contando tudo, sem enrolação.","Texto: “Resultado em 13/11”"]],
+  takes:["3 takes frontais, mesmo cenário."],leg:"Fim da corrida Tray. [LINK EXCLUSIVO] #publi",cta:"Veja a oferta no link.",stickers:["Link exclusivo"],evitar:["Anunciar resultado antes de 13/11."],dica:"Prometa o retorno do resultado: isso mantém a audiência atenta."}
+};
+function trayDirText(id){
+  var d=TRAYDIR[id];if(!d)return"";
+  var t=["OBJETIVO: "+d.obj,"FORMATO: "+d.fmt+" · "+d.dur,"","ROTEIRO"];
+  d.roteiro.forEach(function(b){t.push(b[0]+"\nFala: "+b[1]+"\nNa tela: "+b[2]+"\n")});
+  t.push("TAKES SUGERIDOS");d.takes.forEach(function(x){t.push("- "+x)});
+  t.push("","LEGENDA / TEXTO: "+d.leg,"CTA: "+d.cta,"STICKERS: "+d.stickers.join("; "),"EVITAR: "+d.evitar.join("; "),"DICA: "+d.dica,"","SEMPRE: "+TRAY_BASE.sempre.join(" | "));
+  return t.join("\n");
+}
+function trayMat(id,titulo){
+  var d=TRAYDIR[id];
+  return {titulo:"Corrida Tray · "+titulo,subtitulo:d.fmt+" · "+d.dur,intro:d.obj,
+   secoes:[{titulo:"Roteiro",corpo:"",itens:d.roteiro.map(function(b){return b[0]+": “"+b[1]+"” (tela: "+b[2]+")"})},
+    {titulo:"Takes sugeridos",corpo:"",itens:d.takes},
+    {titulo:"Legenda e CTA",corpo:d.leg,itens:["CTA: "+d.cta].concat(["Stickers: "+d.stickers.join("; ")])},
+    {titulo:"Evitar",corpo:"",itens:d.evitar},
+    {titulo:"Sempre",corpo:TRAY_BASE.tom,itens:TRAY_BASE.sempre}],
+   fechamento:d.dica};
+}
+function trayDirHtml(id){
+  var d=TRAYDIR[id];if(!d)return"";
+  var open=state.trayOpen===id,h='<div class="btns" style="margin:2px 0 8px 28px"><button class="btn small ghost" data-trx="open|'+id+'">'+(open?'Fechar direção':'Ver direção completa')+'</button></div>';
+  if(!open)return h;
+  h+='<div class="card" style="margin:0 0 10px"><p><b>Objetivo:</b> '+esc(d.obj)+'</p><p class="note">'+esc(d.fmt)+' · '+esc(d.dur)+'</p><h3>Roteiro</h3>';
+  d.roteiro.forEach(function(b){h+='<p><b>'+esc(b[0])+'</b><br>“'+esc(b[1])+'”<br><span class="note">Na tela: '+esc(b[2])+'</span></p>'});
+  h+='<h3>Takes sugeridos</h3><ul>'+d.takes.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul>'
+   +'<h3>Legenda ou texto</h3><p>'+esc(d.leg)+'</p><p><b>CTA:</b> '+esc(d.cta)+'</p><p class="note"><b>Stickers:</b> '+esc(d.stickers.join('; '))+'</p>'
+   +'<h3>Evitar</h3><ul>'+d.evitar.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="note"><b>Dica:</b> '+esc(d.dica)+'</p>'
+   +'<div class="btns"><button class="btn small" data-trx="copy|'+id+'">Copiar tudo</button><button class="btn small ghost" data-trx="pdf|'+id+'">Gerar PDF</button><button class="btn small ghost" data-trx="dia|'+id+'">Pôr no Meu dia</button></div></div>';
+  return h;
+}
+function trayMissaoNome(id){var n="";cfg().tray.forEach(function(w){w.m.forEach(function(m){if(m[0]===id)n=m[1]})});return n||id}
 function trayPts(){var p=0;cfg().tray.forEach(function(w){w.m.forEach(function(m){if(state.checks["tray-"+m[0]])p+=parseNum(m[2])})});return p}
 function updTray(){var n=parseNum(T("tray.clientes","")),o=$("#tray-out");if(o)o.innerHTML='<b>'+brl(n*500)+'</b> de bonificação ('+n+' cliente(s) novo(s) na oferta × R$ 500) · pontos: <b>'+(trayPts()+n*30)+'</b> <span class="note">(missões marcadas + 30 por cliente novo confirmado)</span>'}
 function pubTray(){
   var T2=cfg().tray,h='<div><h2>Corrida Tray</h2><p class="sub">Desafio Influencers Black Friday: 20/10 a 10/11, apuração em 13/11. Conversão pesa mais que volume.</p></div>'
+   +'<div class="card"><h3>Vale para toda missão</h3><ul>'+TRAY_BASE.sempre.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="note">'+esc(TRAY_BASE.tom)+'</p><p class="note">Toque em “Ver direção completa” em cada missão para abrir roteiro, takes, legenda e CTA.</p></div>'
    +'<div class="card"><h3>Oferta de 10/11</h3><p>Loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.</p><p class="note">Prêmio do 1º lugar: viagem a Punta Cana para ela e um acompanhante. Cliente novo confirmado vale +30 pontos e há bônus de eficiência de +10. Sempre com link exclusivo e selo de parceria paga.</p></div>';
   T2.forEach(function(w,wi){
     h+='<div class="card">';
@@ -1422,7 +1545,7 @@ function pubTray(){
       w.m.forEach(function(m,mi){h+='<div class="btns" style="flex-wrap:nowrap"><input type="text" data-ed="tray|'+wi+'|m|'+mi+'|1" value="'+esc(m[1])+'"><input type="text" inputmode="numeric" style="width:64px" data-ed="tray|'+wi+'|m|'+mi+'|2" data-num="1" value="'+esc(m[2])+'" aria-label="Pontos"><button class="btn ghost small" data-cfx="tray-delm|'+wi+'|'+mi+'" aria-label="Remover missão">×</button></div>'});
       h+='<div class="btns"><button class="btn ghost small" data-cfx="tray-addm|'+wi+'">Adicionar missão</button><button class="btn ghost small" data-cfx="tray-delw|'+wi+'">Remover esta semana</button></div>';
     }else{
-      h+='<h3>'+esc(w.t)+'</h3>'+w.m.map(function(m){return chk("tray-"+m[0],m[1]+(parseNum(m[2])?" (+"+m[2]+")":""))}).join('');
+      h+='<h3>'+esc(w.t)+'</h3>'+w.m.map(function(m){return chk("tray-"+m[0],m[1]+(parseNum(m[2])?" (+"+m[2]+")":""))+trayDirHtml(m[0])}).join('');
     }
     h+='</div>';
   });
@@ -1436,6 +1559,13 @@ function pubClick(el){
   var tg=el.closest("[data-tg]");if(tg){state[tg.dataset.tg]=!state[tg.dataset.tg];render();return true}
   var p=el.closest("[data-pub]");if(p){state.pub=p.dataset.pub;render();window.scrollTo(0,0);return true}
   var co=el.closest("[data-campopen]");if(co){state.campOpen=state.campOpen===co.dataset.campopen?null:co.dataset.campopen;render();return true}
+  var tx=el.closest("[data-trx]");
+  if(tx){var tq=tx.dataset.trx.split("|"),tid=tq[1];
+    if(tq[0]==="open"){state.trayOpen=state.trayOpen===tid?null:tid;render();return true}
+    if(tq[0]==="copy"){copyText(trayDirText(tid),tx);return true}
+    if(tq[0]==="pdf"){pubOpenMat("relatorio",trayMat(tid,trayMissaoNome(tid)));return true}
+    if(tq[0]==="dia"){var nm=trayMissaoNome(tid);MD.items.push(mdNew({t:"Tray: "+nm,tipo:"gravar",parc:"Tray",d:isoToday()}));mdLocal();tx.textContent="Adicionado ao Meu dia";return true}
+  }
   var cx=el.closest("[data-campx]");
   if(cx){var a=cx.dataset.campx;
     if(a==="add"){var t=$("#cp-t").value.trim()||"Campanha",d=$("#cp-d").value;if(!d)return true;state.campOpen=campAdd($("#cp-m").value,t,d);render();return true}
