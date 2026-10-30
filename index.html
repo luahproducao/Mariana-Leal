@@ -1127,7 +1127,7 @@ function isDirect(t){return DIRECT.indexOf(t)>=0}
 function pad2(n){return String(n).padStart(2,"0")}
 function addDays(iso,n){var d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
 function fd(iso){return iso?iso.slice(8,10)+"/"+iso.slice(5,7):"?"}
-var PUBS=[["camp","Campanhas"],["roteiro","Roteiro"],["fit","Fit"],["marcas","Marcas"],["tray","Tray"]];
+var PUBS=[["camp","Campanhas"],["parc","Parcerias"],["roteiro","Roteiro"],["fit","Fit"],["marcas","Marcas"],["tray","Tray"]];
 var D_GUIA={
  "Bling":{ang:"Plataforma completa de negócios: gestão de ponta a ponta.",usar:["plataforma completa de negócios","gestão de ponta a ponta","centralizador da operação","Loja Virtual Nativa (ao falar da loja virtual)"],evitar:["chamar só de “meu ERP”, “sistema de notas” ou “plataforma de e-commerce”","azul predominante","citar concorrentes","criticar marketplaces"],visual:"Elementos verdes. Lilás só quando o assunto for loja virtual. Carrossel no template oficial do Canva.",temas:["estoque sem planilha","lucro real por produto","nota fiscal sem medo","pedidos de vários canais num lugar só","Lei de Murphy na loja"]},
  "Melhor Envio":{ang:"Frete como estratégia de venda: frete grátis a partir de um valor para subir o ticket, comparando Correios e transportadoras.",usar:["cotações reais, mesmo pacote e mesmo CEP","cupom MARILEAL (confirmar a validade a cada campanha)"],evitar:["cotação inventada ou sem print real"],visual:"",temas:["embalar para não ter devolução","custo de troca","prazo x preço","rotina de envio em 15 minutos"]},
@@ -1199,7 +1199,7 @@ function nextEtapa(c){var es=cfg().etapas;for(var i=0;i<es.length;i++){if(!(c.do
 function renderPub(){
   if(state.pub==="mat"){renderCriar();return}
   var pills='<div class="pills">'+PUBS.map(function(m){return '<button class="pill" data-pub="'+m[0]+'" aria-pressed="'+(state.pub===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>';
-  var v=state.pub,inner=v==="roteiro"?pubRoteiro():v==="fit"?pubFit():v==="marcas"?pubMarcas():v==="tray"?pubTray():pubCamp();
+  var v=state.pub,inner=v==="parc"?pubParc():v==="roteiro"?pubRoteiro():v==="fit"?pubFit():v==="marcas"?pubMarcas():v==="tray"?pubTray():pubCamp();
   $("#view").innerHTML='<div class="stack">'+pills+inner+'</div>';
   if(v==="tray")updTray();
 }
@@ -1263,6 +1263,7 @@ function pubRoteiro(){
   if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
+  if(r.parcId&&parcGet(r.parcId))h+='<div class="draft">Painel: '+esc(parcTitle(parcGet(r.parcId)))+'. O briefing, as regras e o seu ângulo já vieram do painel.</div>';
   h+='<div class="card"><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
    +'<label class="lab">Briefing da marca (cole aqui)<textarea data-pr="pb" style="min-height:140px" placeholder="Entregáveis, mensagem principal, termos obrigatórios, o que evitar, cupom, link...">'+esc(r.briefing)+'</textarea></label>'
    +'<label class="lab">Sua ideia ou ângulo (opcional)<input type="text" data-pr="po" value="'+esc(r.obj)+'" placeholder="Ex.: contar o dia em que quase vendi sem conferir o estoque"></label>'
@@ -1274,7 +1275,7 @@ function pubRoteiro(){
     h+='<label class="lab">Legenda<textarea data-pr="pl">'+esc(x.legenda)+'</textarea></label>'
      +'<label class="lab">Para confirmar antes de gravar (um por linha)<textarea data-pr="pc">'+esc((x.confirmar||[]).join("\n"))+'</textarea></label>'
      +'<label class="lab">Ajuste extra (opcional)<input type="text" data-pr="pa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais direto, mais animado"></label>'
-     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button></div></div>'
+     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
      +'';
   }
   h+='<div class="card"><h3>Antes de postar</h3>'+cfg().pck.map(function(t,i){return '<div class="row'+(r.ck[i]?' chkd':'')+'"><input type="checkbox" id="pk'+i+'" data-prck="'+i+'"'+(r.ck[i]?' checked':'')+'><label for="pk'+i+'">'+esc(t)+'</label></div>'}).join('')+'<div class="btns"><button class="btn ghost small" data-tg="edPck">'+(state.edPck?'Fechar edição':'Editar checklist')+'</button></div>'+(state.edPck?'<label class="lab">Um item por linha<textarea style="min-height:200px" data-ed="pck" data-lines="1">'+esc(cfg().pck.join("\n"))+'</textarea></label>':'')+'</div>';
@@ -1730,6 +1731,123 @@ document.addEventListener("change",async function(e){
 });
 
 
+
+/* ============ PAINEL DA PARCERIA ============ */
+var PARC={items:[]},PCUI={open:null,confDel:false,busy:"",msg:"",bt:"",bx:"",nm:"",mc:""};
+var PCST=["Prospecção","Negociando","Fechada","Em produção","Entregue","Encerrada"],PCROS=["Rascunho","Enviado à marca","Aprovado","Postado"];
+function parcLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-parc")||"[]");PARC.items=Array.isArray(j)?j:[]}catch(e){PARC.items=[]}}
+function parcLocal(){try{localStorage.setItem("hoje-parc",JSON.stringify(PARC.items))}catch(e){}}
+function parcPut(p){p.at=Date.now();parcLocal();if(C.parc)C.parc.doc(p.id).set({json:JSON.stringify(p),at:p.at}).then(function(){setSync("Parceria salva para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function parcGet(id){return PARC.items.filter(function(x){return x.id===id})[0]}
+function parcNew(marca,nome,status){return {id:"pc"+Date.now()+Math.floor(Math.random()*1000),marca:marca,nome:nome||"",status:status||"Prospecção",contato:"",post:"",entregaveis:"",briefs:[],regras:"",angulo:"",duvidas:"",aprend:"",roteiros:[],at:Date.now()}}
+function parcTitle(p){return p.marca+(p.nome?" · "+p.nome:"")}
+function parcCtx(p){
+  var h="PAINEL DA PARCERIA: "+parcTitle(p)+"\nStatus: "+p.status+(p.post?"\nPostagem prevista: "+p.post.split("-").reverse().join("/"):"");
+  if(p.entregaveis.trim())h+="\nEntregáveis: "+p.entregaveis.trim();
+  var bs=p.briefs.slice().reverse().filter(function(b){return (b.x||"").trim()});
+  if(bs.length)h+="\n\nBRIEFINGS (mais recente primeiro):\n"+bs.map(function(b){return "["+(b.t||"Briefing")+"]\n"+b.x.trim()}).join("\n\n");
+  if(p.regras.trim())h+="\n\nREGRAS E COMBINADOS:\n"+p.regras.trim();
+  if(p.angulo.trim())h+="\n\nCOMO EU QUERO FALAR DESTA MARCA:\n"+p.angulo.trim();
+  if(p.aprend.trim())h+="\n\nAPRENDIZADOS E RESULTADOS ANTERIORES COM ESTA MARCA:\n"+p.aprend.trim();
+  if(p.duvidas.trim())h+="\n\nDÚVIDAS AINDA ABERTAS (não invente, deixe em [PREENCHER]):\n"+p.duvidas.trim();
+  return h;
+}
+function pcTa(f,label,v,ph,min){return '<label class="lab">'+label+'<textarea data-pcf="'+f+'"'+(min?' style="min-height:'+min+'px"':'')+' placeholder="'+esc(ph||"")+'">'+esc(v)+'</textarea></label>'}
+function pubParc(){
+  var h='';
+  var p=PCUI.open?parcGet(PCUI.open):null;
+  if(!p){
+    PCUI.open=null;
+    h+='<div><h2>Parcerias</h2><p class="sub">Um painel para cada parceria. Guarde os briefings, as regras, o seu ângulo e os roteiros. O app usa tudo isso para escrever com a marca e com você.</p></div>';
+    h+='<div class="card"><h3>Nova parceria</h3><label class="lab">Marca<select id="pc-m">'+marcaList().map(function(m){return '<option'+(m===PCUI.mc?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
+     +'<label class="lab">Nome da parceria (opcional)<input type="text" id="pc-n" value="'+esc(PCUI.nm)+'" placeholder="Ex.: Black Friday, Reels de novembro"></label>'
+     +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button></div></div>';
+    var l=PARC.items.slice().sort(function(a,b){return (b.at||0)-(a.at||0)});
+    if(!l.length)h+='<div class="card"><p class="sub">Nenhum painel ainda. Crie um ou comece pelas marcas que você já tem.</p><div class="btns"><button class="btn ghost small" data-pcb="seedfix">Criar painel de cada marca fixa</button></div></div>';
+    h+=l.map(function(x){return '<button class="card click" data-pcb="open" data-id="'+x.id+'" style="text-align:left;width:100%"><span class="tag">'+esc(x.status)+'</span><h3>'+esc(parcTitle(x))+'</h3><p class="sub">'+x.briefs.length+' briefing(s) · '+x.roteiros.length+' roteiro(s)'+(x.post?' · postagem '+esc(x.post.split("-").reverse().slice(0,2).join("/")):'')+'</p></button>'}).join('');
+    return h;
+  }
+  h+='<div class="btns"><button class="btn ghost small" data-pcb="back">← Parcerias</button></div>';
+  h+='<div><h2>'+esc(parcTitle(p))+'</h2></div>';
+  if(PCUI.busy)h+='<div class="card"><h3>'+esc(PCUI.busy)+'</h3></div>';
+  if(PCUI.msg)h+='<div class="draft">'+esc(PCUI.msg)+'</div>';
+  h+='<div class="card"><h3>Dados</h3><div class="fields"><label>Nome<input type="text" data-pcf="nome" value="'+esc(p.nome)+'"></label><label>Status<select data-pcf="status">'+PCST.map(function(x){return '<option'+(x===p.status?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
+   +'<div class="fields"><label>Postagem prevista<input type="date" data-pcf="post" value="'+esc(p.post)+'"></label><label>Contato na marca<input type="text" data-pcf="contato" value="'+esc(p.contato)+'" placeholder="Nome e canal"></label></div>'
+   +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'</div>';
+  h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais na hora de escrever. Não cole briefing que a marca pediu para manter em sigilo.</p>'
+   +'<label class="lab">Título<input type="text" id="pc-bt" value="'+esc(PCUI.bt)+'" placeholder="Ex.: Briefing inicial, ajuste de 05/11"></label>'
+   +'<label class="lab">Texto do briefing<textarea id="pc-bx" style="min-height:120px" placeholder="Cole aqui...">'+esc(PCUI.bx)+'</textarea></label><div class="btns"><button class="btn small" data-pcb="addbrief">Guardar briefing</button></div>';
+  h+=p.briefs.slice().map(function(b,i){return {b:b,i:i}}).reverse().map(function(o){return '<div class="card" style="background:var(--bg)"><input type="text" data-pcbt="'+o.i+'" value="'+esc(o.b.t)+'" aria-label="Título do briefing"><textarea data-pcbx="'+o.i+'" style="min-height:100px">'+esc(o.b.x)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(o.b.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px">'+(S?'<button class="btn small" data-pcb="ler" data-i="'+o.i+'">Ler com IA</button>':'')+'<button class="btn ghost small" data-pcb="delbrief" data-i="'+o.i+'">Apagar</button></span></div></div>'}).join('')+'</div>';
+  h+='<div class="card"><h3>Combinados e meu ângulo</h3>'
+   +pcTa("regras","Regras e combinados (obrigatório, evitar, cupom e link, prazos)",p.regras,"Uma por linha...",100)
+   +pcTa("angulo","Como eu quero falar desta marca",p.angulo,"Ex.: contar o dia em que quase comprei sem conferir o estoque...",80)
+   +pcTa("duvidas","Dúvidas para perguntar à marca",p.duvidas,"Uma por linha...",70)
+   +pcTa("aprend","Aprendizados e resultados",p.aprend,"O que funcionou, o que não, números...",80)
+   +'<div class="btns"><button class="btn ghost small" data-pcb="tobrain">Guardar aprendizados no meu cérebro</button></div></div>';
+  h+='<div class="card"><h3>Roteiros desta parceria</h3>'
+   +p.roteiros.map(function(r,i){return '<div class="card" style="background:var(--bg)"><b>'+esc((r.res&&r.res.titulo)||"Roteiro")+'</b><div class="fields"><label>Situação<select data-pcrs="'+i+'">'+PCROS.map(function(x){return '<option'+(x===r.st?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><div class="btns"><button class="btn small" data-pcb="openros" data-i="'+i+'">Abrir e editar</button><button class="btn ghost small" data-pcb="delros" data-i="'+i+'">Apagar</button></div></div>'}).join('')
+   +(S?'<div class="btns"><button class="btn" data-pcb="roteiro">Escrever roteiro com este painel</button></div>':'<p class="note">'+esc(NOAI)+'</p>')+'</div>';
+  var cs=Object.keys(state.camp||{}).map(function(k){return state.camp[k]}).filter(function(c){return c&&c.m===p.marca&&!c.del});
+  if(cs.length)h+='<div class="card"><h3>Campanhas desta marca</h3>'+cs.map(function(c){return '<p class="sub">'+esc(c.t||"Campanha")+' · postagem '+esc(String(c.d||"").split("-").reverse().slice(0,2).join("/"))+'</p>'}).join('')+'</div>';
+  h+='<div class="btns"><button class="btn ghost small" data-pcb="del">'+(PCUI.confDel?'Toque de novo para apagar o painel':'Apagar este painel')+'</button></div>';
+  return h;
+}
+document.addEventListener("click",async function(e){
+  var b=e.target.closest&&e.target.closest("[data-pcb]");if(!b)return;
+  var a=b.dataset.pcb,id=b.dataset.id,i=parseInt(b.dataset.i,10),p=PCUI.open?parcGet(PCUI.open):null;
+  PCUI.msg="";
+  if(a!=="del")PCUI.confDel=false;
+  if(a==="open"){PCUI.open=id;render();window.scrollTo(0,0);return}
+  if(a==="back"){PCUI.open=null;render();return}
+  if(a==="create"){var m=$("#pc-m").value,n=$("#pc-n").value.trim();var np=parcNew(m,n);PARC.items.push(np);parcPut(np);PCUI.open=np.id;PCUI.nm="";render();window.scrollTo(0,0);return}
+  if(a==="seedfix"){Object.keys(cfg().marcas).forEach(function(m){var np2=parcNew(m,"","Fechada");PARC.items.push(np2);parcPut(np2)});render();return}
+  if(!p)return;
+  if(a==="addbrief"){var x=$("#pc-bx").value.trim();if(!x){PCUI.msg="Cole o texto do briefing.";render();return}p.briefs.push({id:"bf"+Date.now(),t:$("#pc-bt").value.trim()||"Briefing",x:x,at:Date.now()});PCUI.bt="";PCUI.bx="";parcPut(p);PCUI.msg="Briefing guardado.";render();return}
+  if(a==="delbrief"){p.briefs.splice(i,1);parcPut(p);render();return}
+  if(a==="delros"){p.roteiros.splice(i,1);parcPut(p);render();return}
+  if(a==="tobrain"){var t=p.aprend.trim();if(!t){PCUI.msg="Escreva os aprendizados primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
+  if(a==="del"){if(!PCUI.confDel){PCUI.confDel=true;render();return}PARC.items=PARC.items.filter(function(x){return x.id!==p.id});parcLocal();if(C.parc)C.parc.doc(p.id).set({del:true,at:Date.now()});PCUI.open=null;PCUI.confDel=false;render();return}
+  if(a==="roteiro"||a==="openros"){
+    var r=state.pr;r.marca=marcaList().indexOf(p.marca)>=0?p.marca:"Outra marca";r.parcId=p.id;r.err="";r.busy="";
+    if(a==="roteiro"){r.briefing=parcCtx(p);r.obj=p.angulo.trim().split("\n")[0]||"";r.res=null;r.ck={};r.instr=""}
+    else{var ro=p.roteiros[i];if(!ro)return;r.res=JSON.parse(JSON.stringify(ro.res));r.briefing=parcCtx(p);r.obj=p.angulo.trim().split("\n")[0]||"";r.ck={};r.roId=ro.id}
+    if(a==="roteiro")r.roId=null;
+    savePr();state.pub="roteiro";render();window.scrollTo(0,0);return;
+  }
+  if(a==="ler"){
+    var br=p.briefs[i];if(!br||!S){PCUI.msg=NOAI;render();return}
+    PCUI.busy="Lendo o briefing...";render();
+    try{
+      var res=await S.json("Leia o briefing de uma marca para a influenciadora Mari e extraia, SEM inventar nada que não esteja no texto: entregáveis, o que é obrigatório, o que evitar, prazos, cupom e link, e as dúvidas que ainda faltam para escrever o roteiro.\n\nMarca: "+p.marca+"\nBriefing:\n"+br.x+"\n\nResponda SOMENTE com JSON {\"entregaveis\":\"\",\"obrigatorio\":[\"\"],\"evitar\":[\"\"],\"prazos\":\"\",\"cupom\":\"\",\"duvidas\":[\"\"]}.",{modelTier:"default"});
+      var L=function(a2){return (a2||[]).map(String).filter(Boolean)};
+      if(res.entregaveis&&!p.entregaveis.trim())p.entregaveis=String(res.entregaveis);
+      var rg=[];if(L(res.obrigatorio).length)rg.push("Obrigatório: "+L(res.obrigatorio).join("; "));if(L(res.evitar).length)rg.push("Evitar: "+L(res.evitar).join("; "));if(res.prazos)rg.push("Prazos: "+res.prazos);if(res.cupom)rg.push("Cupom e link: "+res.cupom);
+      if(rg.length)p.regras=(p.regras.trim()?p.regras.trim()+"\n\n":"")+"[do briefing “"+br.t+"”]\n"+rg.join("\n");
+      if(L(res.duvidas).length)p.duvidas=(p.duvidas.trim()?p.duvidas.trim()+"\n":"")+L(res.duvidas).join("\n");
+      parcPut(p);PCUI.msg="Briefing lido. Confira e ajuste em Combinados e Dúvidas.";
+    }catch(err){PCUI.msg=crErr(err)||"Não consegui ler agora."}
+    PCUI.busy="";render();return;
+  }
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-pcb=saveros]");if(!b)return;
+  var r=state.pr,p=r.parcId?parcGet(r.parcId):null;if(!p||!r.res)return;
+  var cp=JSON.parse(JSON.stringify(r.res)),ex=r.roId?p.roteiros.filter(function(x){return x.id===r.roId})[0]:null;
+  if(ex){ex.res=cp;ex.at=Date.now()}else{var nr={id:"ro"+Date.now(),res:cp,st:"Rascunho",at:Date.now()};p.roteiros.push(nr);r.roId=nr.id}
+  parcPut(p);savePr();b.textContent="Guardado no painel";
+});
+document.addEventListener("input",function(e){var el=e.target;if(el.id==="pc-bt")PCUI.bt=el.value;else if(el.id==="pc-bx")PCUI.bx=el.value;else if(el.id==="pc-n")PCUI.nm=el.value});
+document.addEventListener("change",function(e){
+  var el=e.target;if(!el.dataset)return;
+  var p=PCUI.open?parcGet(PCUI.open):null;
+  if(el.id==="pc-m"){PCUI.mc=el.value;return}
+  if(!p)return;
+  if(el.dataset.pcf){p[el.dataset.pcf]=el.value;parcPut(p);if(el.dataset.pcf==="nome"){var h2=document.querySelector("#view h2");if(h2)h2.textContent=parcTitle(p)}return}
+  if(el.dataset.pcbx!==undefined&&el.dataset.pcbx!==""){var b=p.briefs[parseInt(el.dataset.pcbx,10)];if(b){b.x=el.value;parcPut(p)}return}
+  if(el.dataset.pcbt!==undefined&&el.dataset.pcbt!==""){var b2=p.briefs[parseInt(el.dataset.pcbt,10)];if(b2){b2.t=el.value;parcPut(p)}return}
+  if(el.dataset.pcrs!==undefined&&el.dataset.pcrs!==""){var r2=p.roteiros[parseInt(el.dataset.pcrs,10)];if(r2){r2.st=el.value;parcPut(p)}}
+});
+
 /* ============ MEU CÉREBRO ============ */
 var BR={items:[]},BRUI={cat:"voz",q:0,txt:"",props:[],busy:"",msg:""};
 var BRCATS=[["voz","Meu jeito de falar"],["historia","Minha história"],["publico","Meu público"],["negocio","Loja, marca e produtos"],["marcas","Parcerias e marcas"],["aprend","O que aprendi"],["decisao","Decisões e rumo"]];
@@ -1737,8 +1855,47 @@ var BRQ={voz:["Que expressões você sempre usa com as seguidoras?","O que você
 function brLabel(k){var r=BRCATS.filter(function(c){return c[0]===k})[0];return r?r[1]:"Outros"}
 function brLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-brain")||"[]");BR.items=Array.isArray(j)?j:[]}catch(e){BR.items=[]}}
 function brLocal(){try{localStorage.setItem("hoje-brain",JSON.stringify(BR.items))}catch(e){}}
-function brPut(it){brLocal();if(C.brain)C.brain.doc(it.id).set({cat:it.cat,text:it.text,pin:!!it.pin,at:it.at}).then(function(){setSync("Cérebro salvo para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function brPut(it){brLocal();if(C.brain)C.brain.doc(it.id).set({cat:it.cat,text:it.text,pin:!!it.pin,seed:!!it.seed,at:it.at}).then(function(){setSync("Cérebro salvo para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
 function brAdd(cat,text){var t=String(text||"").trim();if(!t)return null;var it={id:"b"+Date.now()+Math.floor(Math.random()*1000),cat:cat,text:t,pin:false,at:Date.now()};BR.items.push(it);brPut(it);return it}
+
+var BRSEED=[
+["voz","Meu tom é brincalhão e direto."],
+["voz","Expressões que eu uso: “gente”, “oxe”, “onde já se viu”, “é mole?”, “me poupe”."],
+["voz","Evito palavrão, gestos obscenos e conteúdo chocante."],
+["voz","Não gosto de lista de erros sem solução: quando aponto um problema, mostro o caminho."],
+["voz","Meu filho aparece pouco nos reels e mais nos stories, sem rotina escolar. Não mostro brigas de casal."],
+["historia","Tenho a loja Loyall há 7 anos."],
+["historia","Quero ser lembrada por mostrar o processo real de construir empresa, marca e vida."],
+["historia","Meu diferencial é mostrar o empreendedorismo enquanto acontece, sem esperar o case terminar."],
+["historia","Meus valores: ética, lealdade e transparência."],
+["historia","Minhas referências: Letícia Vaz, Flávia (Platô) e Jeeh Moraes."],
+["historia","Faço quase tudo sozinha (só deleguei a edição das publis) e separo pelo menos 1 dia por semana para gravar, sem dia fixo."],
+["publico","Minhas seguidoras são, na maioria, iniciantes: lojistas com nível de consciência baixo, muitas ainda sem faturar grandes volumes."],
+["publico","Recebo muito direct e pouca interação pública. Os comentários aparecem mais em trends; nas publis o engajamento é baixo."],
+["publico","O perfil tem cerca de 127 mil seguidores, mas as curtidas por post às vezes ficam perto de 90."],
+["negocio","Meu produto digital é o Estoque Crescente, vendido pela Kiwify com ManyChat."],
+["negocio","O app do Estoque Crescente calcula custos para a empresária entender o financeiro da marca. Está concluído; faltam página de vendas, estratégia de preço, acesso diferenciado para o pessoal do Telegram e a comunicação de lançamento."],
+["negocio","Tenho a assinatura do Instagram, com conteúdo mais elaborado. O funil da assinatura ainda está confuso."],
+["negocio","Quero lançar o app ainda este ano com 2 minicursos e, mais à frente, cursos do zero ao avançado sobre produzir conteúdo e sobre a carreira de empresária e de influenciadora."],
+["marcas","Marcas fixas: Bling, Melhor Envio, Tray e Ton. Também há Meta e 99 Food."],
+["marcas","Não faria publi de emagrecedores nem de Gummy Hair."],
+["marcas","Bling, Tray e Melhor Envio são parcerias longas e não são para iniciantes; a Ton é a marca mais adequada para o público iniciante."],
+["marcas","Prazos que quero das marcas: briefing final 7 a 10 dias antes, aprovação em até 48h e pagamento até 30 dias depois da nota fiscal."],
+["marcas","Quero no máximo 6 a 7 contratos de marca por mês."],
+["aprend","Já tentei só conteúdo educativo e perdi engajamento e crescimento."],
+["aprend","Meus picos de crescimento vieram de vlogs de viagem, como o de Fortaleza e o “como encontro bons fornecedores”."],
+["aprend","Tenho receio de que conteúdo viral ou de trend atraia ainda mais público iniciante e prejudique as parcerias longas. Aceito fazer trend, GRWM e motivacional, desde que a assinatura e os Melhores Amigos também sejam trabalhados, para não parecer superficial."],
+["decisao","Meta: chegar a 200 mil seguidores em 3 a 6 meses."],
+["decisao","Foco agora: conteúdo mais valioso nos Melhores Amigos e na assinatura, e mini produtos acessíveis para vender e agregar no app do Estoque Crescente."],
+["decisao","Quero campanhas de engajamento com as seguidoras e usar os Melhores Amigos para criar uma relação mais íntima com empresárias e possíveis clientes."],
+["decisao","Prefiro roteiros em texto, um por vez, com comentários ou áudios. Só consigo executar com a demanda organizada por dia, em blocos, com guia de como começar e finalizar."]
+];
+function brSeed(){
+  try{if(localStorage.getItem("hoje-brain-seeded"))return;localStorage.setItem("hoje-brain-seeded","1")}catch(e){return}
+  if(BR.items.length)return;
+  BRSEED.forEach(function(x,i){BR.items.push({id:"seed"+(i+1),cat:x[0],text:x[1],pin:false,seed:true,at:1761800000000+i})});
+  brLocal();
+}
 function brSorted(a){return a.slice().sort(function(x,y){return (y.pin?1:0)-(x.pin?1:0)||(y.at||0)-(x.at||0)})}
 function brainCtx(){
   var a=BR.items.filter(function(x){return x.text&&x.text.trim()});if(!a.length)return "";
@@ -1756,6 +1913,8 @@ function brHtml(){
   var n=BR.items.length,vazias=BRCATS.filter(function(c){return !BR.items.some(function(x){return x.cat===c[0]})});
   var h='<div><h2>Meu cérebro</h2><p class="sub">Escreva aqui do seu jeito. Tudo o que você guarda passa a valer em todo roteiro, guia e sugestão do app. Quanto mais você alimenta, mais o app fala como você.</p></div>';
   h+='<div class="card"><h3>'+n+' anotaç'+(n===1?'ão':'ões')+'</h3><p class="note">'+(vazias.length?'Ainda vazio: '+vazias.map(function(c){return c[1]}).join(', ')+'.':'Todas as áreas já têm anotações. Continue refinando.')+'</p></div>';
+  var ns=BR.items.filter(function(x){return x.seed}).length;
+  if(ns)h+='<div class="card"><h3>Primeira versão pronta</h3><p class="note">Montei com o que já se sabe sobre você. Leia, corrija o que estiver diferente e apague o que não for verdade. Fica marcado como “Revisar” até você confirmar.</p><div class="btns"><button class="btn small" data-brb="okall">Confirmar todas ('+ns+')</button></div></div>';
   var qs=BRQ[BRUI.cat]||BRQ.voz,q=qs[BRUI.q%qs.length];
   h+='<div class="card"><h3>Alimentar o cérebro</h3><div class="pills">'+BRCATS.map(function(c){return '<button class="pill" data-brcat="'+c[0]+'" aria-pressed="'+(BRUI.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'
    +'<p class="note">Para pensar: <b>'+esc(q)+'</b></p><div class="btns"><button class="btn ghost small" data-brb="outra">Outra pergunta</button></div>'
@@ -1769,7 +1928,7 @@ function brHtml(){
   }
   BRCATS.forEach(function(c){
     var l=brSorted(BR.items.filter(function(x){return x.cat===c[0]}));if(!l.length)return;
-    h+='<div><h3>'+esc(c[1])+'</h3></div>'+l.map(function(x){return '<div class="card"><textarea data-bre="'+x.id+'" aria-label="Anotação">'+esc(x.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+(x.pin?'Fixada · ':'')+new Date(x.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px"><button class="btn ghost small" data-brb="pin" data-id="'+x.id+'">'+(x.pin?'Desafixar':'Fixar')+'</button><button class="btn ghost small" data-brb="del" data-id="'+x.id+'">Apagar</button></span></div></div>'}).join('');
+    h+='<div><h3>'+esc(c[1])+'</h3></div>'+l.map(function(x){return '<div class="card"><textarea data-bre="'+x.id+'" aria-label="Anotação">'+esc(x.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+(x.seed?'Revisar · ':'')+(x.pin?'Fixada · ':'')+new Date(x.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px">'+(x.seed?'<button class="btn small" data-brb="ok" data-id="'+x.id+'">Confirmar</button>':'')+'<button class="btn ghost small" data-brb="pin" data-id="'+x.id+'">'+(x.pin?'Desafixar':'Fixar')+'</button><button class="btn ghost small" data-brb="del" data-id="'+x.id+'">Apagar</button></span></div></div>'}).join('');
   });
   var ctx=brainCtx();
   h+='<details class="card"><summary><b>O que o app lê antes de cada pedido</b></summary><p class="note">Anotações fixadas e mais recentes entram primeiro. Cabem cerca de 7 mil caracteres ('+ctx.length+' agora).</p><pre style="white-space:pre-wrap;font:inherit;font-size:13px;color:var(--muted)">'+esc(ctx||"Nada ainda.")+'</pre></details>';
@@ -1784,6 +1943,8 @@ document.addEventListener("click",async function(e){
   if(a==="add"){var ta=document.querySelector('[data-br="novo"]');var tx=ta?ta.value:BRUI.txt;if(!String(tx).trim()){BRUI.msg="Escreva algo antes de guardar.";render();return}brAdd(BRUI.cat,tx);BRUI.txt="";BRUI.msg="Guardado em “"+brLabel(BRUI.cat)+"”.";render();return}
   if(a==="pin"){var it=BR.items.filter(function(x){return x.id===id})[0];if(it){it.pin=!it.pin;brPut(it);render()}return}
   if(a==="del"){BR.items=BR.items.filter(function(x){return x.id!==id});brLocal();if(C.brain)C.brain.doc(id).set({del:true,at:Date.now()});render();return}
+  if(a==="ok"){var i0=BR.items.filter(function(x){return x.id===id})[0];if(i0){delete i0.seed;brPut(i0);render()}return}
+  if(a==="okall"){BR.items.forEach(function(x){if(x.seed){delete x.seed;brPut(x)}});render();return}
   if(a==="dropprops"){BRUI.props=[];render();return}
   if(a==="saveprops"){var n=0;BRUI.props.forEach(function(x){if(x.on&&brAdd(x.cat,x.texto))n++});BRUI.props=[];BRUI.msg=n+" guardada(s).";render();return}
   if(a==="digest"){
@@ -1803,12 +1964,12 @@ document.addEventListener("click",async function(e){
 document.addEventListener("input",function(e){var el=e.target;if(el.dataset&&el.dataset.br==="novo")BRUI.txt=el.value});
 document.addEventListener("change",function(e){
   var el=e.target;if(!el.dataset)return;
-  if(el.dataset.bre){var it=BR.items.filter(function(x){return x.id===el.dataset.bre})[0];if(it){it.text=el.value;it.at=it.at||Date.now();brPut(it)}return}
+  if(el.dataset.bre){var it=BR.items.filter(function(x){return x.id===el.dataset.bre})[0];if(it){it.text=el.value;delete it.seed;it.at=it.at||Date.now();brPut(it)}return}
   if(el.dataset.brp!==undefined&&el.dataset.brp!==""){var x=BRUI.props[parseInt(el.dataset.brp,10)];if(x)x.on=el.checked}
 });
 
 /* ============ INÍCIO ============ */
-loadLocal();brLoad();state.sel=pickDay();render();
+loadLocal();brLoad();brSeed();parcLoad();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
@@ -1817,7 +1978,7 @@ function listen(name,apply){
   try{
     if(!window.claude||!window.claude.use)return;
     var db=await window.claude.use("db");if(!db)return;
-    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts","brain"].forEach(function(n){C[n]=db.collection(n)});
+    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts","brain","parc"].forEach(function(n){C[n]=db.collection(n)});
     listen("checks",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.done)o[d.id]=true});state.checks=o});
     listen("st",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.s)o[d.id]=x.s});state.st=o});
     listen("notes",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.text)o[d.id]=x.text});state.notes=o});
@@ -1827,7 +1988,8 @@ function listen(name,apply){
     listen("camp",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&!x.del&&x.m)o[d.id]=x});state.camp=o;savePub()});
     listen("cfg",function(s){s.docs.forEach(function(d){if(d.id==="main"){try{var j=JSON.parse(d.data().json);CF=cfgMerge(j);try{localStorage.setItem("hoje-cfg",JSON.stringify(CF))}catch(e){}}catch(e){}}});applyRegras()});
     listen("drafts",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=state.drafts.filter(function(d){return !ids[d.id]});loc.forEach(draftSync);a=a.concat(loc);a.sort(function(p,q){return (q.at||0)-(p.at||0)});state.drafts=a.slice(0,50);saveDrafts()});
-    listen("brain",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,cat:x.cat||"outro",text:x.text,pin:!!x.pin,at:x.at||0})});BR.items=a;brLocal()});
+    listen("brain",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,cat:x.cat||"outro",text:x.text,pin:!!x.pin,seed:!!x.seed,at:x.at||0})});var loc=BR.items.filter(function(x){return !ids[x.id]});loc.forEach(brPut);BR.items=a.concat(loc);brLocal()});
+    listen("parc",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=PARC.items.filter(function(x){return !ids[x.id]});loc.forEach(parcPut);PARC.items=a.concat(loc);parcLocal()});
     listen("ideas",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,text:x.text,at:x.at||0})});state.ideas=a});
   }catch(e){}
 })();
