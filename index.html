@@ -359,6 +359,10 @@ h3{font-size:21px}
 .cp .dst{border-left:3px solid var(--accent);padding-left:10px}
 .stg summary{cursor:pointer;color:var(--accent);font-weight:600}
 .stg ul{margin:6px 0 0;padding-left:18px}
+
+#undo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:12px;background:var(--text,#2b1d22);color:#fff;padding:10px 12px 10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px);font-size:14px}
+#undo[hidden]{display:none}
+#undo button{background:#fff;color:#2b1d22;border:0;border-radius:999px;padding:8px 14px;font-weight:700;font:inherit;font-weight:700}
 </style>
 
 <div class="wrap">
@@ -869,7 +873,7 @@ function calEditor(it){
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
    +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
-   +(calNext(it.st)?'<div class="btns"><button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button></div>':'')
+   +((calNext(it.st)||calPrev(it.st))?'<div class="btns">'+(calPrev(it.st)?'<button class="btn ghost" data-cst="'+it.id+'|'+calPrev(it.st)+'">‹ Voltar para '+calLbl(calPrev(it.st))+'</button>':'')+(calNext(it.st)?'<button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button>':'')+'</div>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost adv" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
    +'<button class="btn small ghost adv" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
@@ -1416,6 +1420,19 @@ document.addEventListener("click",function(e){
   if(b){var d=dayById(state.sel);if(d)copyText(cpText(d,b.dataset.cpcopy),b);return}
   var g=e.target.closest&&e.target.closest("[data-cped]");
   if(g){var d2=dayById(state.sel);if(!d2)return;ED.open=d2.id+"|"+g.dataset.cped;render();var el=document.querySelector(".ed");if(el)el.scrollIntoView({block:"center"})}});
+
+
+/* ============ v35: voltar etapa e desfazer ============ */
+function calPrev(s){var i=CALST.indexOf(s);return i>0?CALST[i-1]:null}
+var UNDO={snap:null,t:null};
+function undoBar(){var b=document.getElementById("undo");if(!b){b=document.createElement("div");b.id="undo";b.setAttribute("role","status");b.hidden=true;document.body.appendChild(b)}return b}
+document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;
+  var u=t.closest("#undo button");
+  if(u){if(UNDO.snap){try{CALD.items=JSON.parse(UNDO.snap.cal);MD.items=JSON.parse(UNDO.snap.md);calSave();mdLocal()}catch(er){}UNDO.snap=null}undoBar().hidden=true;render();e.stopPropagation();return}
+  var m=t.closest("[data-cstc],[data-agora],[data-rvx='all'],[data-rvx^='pub|'],[data-cst]");if(!m)return;
+  var lbl=m.hasAttribute("data-agora")?"Tarefa marcada como feita":(m.dataset.rvx?"Marcado como postado":"Etapa alterada");
+  UNDO.snap={cal:JSON.stringify(CALD.items),md:JSON.stringify(MD.items||[])};
+  setTimeout(function(){var b=undoBar();b.innerHTML='<span>'+lbl+'</span><button type="button">Desfazer</button>';b.hidden=false;clearTimeout(UNDO.t);UNDO.t=setTimeout(function(){b.hidden=true;UNDO.snap=null},12000)},0)},true);
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
