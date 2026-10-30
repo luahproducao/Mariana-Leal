@@ -339,6 +339,14 @@ h3{font-size:21px}
 .btn:not(.ghost){background-color:var(--accent);color:#fff}
 #view::after{content:"feito com carinho para a Mari";font-family:'Pinyon Script','Cormorant Garamond',cursive;font-size:26px;letter-spacing:0;text-transform:none;color:var(--accent);opacity:.85;border-top:1px solid rgba(176,141,87,.4)}
 .brand{font-size:27px;white-space:nowrap}
+
+[data-ed]{position:relative}
+.txt[data-ed]{padding-right:24px}
+[data-ed]::after{content:"✎";position:absolute;right:8px;top:6px;color:var(--gold);opacity:.75;font-size:14px}
+.card[data-ed]::after{right:14px;top:12px}
+.ed-note{margin-top:6px;color:var(--accent);font-style:italic;font-size:14px}
+.ed{border-top:2px solid var(--gold)}
+.ed textarea,.ed input{width:100%}
 </style>
 
 <div class="wrap">
@@ -645,25 +653,25 @@ function renderHoje(){
   }
   h+='<div class="hero"><div class="txt"><div class="kicker">'+esc(d.phase)+'</div><h2>'+esc(d.title)+'</h2><p>'+esc(d.theme)+'</p><p>'+(p.n===p.t?'Dia completo':'Faltam '+(p.t-p.n)+' entregas')+' · pedidos para você: '+needsDone+'/'+d.needs.length+'</p></div>'+ringSvg(pc)+'</div>';
   if(d.urgent)h+='<div class="alert"><b>Atenção</b>'+esc(d.urgent)+'</div>';
-  h+='<div class="card"><p><b>Começar:</b> '+esc(d.start)+'</p><p><b>Terminar:</b> '+esc(d.finish)+'</p></div>';
+  h+='<div class="card tap" role="button" tabindex="0" data-ed="sf"><p><b>Começar:</b> '+esc(d.start)+'</p><p><b>Terminar:</b> '+esc(d.finish)+'</p>'+edNote(d,"sf")+'</div>'+edHtml(d,"sf");
   if(SIMPLE)h+=ckHtml(isoToday());
   var fid=d.id+"-f";
-  h+='<div class="block"><h3>Feed principal</h3><div class="item'+(stOf(fid)==="posted"?' done':'')+'"><div class="row"><div class="txt"><span class="tag">'+esc(d.feed.kind)+'</span><br>'+esc(d.feed.title)+'</div></div><div class="meta">'+stSelect(fid)+'</div>'
-    +'<details><summary>Ver roteiro</summary><div class="in"><p>'+esc(d.feed.body)+'</p></div></details>'
-    +(d.feed.legenda?'<details><summary>Legenda</summary><div class="in"><p>'+esc(d.feed.legenda)+'</p><div class="btns"><button class="btn small ghost" data-copylegenda="'+d.id+'">Copiar legenda</button></div></div></details>':'')
+  h+='<div class="block"><h3>Feed principal</h3><div class="item'+(stOf(fid)==="posted"?' done':'')+'"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="feed"><span class="tag">'+esc(d.feed.kind)+'</span><br>'+esc(d.feed.title)+edNote(d,"feed")+'</div></div><div class="meta">'+stSelect(fid)+'</div>'+edHtml(d,"feed")
+    +'<details><summary>Ver roteiro</summary><div class="in"><p style="white-space:pre-wrap">'+esc(d.feed.body)+'</p></div></details>'
+    +(d.feed.legenda?'<details><summary>Legenda</summary><div class="in"><p style="white-space:pre-wrap">'+esc(d.feed.legenda)+'</p><div class="btns"><button class="btn small ghost" data-copylegenda="'+d.id+'">Copiar legenda</button></div></div></details>':'')
     +'</div></div>';
   var sts=trackItems(d).filter(function(x){return x.n});
   var shown=sts.filter(function(x){return !state.core||x.core});
   h+='<div class="block"><h3><span>Stories ('+shown.length+(state.core?' de '+sts.length:'')+')</span><label class="toggle"><input type="checkbox" id="core"'+(state.core?' checked':'')+'> Só o essencial</label></h3>';
   shown.forEach(function(x){
-    h+='<div class="item'+(stOf(x.id)==="posted"?' done':'')+'"><div class="row"><span class="s-num">'+x.n+'</span><div class="txt">'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'<div>'+esc(x.text).replace(/\n/g,'<br>')+'</div></div></div>'
+    h+='<div class="item'+(stOf(x.id)==="posted"?' done':'')+'"><div class="row"><span class="s-num">'+x.n+'</span><div class="txt tap" role="button" tabindex="0" data-ed="s'+x.n+'">'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'<div>'+esc(x.text).replace(/\n/g,'<br>')+'</div>'+edNote(d,"s"+x.n)+'</div></div>'
       +(x.tray?'<div class="meta"><span class="note">Use o link exclusivo da Tray e escreva “Parceria paga”.</span></div>':'')
-      +'<div class="meta">'+stSelect(x.id)+'</div></div>';
+      +'<div class="meta">'+stSelect(x.id)+'</div>'+edHtml(d,"s"+x.n)+'</div>';
   });
   h+='</div>';
   h+='<div class="block"><h3>Canais extras</h3>'
-    +'<div class="item"><div class="row"><div class="txt"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div></div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div></div>'
-    +'<div class="item"><div class="row"><div class="txt"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div></div></div><div class="meta">'+stSelect(d.id+"-as")+'</div></div></div>';
+    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ma"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div>'+edNote(d,"ma")+'</div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div>'+edHtml(d,"ma")+'</div>'
+    +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ass"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div>'+edNote(d,"ass")+'</div></div><div class="meta">'+stSelect(d.id+"-as")+'</div>'+edHtml(d,"ass")+'</div></div>';
   if(d.funnel)h+='<div class="block"><h3>Antes de qualquer chamada para a assinatura</h3><div class="item">'+d.funnel.map(function(t,k){return chk(d.id+"-fun"+k,t)}).join("")+'</div></div>';
   h+='<div class="block"><h3>Avisar a Laila</h3><div class="btns"><button class="btn" id="avisar">Copiar aviso para a Laila</button></div><p class="note">Monta uma mensagem com o que você já gravou e o seu recado. É só colar no WhatsApp.</p></div>';
   var r=state.results[d.id]||{};
@@ -1225,6 +1233,47 @@ function atalhosHtml(){
 
 function greetHtml(){var hr=new Date().getHours();return '<div class="greet"><span class="script">'+(hr<12?"Bom dia":hr<18?"Boa tarde":"Boa noite")+', Mari</span><span class="note">'+acFmt(isoToday())+' · o que fazer hoje</span></div>'}
 if(SIMPLE)state.hmode="plano";
+
+
+/* ============ v32: CARTÕES DO PLANO EDITÁVEIS ============ */
+var OVR={},ORIGV={},ED={open:null};
+function ovPath(d,k){
+  if(k==="feed.kind"||k==="feed.title"||k==="feed.body"||k==="feed.legenda")return [d.feed,k.slice(5)];
+  if(k==="ma"||k==="ass"||k==="start"||k==="finish")return [d,k];
+  var m=k.match(/^s(\d+)$/);if(m&&d.stories[+m[1]-1])return [d.stories[+m[1]-1],1];
+  return null}
+function ovLoad(){try{OVR=JSON.parse(localStorage.getItem("hoje-ovr")||"{}")}catch(e){OVR={}}
+  Object.keys(OVR).forEach(function(key){var i=key.indexOf("|"),d=dayById(key.slice(0,i)),k=key.slice(i+1);if(!d||k.indexOf("n.")===0)return;var p=ovPath(d,k);if(!p)return;if(!(key in ORIGV))ORIGV[key]=p[0][p[1]];p[0][p[1]]=OVR[key]})}
+function ovSave(){try{localStorage.setItem("hoje-ovr",JSON.stringify(OVR))}catch(e){}}
+function ovSet(d,k,v){var key=d.id+"|"+k;
+  if(k.indexOf("n.")!==0){var p=ovPath(d,k);if(!p)return;if(!(key in ORIGV))ORIGV[key]=p[0][p[1]];p[0][p[1]]=v}
+  OVR[key]=v;ovSave()}
+function ovReset(d,key){var prefix=key==="feed"?["feed.kind","feed.title","feed.body","feed.legenda","n.feed"]:key==="sf"?["start","finish","n.sf"]:[key,"n."+key];
+  prefix.forEach(function(k){var kk=d.id+"|"+k;if(kk in ORIGV){var p=ovPath(d,k);if(p)p[0][p[1]]=ORIGV[kk]}delete OVR[kk]});ovSave()}
+function ovNote(d,k){return OVR[d.id+"|n."+k]||""}
+function edNote(d,k){var n=ovNote(d,k);return n?'<div class="ed-note">✎ '+esc(n).replace(/\n/g,'<br>')+'</div>':''}
+function edFields(d,key){
+  if(key==="feed")return [["feed.kind","Tipo","input"],["feed.title","Título","input"],["feed.body","Roteiro","textarea",170],["feed.legenda","Legenda","textarea",110],["n.feed","Minhas anotações","textarea",70]];
+  if(key==="sf")return [["start","Começar","textarea",64],["finish","Terminar","textarea",64],["n.sf","Minhas anotações","textarea",64]];
+  if(key==="ma")return [["ma","Melhores Amigos","textarea",96],["n.ma","Minhas anotações","textarea",64]];
+  if(key==="ass")return [["ass","Assinatura","textarea",96],["n.ass","Minhas anotações","textarea",64]];
+  return [[key,"Story: o que fazer","textarea",96],["n."+key,"Minhas anotações: o que vou montar","textarea",70]]}
+function edVal(d,k){if(k.indexOf("n.")===0)return ovNote(d,k.slice(2));var p=ovPath(d,k);return p?String(p[0][p[1]]||""):""}
+function edHtml(d,key){if(ED.open!==d.id+"|"+key)return '';
+  var h='<div class="card ed"><h3>Ler e editar</h3><p class="note">O que você mudar aqui fica salvo e vale em todo o app.</p>';
+  edFields(d,key).forEach(function(f){h+='<label class="lab">'+f[1]+(f[2]==="input"?'<input type="text" data-edf="'+d.id+'|'+f[0]+'" value="'+esc(edVal(d,f[0]))+'">':'<textarea data-edf="'+d.id+'|'+f[0]+'" style="min-height:'+f[3]+'px">'+esc(edVal(d,f[0]))+'</textarea>')+'</label>'});
+  return h+'<div class="btns"><button class="btn small ghost" data-edb="copy|'+key+'">Copiar texto</button><button class="btn small ghost" data-edb="reset|'+key+'">Voltar ao original</button><button class="btn small" data-edb="close">Fechar</button></div></div>'}
+document.addEventListener("input",function(e){var t=e.target;if(!t||!t.dataset||!t.dataset.edf)return;var q=t.dataset.edf,i=q.indexOf("|"),d=dayById(q.slice(0,i));if(d)ovSet(d,q.slice(i+1),t.value)});
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-edb]");
+  if(b){var q=b.dataset.edb.split("|"),a=q[0],d=dayById(state.sel);if(!d)return;
+    if(a==="close"){ED.open=null;render();return}
+    if(a==="reset"){ovReset(d,q[1]);render();return}
+    if(a==="copy"){copyText(edFields(d,q[1]).map(function(f){var v=edVal(d,f[0]);return v?f[1]+": "+v:""}).filter(Boolean).join("\n\n"),b);return}}
+  var x=e.target.closest&&e.target.closest("[data-ed]");if(!x)return;
+  if(e.target.closest("select,button,a,input,textarea,label,summary"))return;
+  var d2=dayById(state.sel);if(!d2)return;var key=d2.id+"|"+x.dataset.ed;ED.open=ED.open===key?null:key;render();
+  if(ED.open){var el=document.querySelector(".ed");if(el)el.scrollIntoView({block:"center"})}});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
@@ -2818,7 +2867,7 @@ document.addEventListener("change",function(e){
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
 
 /* ============ SINCRONIZAÇÃO (fora do Claude) ============ */
-var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal","hoje-acoes","hoje-check"];
+var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal","hoje-acoes","hoje-check","hoje-ovr"];
 var SYN={meta:{},busy:false,timer:null,msg:"",applying:false};
 function synOn(){var c=aiGet();return !!(c.proxy&&c.code)&&!(window.claude&&window.claude.use)}
 function synLoadMeta(){try{SYN.meta=JSON.parse(localStorage.getItem("hoje-sync-meta")||"{}")}catch(e){SYN.meta={}}}
@@ -2838,7 +2887,7 @@ async function synNow(){
     localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
     if(Object.keys(push.meta).length){var r2=await fetch(base,{method:"PUT",headers:{"content-type":"application/json","x-app-code":c.code},body:JSON.stringify(push)});if(!r2.ok)throw 0}
     localStorage.setItem("hoje-sync-init","1");
-    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();ckLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
     SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
   }catch(e){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}
   SYN.busy=false;
@@ -2967,7 +3016,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();acLoad();ckLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
+synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
