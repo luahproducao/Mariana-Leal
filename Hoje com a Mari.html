@@ -290,6 +290,17 @@ body::after{content:"";position:fixed;left:0;right:0;top:0;height:300px;z-index:
 .cal-d.sel{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .nav,nav{border-top:1px solid rgba(176,141,87,.5)}
 #view::after{content:"L O Y A L L";display:block;text-align:center;margin:34px 0 96px;padding-top:18px;border-top:1px solid rgba(176,141,87,.35);color:var(--gold-ink,var(--muted));font-size:10px;letter-spacing:.5em;text-transform:uppercase;opacity:.8}
+
+.det{margin:2px 0}
+.det>summary{list-style:none;cursor:pointer;padding:14px 16px;border:1px solid rgba(176,141,87,.3);border-radius:var(--r,16px);font-weight:700;display:flex;justify-content:space-between;align-items:center;background:var(--surface)}
+.det>summary::-webkit-details-marker{display:none}
+.det>summary::after{content:"+";color:var(--gold);font-size:20px;line-height:1}
+.det[open]>summary::after{content:"–"}
+.det[open]>summary{margin-bottom:12px}
+.agora{border-top:2px solid var(--gold)}
+.agora .cal-i{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(176,141,87,.2)}
+.agora .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-weight:700;color:var(--gold-ink,var(--accent));font-size:13px}
+.ckcard .row{padding:2px 0;gap:10px;min-height:0}.ckcard .row label{font-size:15px;line-height:1.3}.ckcard .row input[type=checkbox]{width:20px;height:20px;flex:0 0 auto}
 </style>
 
 <div class="wrap">
@@ -457,7 +468,7 @@ var NAV=[
  ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
  ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
 ];
-var MORE=[["produtos","Produtos"],["prazos","Prazos"],["equipe","Equipe"],["canais","Canais"],["cerebro","Cérebro"],["ajustes","Ajustes"]];
+var MORE=[["prazos","Prazos"],["canais","Melhores Amigos"],["produtos","Mini produtos"],["equipe","Equipe"],["ajustes","Ajustes"]];
 
 /* ============ PRODUTOS ============ */
 var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
@@ -635,7 +646,7 @@ function renderGravar(){
   if(state.rec>=list.length)state.rec=list.length-1; if(state.rec<0)state.rec=0;
   var x=list[state.rec],last=state.rec===list.length-1;
   var tip=state.rec===0?"Como começar: "+d.start:(last?"Como terminar: "+d.finish:HOW_REC);
-  $("#view").innerHTML='<div class="stack"><div><div class="kicker">'+esc(d.title)+'</div><h2>Gravar agora</h2></div>'
+  $("#view").innerHTML='<div class="stack"><div><div class="kicker">'+esc(d.title)+'</div><h2>Roteiro de hoje</h2></div>'+gravCal()
    +'<label class="toggle"><input type="checkbox" id="core"'+(state.core?' checked':'')+'> Só o essencial do dia</label>'
    +'<div class="rec"><div class="kicker">Story '+x.n+' · '+(state.rec+1)+' de '+list.length+'</div><div>'+audTag(x.aud)+(x.tray?'<span class="tag t">Tray</span>':'')+'</div>'
    +'<div class="big-text">'+esc(x.text).replace(/\n/g,'<br>')+'</div>'
@@ -767,7 +778,7 @@ var CALSEED=[["10-08","F","Tr","R","Trend adaptada: tradução baiana de dona de
 var CALC={F:"Feed principal",S:"Stories",A:"Assinatura",M:"Melhores Amigos",T:"Reels teste"};
 var CALT={Tr:"Trend",Po:"Ponte (solução)",Es:"Estrutura",In:"Interação",Ar:"Arrume-se comigo",Te:"Teste",St:"Storytelling",Ba:"Bastidor",Pu:"Publi",Ca:"Carrossel",Au:"Aula",Pr:"Produto e app",Li:"Live"};
 var CALF={R:"Reels",C:"Carrossel",E:"Post estático",S:"Story",L:"Live"};
-var CALST=["Ideia","Em andamento","Revisão","Publicado"];
+var CALST=["Ideia","Roteiro","Gravado","Editado","Publicado"],CALLBL={"Publicado":"Postado"};function calLbl(s){return CALLBL[s]||s}function calDots(s){var i=CALST.indexOf(s);if(i<0)i=0;return CALST.map(function(_,k){return k<=i?"●":"○"}).join("")}function calNext(s){var i=CALST.indexOf(s);return i>=0&&i<CALST.length-1?CALST[i+1]:null}function calMig(){var m={"Em andamento":"Roteiro","Revisão":"Editado"};CALD.items.forEach(function(x){if(m[x.st])x.st=m[x.st]})}
 var CALKIND={"Feed principal":"f","Stories":"s","Assinatura":"a","Melhores Amigos":"m","Reels teste":"r"};
 var CALD={items:[]};
 var CAL={m:null,sel:null,f:"todos",edit:null,delc:null,busy:false,msg:""};
@@ -775,7 +786,7 @@ var CALK=[["todos","Tudo"],["f","Feed"],["s","Stories"],["a","Assinatura"],["m",
 var CALMES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 function calSave(){try{localStorage.setItem("hoje-cal",JSON.stringify(CALD.items))}catch(e){}}
 function calLoad(){var j=null;try{j=JSON.parse(localStorage.getItem("hoje-cal")||"null")}catch(e){}
-  if(Array.isArray(j)){CALD.items=j;return}
+  if(Array.isArray(j)){CALD.items=j;calMig();return}
   CALD.items=CALSEED.map(function(r,i){return {id:"n"+i,d:"2026-"+r[0],canal:CALC[r[1]],tipo:CALT[r[2]],fmt:CALF[r[3]],t:r[4],marca:r[5]||"",st:"Ideia",nota:"",leg:"",link:"",at:0,src:"notion"}});
   calSave()}
 function calGet(id){return CALD.items.filter(function(x){return x.id===id})[0]}
@@ -789,6 +800,7 @@ function calItems(iso){
   PRAZOS.forEach(function(x,i){if(x.date===iso)a.push({k:"z",tag:"Prazo · "+x.brand,t:x.t,go:"prz|"+i})});
   Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(c&&c.d===iso)a.push({k:"p",tag:"Publi · "+c.m,t:(c.t||"Publi")+" · dia da postagem",pub:true,go:"camp|"+id})});
   AC.items.forEach(function(x){if(x.ini===iso)a.push({k:"p",tag:x.tipo,t:"Começa: "+x.nome,go:"acgo|"+x.id});if(x.fim===iso)a.push({k:"p",tag:x.tipo,t:"Termina: "+x.nome,go:"acgo|"+x.id})});
+  Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(!c||c.del||!c.d)return;var ds=etapaDates(c);cfg().etapas.forEach(function(e){if(!(c.done||{})[e.id]&&ds[e.id]===iso&&iso!==c.d)a.push({k:"z",tag:"Etapa · "+c.m,t:e.label,go:"camp|"+id})})});
   (MD.items||[]).forEach(function(it){if(it.d===iso&&it.st!=="cancelado")a.push({k:"t",tag:it.quem||"Mari",t:it.t+(it.st==="feito"?" ✓":""),go:"md|"+iso})});
   return a;
 }
@@ -797,7 +809,7 @@ var CALTAGC={f:"",s:"m",a:"t",m:"l",r:"",p:"l",z:"t",t:"",d:""};
 function calEditor(it){
   var h='<div class="card" style="background:var(--bg)"><h3>Conteúdo</h3>'
    +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
-   +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+s+'</button>'}).join('')+'</div>'
+   +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+calLbl(s)+'</button>'}).join('')+'</div>'
    +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
    +'<label class="lab">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
@@ -806,6 +818,7 @@ function calEditor(it){
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
    +'<label class="lab">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
+   +(calNext(it.st)?'<div class="btns"><button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button></div>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
    +'<button class="btn small ghost" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
@@ -822,9 +835,10 @@ function calHtml(){
   for(var d=1;d<=nd;d++){var iso=calIso(y,mo,d),its=calItems(iso).filter(calFilter),ks={};its.forEach(function(x){if(x.k!=="d")ks[x.k]=1});
     h+='<button class="cal-d'+(iso===CAL.sel?' sel':'')+(iso===today?' hoje':'')+'" data-cald="'+iso+'" aria-label="'+d+' de '+CALMES[mo-1]+', '+its.length+' item(ns)"><span>'+d+'</span><i>'+Object.keys(ks).slice(0,5).map(function(k){return'<b class="k-'+k+'"></b>'}).join('')+'</i></button>'}
   h+='</div><p class="note cal-leg"><b class="k-f"></b>Feed <b class="k-s"></b>Stories <b class="k-a"></b>Assinatura <b class="k-m"></b>Melhores Amigos <b class="k-r"></b>Teste <b class="k-p"></b>Publi <b class="k-z"></b>Prazo <b class="k-t"></b>Tarefa</p>';
+  h+=semDataHtml();
   var sel=CAL.sel,its2=calItems(sel).filter(calFilter),dd=new Date(sel+"T12:00:00");
   h+='<div class="card"><h3>'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][dd.getDay()]+', '+sel.slice(8,10)+'/'+sel.slice(5,7)+'</h3>'
-   +(its2.length?its2.map(function(x){return(x.id&&CAL.edit===x.id)?calEditor(calGet(x.id)):'<div class="cal-i tap" role="button" tabindex="0" data-calgo="'+esc(x.go)+'"><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span> '+esc(x.t)+(x.st?' <span class="note">· '+esc(x.st)+'</span>':'')+' <b aria-hidden="true">›</b></div>'}).join(''):'<p class="note">Nada marcado neste dia.</p>')
+   +(its2.length?its2.map(function(x){return(x.id&&CAL.edit===x.id)?calEditor(calGet(x.id)):'<div class="cal-i tap" role="button" tabindex="0" data-calgo="'+esc(x.go)+'"><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span> '+esc(x.t)+(x.st?' <span class="note">· '+esc(calLbl(x.st))+' '+calDots(x.st)+'</span>':'')+' <b aria-hidden="true">›</b></div>'}).join(''):'<p class="note">Nada marcado neste dia.</p>')
    +((sel<today&&CALD.items.some(function(z){return z.d===sel&&z.st!=="Publicado"}))?'<div class="btns"><button class="btn small ghost" data-calx="pubday">Marcar o dia como publicado</button></div>':'')
    +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
    +'<label class="lab">Onde<select id="cal-k">'+Object.keys(CALKIND).map(function(c){return'<option>'+c+'</option>'}).join('')+'<option value="tarefa">Tarefa só para mim (Meu dia)</option></select></label>'
@@ -836,7 +850,7 @@ function calHoje(D){
   var its=CALD.items.filter(function(x){return x.d===D&&!x.skip});
   var h='<div class="block"><h3>No calendário editorial'+(its.length?' ('+its.length+')':'')+'</h3>';
   if(!its.length)h+='<p class="note">Nada planejado para este dia no calendário.</p>';
-  its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div><div class="meta"><button class="btn small'+(x.st==="Publicado"?' ghost':'')+'" data-cstc="'+x.id+'">'+esc(x.st)+' ›</button></div></div>'});
+  its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div><div class="meta"><button class="btn small'+(x.st==="Publicado"?' ghost':'')+'" data-cstc="'+x.id+'">'+esc(calLbl(x.st))+' '+calDots(x.st)+' ›</button></div></div>'});
   h+='<div class="btns"><button class="btn ghost small" data-calgo="open">Abrir o calendário</button></div></div>';
   return h;
 }
@@ -854,7 +868,7 @@ document.addEventListener("click",function(e){
   var f=t.closest("[data-calf]");if(f){CAL.f=f.dataset.calf;render();return}
   var dEl=t.closest("[data-cald]");if(dEl){CAL.sel=dEl.dataset.cald;CAL.edit=null;render();return}
   var cs=t.closest("[data-cst]");if(cs){var q0=cs.dataset.cst.split("|"),i0=calGet(q0[0]);if(i0){i0.st=q0[1];i0.at=Date.now();calSave();render()}return}
-  var cc=t.closest("[data-cstc]");if(cc){var i1=calGet(cc.dataset.cstc);if(i1){i1.st=CALST[(CALST.indexOf(i1.st)+1)%CALST.length];i1.at=Date.now();calSave();render()}return}
+  var cc=t.closest("[data-cstc]");if(cc){var i1=calGet(cc.dataset.cstc);if(i1){i1.st=calNext(i1.st)||i1.st;i1.at=Date.now();calSave();render()}return}
   var x=t.closest("[data-calx]");
   if(x){var q=x.dataset.calx.split("|"),a=q[0],y=+(CAL.m||isoToday()).slice(0,4),mo=+(CAL.m||isoToday()).slice(5,7);
     if(a==="prev"||a==="next"){mo+=a==="next"?1:-1;if(mo<1){mo=12;y--}if(mo>12){mo=1;y++}CAL.m=y+"-"+String(mo).padStart(2,"0");render();return}
@@ -937,7 +951,7 @@ var PL={txt:"",dest:"auto",d:"",canal:"Feed principal",acao:"tray",busy:false,pr
 function plDest(){return(!S&&PL.dest==="auto")?"cal":PL.dest}
 function plBox(){
   if(!PL.open&&!PL.txt&&!PL.prev&&!PL.busy)return '<button class="card tap plmini" data-plx="open"><span class="plic" aria-hidden="true">✎</span><span>O que estou planejando…</span></button>'+(PL.msg?'<p class="note">'+esc(PL.msg)+'</p>':'');
-  var dests=(S?[["auto","Deixar a IA organizar"]]:[]).concat([["cal","Calendário editorial"],["tarefa","Tarefa no Meu dia"],["camp","Anotação de uma campanha"],["cer","Cérebro (decisão ou ideia)"]]);
+  var dests=(S?[["auto","Deixar a IA organizar"]]:[]).concat([["ideia","Caixa de ideias"],["cal","Calendário editorial"],["tarefa","Tarefa no Meu dia"],["camp","Anotação de uma campanha"],["cer","Minha base (decisão ou aprendizado)"]]);
   var pd=plDest();
   var h='<div class="card"><h3>O que estou planejando</h3><p class="note">Escreva do seu jeito: a semana, uma ideia, uma mudança numa campanha. O texto vai para a aba certa.</p>'
    +'<textarea id="pl-t" data-pl="txt" style="min-height:96px" placeholder="Ex.: semana que vem quero um reels sobre preço mínimo na terça e mudar os stories da Tray da semana 3.">'+esc(PL.txt)+'</textarea>'
@@ -952,23 +966,24 @@ function plBox(){
   else h+='<div class="btns"><button class="btn" data-plx="go"'+(PL.busy?' disabled':'')+'>'+(PL.busy?'Organizando…':(pd==="auto"?'Organizar':'Guardar'))+'</button></div>';
   return h+'</div>';
 }
-function plDestNome(x){var d=x.destino;return d==="calendario"?"Calendário · "+(x.canal||"Feed principal"):d==="tarefa"?"Tarefa no Meu dia":d==="campanha"?"Campanha · "+((acGet(x.acao)||{}).nome||"?"):"Cérebro"}
+function plDestNome(x){var d=x.destino;return d==="calendario"?"Calendário · "+(x.canal||"Feed principal"):d==="tarefa"?"Tarefa no Meu dia":d==="campanha"?"Campanha · "+((acGet(x.acao)||{}).nome||"?"):d==="ideia"?"Caixa de ideias":"Minha base"}
 function plApply(list){var n={calendario:0,tarefa:0,campanha:0,cerebro:0};
   list.forEach(function(x){if(!x.ok)return;
     if(x.destino==="calendario"){CALD.items.push(calNew({t:x.titulo,nota:x.texto||"",canal:CALKIND[x.canal]?x.canal:"Feed principal",fmt:x.formato||"Reels",marca:x.marca||"",d:x.data||isoToday(),tipo:x.marca?"Publi":""}));n.calendario++}
     else if(x.destino==="tarefa"){MD.items.push(mdNew({t:x.titulo,nota:x.texto||"",tipo:"gravar",d:x.data||"",parc:""}));n.tarefa++}
     else if(x.destino==="campanha"){var a=acGet(x.acao)||acGet("tray");if(a){a.notas=a.notas||[];a.notas.push({t:(x.titulo+(x.texto?": "+x.texto:"")),at:Date.now()});n.campanha++}}
+    else if(x.destino==="ideia"){var iid="i"+Date.now()+Math.floor(Math.random()*1000),itx=x.titulo+(x.texto&&x.texto!==x.titulo?"\n"+x.texto:""),io={text:itx,at:Date.now()};state.ideas.push({id:iid,text:itx,at:io.at});dbSet("ideas",iid,io,"Ideia guardada");n.ideia=(n.ideia||0)+1}
     else{brAdd("decisao",x.titulo+(x.texto?": "+x.texto:""));n.cerebro++}});
   calSave();mdLocal();acSave();
-  var p=[];if(n.calendario)p.push(n.calendario+" no calendário");if(n.tarefa)p.push(n.tarefa+" tarefa(s)");if(n.campanha)p.push(n.campanha+" anotação(ões) de campanha");if(n.cerebro)p.push(n.cerebro+" no cérebro");
+  var p=[];if(n.calendario)p.push(n.calendario+" no calendário");if(n.tarefa)p.push(n.tarefa+" tarefa(s)");if(n.campanha)p.push(n.campanha+" anotação(ões) de campanha");if(n.ideia)p.push(n.ideia+" na caixa de ideias");if(n.cerebro)p.push(n.cerebro+" na minha base");
   return p.length?"Guardei: "+p.join(", ")+".":"Nada marcado para guardar."}
 async function plIA(){
   var txt=PL.txt.trim();if(!txt)return;if(!S){PL.msg=NOAI;render();return}
   PL.busy=true;PL.msg="";render();
   try{
     var hoje=isoToday(),sem=["domingo","segunda","terça","quarta","quinta","sexta","sábado"][new Date(hoje+"T12:00:00").getDay()];
-    var r=await S.json(RULES+"\n\nA Mari escreveu o que está planejando. Separe em itens e diga onde cada um deve ficar. Não invente nada além do que ela escreveu; preserve as palavras dela.\nHoje é "+hoje+" ("+sem+"). Converta “terça”, “semana que vem” etc. em datas YYYY-MM-DD a partir de hoje; se não der para saber, deixe a data vazia.\nDestinos: calendario (conteúdo para postar), tarefa (coisa para ela fazer), campanha (mudança ou ideia para uma campanha ou desafio em andamento), cerebro (decisão, aprendizado ou ideia geral).\nCampanhas ativas: "+JSON.stringify(AC.items.map(function(a){return{id:a.id,nome:a.nome}}))+"\nCanais: Feed principal, Stories, Assinatura, Melhores Amigos, Reels teste. Formatos: Reels, Carrossel, Story, Post estático, Live. Marcas: "+Object.keys(cfg().marcas).join(", ")+".\nTexto dela: "+txt+"\n\nResponda SOMENTE com JSON: {\"itens\":[{\"destino\":\"calendario|tarefa|campanha|cerebro\",\"titulo\":\"curto\",\"texto\":\"detalhe com as palavras dela\",\"data\":\"YYYY-MM-DD ou vazio\",\"canal\":\"\",\"formato\":\"\",\"marca\":\"\",\"acao\":\"id da campanha ou vazio\"}]}",{modelTier:"main"});
-    var its=(r.itens||[]).filter(function(x){return x&&x.titulo}).map(function(x){return{destino:["calendario","tarefa","campanha","cerebro"].indexOf(x.destino)>=0?x.destino:"tarefa",titulo:String(x.titulo),texto:String(x.texto||""),data:/^\d{4}-\d{2}-\d{2}$/.test(x.data||"")?x.data:"",canal:x.canal||"",formato:x.formato||"",marca:x.marca||"",acao:x.acao||"",ok:true}});
+    var r=await S.json(RULES+"\n\nA Mari escreveu o que está planejando. Separe em itens e diga onde cada um deve ficar. Não invente nada além do que ela escreveu; preserve as palavras dela.\nHoje é "+hoje+" ("+sem+"). Converta “terça”, “semana que vem” etc. em datas YYYY-MM-DD a partir de hoje; se não der para saber, deixe a data vazia.\nDestinos: calendario (conteúdo para postar), tarefa (coisa para ela fazer), campanha (mudança ou ideia para uma campanha ou desafio em andamento), ideia (ideia solta de conteúdo, ainda sem data), cerebro (decisão ou aprendizado sobre ela ou o negócio, vira a “minha base”).\nCampanhas ativas: "+JSON.stringify(AC.items.map(function(a){return{id:a.id,nome:a.nome}}))+"\nCanais: Feed principal, Stories, Assinatura, Melhores Amigos, Reels teste. Formatos: Reels, Carrossel, Story, Post estático, Live. Marcas: "+Object.keys(cfg().marcas).join(", ")+".\nTexto dela: "+txt+"\n\nResponda SOMENTE com JSON: {\"itens\":[{\"destino\":\"calendario|tarefa|campanha|ideia|cerebro\",\"titulo\":\"curto\",\"texto\":\"detalhe com as palavras dela\",\"data\":\"YYYY-MM-DD ou vazio\",\"canal\":\"\",\"formato\":\"\",\"marca\":\"\",\"acao\":\"id da campanha ou vazio\"}]}",{modelTier:"main"});
+    var its=(r.itens||[]).filter(function(x){return x&&x.titulo}).map(function(x){return{destino:["calendario","tarefa","campanha","ideia","cerebro"].indexOf(x.destino)>=0?x.destino:"tarefa",titulo:String(x.titulo),texto:String(x.texto||""),data:/^\d{4}-\d{2}-\d{2}$/.test(x.data||"")?x.data:"",canal:x.canal||"",formato:x.formato||"",marca:x.marca||"",acao:x.acao||"",ok:true}});
     if(!its.length)PL.msg="Não consegui separar em itens. Escolha onde guardar e tente de novo.";else PL.prev=its;
   }catch(e){PL.msg=crErr(e)||"Não consegui agora. Escolha onde guardar."}
   PL.busy=false;render();
@@ -987,7 +1002,7 @@ document.addEventListener("click",function(e){
     if(a==="confirm"){PL.msg=plApply(PL.prev||[]);PL.prev=null;PL.txt="";PL.open=false;render();return}
     if(a==="go"){var txt=PL.txt.trim();if(!txt){PL.msg="Escreva o que está planejando.";render();return}
       var pd=plDest();if(pd==="auto"){plIA();return}
-      var first=txt.split(/\n/)[0].slice(0,100),it={destino:pd==="cal"?"calendario":pd==="tarefa"?"tarefa":pd==="camp"?"campanha":"cerebro",titulo:first,texto:txt.length>first.length?txt:"",data:PL.d||(pd==="cal"?(CAL.sel||isoToday()):""),canal:PL.canal,acao:PL.acao,ok:true};
+      var first=txt.split(/\n/)[0].slice(0,100),it={destino:pd==="ideia"?"ideia":pd==="cal"?"calendario":pd==="tarefa"?"tarefa":pd==="camp"?"campanha":"cerebro",titulo:first,texto:txt.length>first.length?txt:"",data:PL.d||(pd==="cal"?(CAL.sel||isoToday()):""),canal:PL.canal,acao:PL.acao,ok:true};
       PL.msg=plApply([it]);PL.txt="";PL.open=false;render();return}
   }
   var ax=t.closest("[data-acx]");
@@ -1013,7 +1028,9 @@ function ckSave(){try{localStorage.setItem("hoje-check",JSON.stringify({items:CK
 function ckLoad(){var j=null;try{j=JSON.parse(localStorage.getItem("hoje-check")||"null")}catch(e){}
   if(j&&Array.isArray(j.items)){CK.items=j.items;CK.done=j.done||{};return}
   CK.items=CKDEF.map(function(x){return{id:x[0],t:x[1]}});CK.done={};ckSave()}
-function ckN(D){var d=CK.done[D]||{};return CK.items.filter(function(i){return d[i.id]}).length}
+function ckAuto(D,i){return i.id==="k2"&&CALD.items.some(function(x){return x.d===D&&!x.skip})}
+function ckDone(D,i){if(ckAuto(D,i))return CALD.items.filter(function(x){return x.d===D&&!x.skip}).every(function(x){return x.st==="Publicado"});return !!(CK.done[D]||{})[i.id]}
+function ckN(D){return CK.items.filter(function(i){return ckDone(D,i)}).length}
 function ckHtml(D){
   var d=CK.done[D]||{},n=ckN(D),tot=CK.items.length,pc=tot?Math.round(n/tot*100):0;
   var h='<div class="card ckcard"><div class="ckhead"><h3>Checklist do dia</h3><span class="note"><b>'+n+' de '+tot+'</b></span></div><div class="ckbar" aria-hidden="true"><i style="width:'+pc+'%"></i></div>';
@@ -1021,7 +1038,7 @@ function ckHtml(D){
     h+=CK.items.map(function(i){return'<div class="row"><input type="text" data-ckn="'+i.id+'" value="'+esc(i.t)+'" aria-label="Item do checklist"><button class="btn small ghost" data-ckx="rm|'+i.id+'" aria-label="Remover">×</button></div>'}).join('')
      +'<div class="row"><input type="text" id="ck-new" placeholder="Novo item"><button class="btn small" data-ckx="add">Adicionar</button></div><div class="btns"><button class="btn small ghost" data-ckx="edit">Pronto</button></div>';
   }else{
-    h+=CK.items.map(function(i){return'<div class="row'+(d[i.id]?' chkd':'')+'"><input type="checkbox" id="ck-'+i.id+'" data-ckt="'+i.id+'"'+(d[i.id]?' checked':'')+'><label for="ck-'+i.id+'">'+esc(i.t)+'</label></div>'}).join('')
+    h+=CK.items.map(function(i){var dn=ckDone(D,i),au=ckAuto(D,i);return'<div class="row'+(dn?' chkd':'')+'"><input type="checkbox" id="ck-'+i.id+'" data-ckt="'+i.id+'"'+(dn?' checked':'')+(au?' disabled':'')+'><label for="ck-'+i.id+'">'+esc(i.t)+(au?' <span class="note">(marca sozinho quando tudo do calendário estiver postado)</span>':'')+'</label></div>'}).join('')
      +(n===tot&&tot?'<p class="note">Checklist completo. Bom trabalho hoje.</p>':'')+'<div class="btns"><button class="btn small ghost" data-ckx="edit">Editar checklist</button></div>';
   }
   return h+'</div>';
@@ -1072,13 +1089,13 @@ function resHtml(){
   var med=Math.round(l.reduce(function(a,x){return a+n(x.mlk)},0)/l.length);
   var h='<div class="card"><h3>Resultados</h3><p class="note">'+l.length+' conteúdo'+(l.length===1?'':'s')+' com números. Média de '+med+' curtidas. Pontuação: salvamento vale 3, comentário 2, curtida 1.</p>';
   h+=by.slice(0,5).map(function(x,i){return'<div class="cal-i tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag">'+(i+1)+'º</span> '+esc(x.t)+' <span class="note">· '+esc(x.canal)+' · '+n(x.mlk)+' curt., '+n(x.mcm)+' com., '+n(x.msv)+' salv.</span> <b aria-hidden="true">›</b></div>'}).join('');
-  return h+'</div>'}
+  return h+'</div>'+proxSugHtml()}
 function metHtml(it){
   if(it.st!=="Publicado")return '';
   return '<h3 style="margin-top:12px">Como foi</h3><div class="fields"><label>Curtidas<input type="number" inputmode="numeric" data-cif="mlk" value="'+esc(it.mlk||"")+'"></label><label>Comentários<input type="number" inputmode="numeric" data-cif="mcm" value="'+esc(it.mcm||"")+'"></label></div>'
    +'<div class="fields"><label>Salvamentos<input type="number" inputmode="numeric" data-cif="msv" value="'+esc(it.msv||"")+'"></label><label>Alcance<input type="number" inputmode="numeric" data-cif="mal" value="'+esc(it.mal||"")+'"></label></div>'
    +'<label class="lab">O que funcionou ou não funcionou<textarea data-cif="func" style="min-height:70px" placeholder="Ex.: o gancho do primeiro segundo segurou; a legenda longa não.">'+esc(it.func||"")+'</textarea></label>'
-   +'<div class="btns"><button class="btn small ghost" data-rvx="learn|'+it.id+'">Guardar aprendizado no cérebro</button></div>'}
+   +'<div class="btns"><button class="btn small ghost" data-rvx="learn|'+it.id+'">Guardar aprendizado na minha base</button></div>'}
 var CALTPL={"Feed principal":"GANCHO (1º segundo): \nPROBLEMA OU HISTÓRIA: \nO QUE EU FAÇO NA PRÁTICA: \nCHAMADA FINAL (um passo só): \nTAKES: rosto + mão/tela + detalhe do produto\nTEXTO NA TELA: ",
 "Stories":"STORY 1 (abertura, rosto): \nSTORY 2 (o conteúdo, tela ou bastidor): \nSTORY 3 (enquete, caixinha ou link): \nADESIVO: \nSE FOR PUBLI: link rastreável e “Parceria paga” visíveis",
 "Melhores Amigos":"ABERTURA (como se falasse com uma amiga): \nBASTIDOR OU OPINIÃO QUE NÃO VAI NO FEED: \nPERGUNTA PARA ELAS RESPONDEREM: \nO QUE QUERO SABER DELAS: ",
@@ -1094,22 +1111,59 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
   if(a==="mov"){it.d=isoToday();it.at=Date.now();calSave();render();return}
   if(a==="skip"){it.skip=true;it.at=Date.now();calSave();render();return}
   if(a==="tpl"){var m=CALTPL[it.canal]||"";it.nota=(it.nota?it.nota+"\n\n":"")+m;it.at=Date.now();calSave();render();return}
-  if(a==="learn"){var tx=(it.func||"").trim();if(!tx){CAL.msg="Escreva o que funcionou antes de guardar.";render();return}brAdd("aprend",it.canal+" · "+it.t+": "+tx);CAL.msg="Guardado no cérebro.";render();return}
+  if(a==="learn"){var tx=(it.func||"").trim();if(!tx){CAL.msg="Escreva o que funcionou antes de guardar.";render();return}brAdd("aprend",it.canal+" · "+it.t+": "+tx);CAL.msg="Guardado na minha base.";render();return}
 });
 function onbHtml(){var d=false;try{d=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(d)return '';
-  return '<div class="card onb"><h3>Como usar o app</h3><ol><li><b>Hoje</b> mostra o checklist, o que está em andamento e o que vai ao ar.</li><li><b>Calendário</b> guarda tudo: feed, stories, assinatura, Melhores Amigos e publis. Toque num dia para abrir.</li><li><b>O que estou planejando</b>: escreva ou fale do seu jeito e o texto vai para a aba certa.</li><li><b>Publis</b> tem cada marca, a corrida Tray e os PDFs de briefing.</li><li><b>Mais &gt; Cérebro</b> é onde o app aprende sobre você. Quanto mais você alimenta, melhor ele escreve.</li></ol><div class="btns"><button class="btn small" data-onb="1">Entendi</button></div></div>'}
+  return '<div class="card onb"><h3>Como usar o app</h3><ol><li><b>Hoje</b> mostra o que fazer agora, o que vai ao ar no dia e o checklist.</li><li><b>Calendário</b> guarda tudo: feed, stories, assinatura, Melhores Amigos e publis. Toque num dia para abrir.</li><li><b>O que estou planejando</b> (em Hoje, dentro de “Campanhas e planejamento”): escreva ou fale do seu jeito e o texto vai para o lugar certo.</li><li><b>Publis</b> tem cada marca, a corrida Tray e os PDFs de briefing.</li><li><b>Criar &gt; Minha base</b> é onde o app aprende sobre você. Quanto mais você acrescenta, melhor ele escreve.</li><li>Cada conteúdo anda por etapas: ideia, roteiro, gravado, editado e postado. Avance no calendário.</li></ol><div class="btns"><button class="btn small" data-onb="1">Entendi</button></div></div>'}
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-onb]");if(!x)return;try{localStorage.setItem("hoje-onb","1")}catch(er){}render()});
 function instHtml(){return '<div class="card"><h3>Instalar na tela inicial</h3><p><b>iPhone (Safari):</b> toque em Compartilhar e depois em “Adicionar à Tela de Início”.</p><p><b>Android (Chrome):</b> menu ⋮ e depois “Instalar app” ou “Adicionar à tela inicial”.</p><p class="note">Instalado, ele abre em tela cheia, como um app. Avisos e lembretes no celular não funcionam em app web; use o alarme do celular para os horários importantes.</p></div>'}
+
+
+/* ============ v29: fluxo único ============ */
+var HK={};
+document.addEventListener("toggle",function(e){var t=e.target;if(t&&t.dataset&&t.dataset.det){HK[t.dataset.det]=t.open}},true);
+function detHtml(id,title,inner){return '<details class="det" data-det="'+id+'"'+(HK[id]?' open':'')+'><summary>'+title+'</summary><div class="stack">'+inner+'</div></details>'}
+function semDataHtml(){var l=CALD.items.filter(function(x){return !x.d&&!x.skip});if(!l.length)return '';
+  return '<div class="card"><h3>Ideias sem data ('+l.length+')</h3><p class="note">Escolha um dia quando quiser planejar. Ao marcar o dia, ela entra no calendário.</p>'+l.map(function(x){return CAL.edit===x.id?calEditor(x):'<div class="cal-i tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag">'+esc(x.canal)+'</span> '+esc(x.t)+' <b aria-hidden="true">›</b></div>'}).join('')+'</div>'}
+function agoraList(D){var out=[],t=isoToday();
+  CALD.items.filter(function(x){return x.d===D&&!x.skip&&x.st!=="Publicado"}).forEach(function(x){var n=calNext(x.st);out.push({h:'data-calgo="ci|'+x.id+'"',tag:x.canal,t:x.t,s:calLbl(x.st)+(n?' · próximo: '+calLbl(n):'')})});
+  Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(!c||c.del||!c.d)return;var ds=etapaDates(c);cfg().etapas.forEach(function(e){var d=ds[e.id];if(!(c.done||{})[e.id]&&d&&d<=D&&d>=addDays(D,-3)&&e.quem!=="Marca")out.push({h:'data-calgo="camp|'+id+'"',tag:"Etapa · "+c.m,t:e.label,s:d===D?'hoje':'atrasada desde '+acFmt(d)})})});
+  (MD.items||[]).filter(function(x){return x.d===D&&x.st==="pendente"&&x.quem==="Mari"&&x.tipo!=="assessoria"}).forEach(function(x){out.push({h:'data-agora="'+x.id+'"',tag:"Tarefa",t:x.t,s:'toque para marcar como feita'})});
+  return out}
+function agoraHtml(D){var l=agoraList(D);
+  var h='<div class="card agora"><h3>Faça agora</h3>';
+  if(!l.length)return h+'<p class="note">Nada urgente para este dia. Use o tempo para gravar ou planejar.</p></div>';
+  h+=l.slice(0,4).map(function(x,i){return'<div class="cal-i tap" role="button" tabindex="0" '+x.h+'><span class="num">'+(i+1)+'</span><span><b>'+esc(x.t)+'</b><br><span class="note">'+esc(x.tag)+' · '+esc(x.s)+'</span></span></div>'}).join('');
+  if(l.length>4)h+='<p class="note">Mais '+(l.length-4)+' abaixo.</p>';
+  return h+'</div>'}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-agora]");if(!x)return;var it=(MD.items||[]).filter(function(z){return z.id===x.dataset.agora})[0];if(it){it.st="feito";it.at=Date.now();mdLocal();render()}});
+function scoreOf(x){function n(v){return +String(v||0).replace(/\D/g,"")||0}return n(x.msv)*3+n(x.mcm)*2+n(x.mlk)}
+function resInsight(){var l=CALD.items.filter(function(x){return x.st==="Publicado"&&scoreOf(x)>0});if(l.length<2)return null;
+  var g={};l.forEach(function(x){var k=x.canal+"|"+x.fmt;(g[k]=g[k]||[]).push(x)});
+  var best=null;Object.keys(g).forEach(function(k){var a=g[k],avg=Math.round(a.reduce(function(s,x){return s+scoreOf(x)},0)/a.length);if(!best||avg>best.avg)best={k:k,avg:avg,n:a.length,top:a.slice().sort(function(p,q){return scoreOf(q)-scoreOf(p)})[0]}});
+  if(!best)return null;var p=best.k.split("|");best.canal=p[0];best.fmt=p[1];return best}
+function proxSugHtml(){var r=resInsight();if(!r)return '';
+  return '<div class="card"><h3>Sugestão para a próxima</h3><p>Seus <b>'+esc(r.fmt)+'</b> em <b>'+esc(r.canal)+'</b> têm a melhor pontuação média ('+r.avg+', em '+r.n+' conteúdo'+(r.n===1?'':'s')+'). O melhor foi “'+esc(r.top.t)+'”.</p><div class="btns"><button class="btn small" data-rvx="similar|'+r.top.id+'">Criar uma ideia parecida</button></div></div>'}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-rvx^='similar|']");if(!x)return;var it=calGet(x.dataset.rvx.split("|")[1]);if(!it)return;
+  var n=calNew({t:"Mais um no estilo de: "+it.t,canal:it.canal,fmt:it.fmt,tipo:it.tipo,d:"",st:"Ideia",nota:it.func?"O que funcionou antes: "+it.func:""});CALD.items.push(n);calSave();CAL.edit=n.id;state.tab="cal";render();window.scrollTo(0,0)});
+function gravCal(){var D=isoToday(),l=CALD.items.filter(function(x){return x.d===D&&!x.skip&&x.st!=="Publicado"});if(!l.length)return '';
+  return '<div class="card"><h3>Do seu calendário de hoje</h3>'+l.map(function(x){return'<div class="item"><b>'+esc(x.t)+'</b> <span class="note">· '+esc(x.canal)+' · '+esc(calLbl(x.st))+'</span>'+(x.nota?'<p style="white-space:pre-wrap">'+esc(x.nota.slice(0,500))+(x.nota.length>500?'…':'')+'</p>':'<p class="note">Sem roteiro ainda. Abra para escrever ou pedir à IA.</p>')+'<div class="btns"><button class="btn small ghost" data-calgo="ci|'+x.id+'">Abrir e editar</button></div></div>'}).join('')+'</div>'}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-idx]");if(!x)return;var q=x.dataset.idx.split("|"),a=q[0],id=q[1];var it=state.ideas.filter(function(z){return z.id===id})[0];if(!it)return;
+  var first=String(it.text).split(/\n/)[0].slice(0,100),rest=String(it.text).length>first.length?it.text:"";
+  if(a==="cal"){var n=calNew({t:first,nota:rest,d:"",st:"Ideia"});CALD.items.push(n);calSave();CAL.edit=n.id;state.tab="cal"}
+  else if(a==="tar"){MD.items.push(mdNew({t:first,nota:rest,tipo:"gravar",d:""}));mdLocal()}
+  else if(a==="base"){brAdd("decisao",it.text)}
+  state.ideas=state.ideas.filter(function(z){return z.id!==id});dbSet("ideas",id,{del:true,at:Date.now()},"Ideia movida");saveLocal();render();window.scrollTo(0,0)});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
   var inner="";
   if(state.more==="produtos"){renderProdutos();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
-  if(state.more==="cerebro"){$("#view").innerHTML='<div class="stack">'+pillsMais()+brHtml()+'</div>';return}
+  if(state.more==="cerebro"||state.more==="ideias"){state.tab="criar";state.hub=state.more==="cerebro"?"cerebro":"ideias";state.more="prazos";render();return}
   if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+instHtml()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
-  if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlIdeias();
+  if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlPrazos();
   $("#view").innerHTML='<div class="stack">'+pillsMais()+inner+'</div>';
 }
 function htmlPrazos(){
@@ -1142,10 +1196,10 @@ function htmlEquipe(){
 }
 function htmlIdeias(){
   var list=state.ideas.slice().sort(function(a,b){return (b.at||0)-(a.at||0)});
-  return '<div><h2>Caixa de ideias</h2><p class="sub">Anote a trend ou o assunto na hora. A equipe transforma em roteiro depois.</p></div>'
+  return '<div><h2>Caixa de ideias</h2><p class="sub">A caixa de entrada de tudo: anote na hora e depois decida o destino de cada ideia, com um toque.</p></div>'
    +'<textarea id="idea" placeholder="Ex.: trend do áudio X, mostrando a embalagem do pedido..." aria-label="Nova ideia"></textarea>'
    +'<div class="btns"><button class="btn" id="addidea">Guardar ideia</button></div>'
-   +(list.length?list.map(function(i){return '<div class="card"><textarea data-ide="'+i.id+'" aria-label="Ideia">'+esc(i.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(i.at).toLocaleDateString("pt-BR")+'</span><button class="btn ghost small" data-idel="'+i.id+'">Apagar</button></div></div>'}).join(""):'<p class="note">Nenhuma ideia guardada ainda.</p>');
+   +(list.length?list.map(function(i){return '<div class="card"><textarea data-ide="'+i.id+'" aria-label="Ideia">'+esc(i.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(i.at).toLocaleDateString("pt-BR")+'</span><button class="btn ghost small" data-idel="'+i.id+'">Apagar</button></div><div class="btns"><button class="btn small" data-idx="cal|'+i.id+'">Pôr no calendário</button><button class="btn small ghost" data-idx="tar|'+i.id+'">Virar tarefa</button><button class="btn small ghost" data-idx="base|'+i.id+'">Guardar na minha base</button></div></div>'}).join(""):'<p class="note">Nenhuma ideia guardada ainda.</p>');
 }
 function render(){
   renderChrome();
@@ -1157,7 +1211,7 @@ function render(){
 function addSeg(){
   var t=state.tab;if(t!=="hoje"&&t!=="gravar")return;
   var hm=state.hmode||"meu",pr=function(c){return c?"true":"false"};
-  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Gravar agora</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
+  $("#view").insertAdjacentHTML("afterbegin",'<div class="seg" role="tablist"><button data-hm="meu" aria-pressed="'+pr(t==="hoje"&&hm!=="plano")+'">Meu dia</button><button data-tab="gravar" aria-pressed="'+pr(t==="gravar")+'">Roteiro de hoje</button><button data-tab="cal" aria-pressed="false">Calendário</button></div>');
 }
 function addHero(){
   var t=state.tab,H=null;
@@ -1395,7 +1449,7 @@ function renderHub(){
   if(hb==="inicio"){
     var np=Object.keys(state.plano||{}).length;
     $("#view").innerHTML='<div class="tiles">'
-     +hubCard("cerebro","Meu cérebro",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo")
+     +hubCard("cerebro","Minha base",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo")
      +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
      +hubCard("roteiro","Roteiro de conteúdo","Para o seu conteúdo, sem marca: Reels, Story ou Carrossel na sua voz.")
      +hubCard("guia","Guia de captação e edição","Monte o direcionamento para a editora com suas referências e envie em PDF junto com os arquivos.","Novo")
@@ -1546,7 +1600,7 @@ function isDirect(t){return DIRECT.indexOf(t)>=0}
 function pad2(n){return String(n).padStart(2,"0")}
 function addDays(iso,n){var d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
 function fd(iso){return iso?iso.slice(8,10)+"/"+iso.slice(5,7):"?"}
-var PUBS=[["parc","Parcerias"],["marcas","Marcas"],["camp","Prazos e dinheiro"],["fit","Fit"],["tray","Tray"]];
+var PUBS=[["parc","Parcerias"],["marcas","Marcas"],["camp","Prazos e dinheiro"],["fit","Vale aceitar?"],["tray","Tray"]];
 var D_GUIA={
  "Bling":{ang:"Plataforma completa de negócios: gestão de ponta a ponta.",usar:["plataforma completa de negócios","gestão de ponta a ponta","centralizador da operação","Loja Virtual Nativa (ao falar da loja virtual)"],evitar:["chamar só de “meu ERP”, “sistema de notas” ou “plataforma de e-commerce”","azul predominante","citar concorrentes","criticar marketplaces"],visual:"Elementos verdes. Lilás só quando o assunto for loja virtual. Carrossel no template oficial do Canva.",temas:["estoque sem planilha","lucro real por produto","nota fiscal sem medo","pedidos de vários canais num lugar só","Lei de Murphy na loja"]},
  "Melhor Envio":{ang:"Frete como estratégia de venda: frete grátis a partir de um valor para subir o ticket, comparando Correios e transportadoras.",usar:["cotações reais, mesmo pacote e mesmo CEP","cupom MARILEAL (confirmar a validade a cada campanha)"],evitar:["cotação inventada ou sem print real"],visual:"",temas:["embalar para não ter devolução","custo de troca","prazo x preço","rotina de envio em 15 minutos"]},
@@ -2381,15 +2435,15 @@ function mdHtml(){
   var h='<div class="btns" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,-1)+'" aria-label="Dia anterior">‹</button><div style="text-align:center"><h2 style="margin:0">'+esc(mdFmt(D).replace(/^./,function(c){return c.toUpperCase()}).replace("-feira","-feira"))+'</h2>'+(D!==today?'<button class="btn ghost small" data-mdb="dia" data-d="'+today+'">Voltar para hoje</button>':'<span class="note">Hoje</span>')+'</div><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,1)+'" aria-label="Próximo dia">›</button></div>';
   h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length+CALD.items.filter(function(x){return x.d===d2&&x.st!=="Publicado"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
   if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
-  h+=onbHtml()+ckHtml(D)+rvHtml()+acStrip()+plBox()+ornHtml()+calHoje(D);
+  h+=onbHtml()+agoraHtml(D)+calHoje(D)+ckHtml(D)+rvHtml()+detHtml("camp","Campanhas e planejamento"+(acAtivas().length?" · "+acAtivas().length+" em andamento":""),acStrip()+plBox()+proxSugHtml())
   var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
   if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
   var tot=mine.filter(function(x){return x.st==="pendente"}).length;
   if(pend>3||tot>5)h+='<div class="alert"><b>Dia cheio</b>São '+tot+' itens para você ('+pend+' tarefa(s) e '+(tot-pend)+' pedido(s)). Use “Adiar para amanhã” no que puder esperar.</div>';
   if(ent.length)h+='<div class="block"><h3>Entrada ('+ent.length+')</h3><p class="note">Chegou e ainda não tem dia. Escolha quando fazer.</p>'+ent.map(mdItem).join('')+'</div>';
   if(atr.length)h+='<div class="block"><h3>Atrasado ('+atr.length+')</h3>'+atr.map(mdItem).join('')+'</div>';
-  MDT.forEach(function(t){var l=mine.filter(function(x){return x.tipo===t[0]});if(l.length)h+='<div class="block"><h3>'+t[1]+'</h3>'+l.map(mdItem).join('')+'</div>'});
-  if(oth.length)h+='<div class="block"><h3>Aguardando outras pessoas</h3>'+oth.map(mdItem).join('')+'</div>';
+  MDT.forEach(function(t){var l=mine.filter(function(x){return x.tipo===t[0]});if(l.length)h+=t[0]==="assessoria"?detHtml("ass",esc(t[1])+" ("+l.length+")",l.map(mdItem).join('')):'<div class="block"><h3>'+t[1]+'</h3>'+l.map(mdItem).join('')+'</div>'});
+  if(oth.length)h+=detHtml("oth","Aguardando outras pessoas ("+oth.length+")",oth.map(mdItem).join(''));
   if(!dia.length&&!atr.length&&!ent.length)h+='<div class="card"><p class="sub">Nada marcado para este dia. Adicione abaixo ou escolha outro dia.</p></div>';
   var f=MDUI.f;
   h+=MDUI.add?'<div class="card"><h3>Nova tarefa</h3><label class="lab">O que é<input type="text" id="md-t" value="'+esc(f.t)+'" placeholder="Ex.: gravar o reels da Bling"></label>'
@@ -2588,6 +2642,7 @@ function pubParc(){
     h+='<div class="card tap" role="button" tabindex="0" data-go="tab=pub;pub=camp"><div class="fields"><div><div class="note">A receber</div><h3>'+brl(rec)+'</h3></div><div><div class="note">Em produção</div><h3>'+prod+'</h3></div></div>'+(atr?'<p class="note" style="color:var(--bad)">'+atr+' pagamento(s) com prazo vencido.</p>':'')+'</div>';
     h+='<div class="card"><h3>Nova parceria</h3><label class="lab">Marca<select id="pc-m">'+marcaList().map(function(m){return '<option'+(m===PCUI.mc?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
      +'<label class="lab">Nome da parceria (opcional)<input type="text" id="pc-n" value="'+esc(PCUI.nm)+'" placeholder="Ex.: Black Friday, Reels de novembro"></label>'
+     +'<label class="lab">Dia previsto da postagem (gera as etapas no calendário)<input type="date" id="pc-d"></label>'
      +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button><button class="btn ghost small" data-pcb="avulso">Roteiro avulso</button></div></div>';
     var nx0=function(x){var c=x.campId&&state.camp[x.campId];return c?nextEtapa(c):null};
     var l=PARC.items.slice().sort(function(a,b){var an=nx0(a)?0:1,bn=nx0(b)?0:1;return an-bn||(a.post||"9").localeCompare(b.post||"9")});
@@ -2602,7 +2657,7 @@ function pubParc(){
   if(PCUI.msg)h+='<div class="draft">'+esc(PCUI.msg)+'</div>';
   if(!c)return h+'<div class="card"><p class="sub">Carregando os dados desta parceria...</p></div>';
   var cid=p.campId,ds=p.post?etapaDates(c):null,es=cfg().etapas,dn=es.filter(function(e){return (c.done||{})[e.id]}).length,nx=nextEtapa(c);
-  h+='<div class="card"><h3>Caminho da parceria · '+dn+' de '+es.length+'</h3>'+(ds?es.map(function(e){var d1=(c.done||{})[e.id],dt=ds[e.id];return '<div class="row'+(d1?' chkd':'')+'"><input type="checkbox" id="cd-'+cid+e.id+'" data-cdone="'+cid+'|'+e.id+'"'+(d1?' checked':'')+'><label for="cd-'+cid+e.id+'">'+esc(e.label)+' <span class="note">('+esc(e.quem)+' · '+fd(dt)+')</span> '+stBadge(dt,d1)+'</label></div>'}).join('')+(nx?'<p class="note"><b>Próximo passo:</b> '+esc(nx[1])+' · '+fd(ds[nx[0]])+'</p>':'<p class="note"><b>Tudo concluído.</b> Guarde o aprendizado no cérebro.</p>'):'<p class="note">Escolha a data de postagem prevista em Dados. Os prazos de cada etapa são calculados a partir dela.</p>')+'<p class="note">Briefing, roteiro e status marcam algumas etapas sozinhos.</p></div>';
+  h+='<div class="card"><h3>Caminho da parceria · '+dn+' de '+es.length+'</h3>'+(ds?es.map(function(e){var d1=(c.done||{})[e.id],dt=ds[e.id];return '<div class="row'+(d1?' chkd':'')+'"><input type="checkbox" id="cd-'+cid+e.id+'" data-cdone="'+cid+'|'+e.id+'"'+(d1?' checked':'')+'><label for="cd-'+cid+e.id+'">'+esc(e.label)+' <span class="note">('+esc(e.quem)+' · '+fd(dt)+')</span> '+stBadge(dt,d1)+'</label></div>'}).join('')+(nx?'<p class="note"><b>Próximo passo:</b> '+esc(nx[1])+' · '+fd(ds[nx[0]])+'</p>':'<p class="note"><b>Tudo concluído.</b> Guarde o aprendizado na minha base.</p>'):'<p class="note">Escolha a data de postagem prevista em Dados. Os prazos de cada etapa são calculados a partir dela.</p>')+'<p class="note">Briefing, roteiro e status marcam algumas etapas sozinhos.</p></div>';
   h+='<div class="card"><h3>Dados</h3><div class="fields"><label>Nome<input type="text" data-pcf="nome" value="'+esc(p.nome)+'"></label><label>Status<select data-pcf="status">'+PCST.map(function(x){return '<option'+(x===p.status?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields"><label>Postagem prevista<input type="date" data-pcf="post" value="'+esc(p.post)+'"></label><label>Contato na marca<input type="text" data-pcf="contato" value="'+esc(p.contato)+'" placeholder="Nome e canal"></label></div>'
    +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'<div class="btns"><button class="btn small" data-pcb="plan">Criar tarefas nos dias</button></div><p class="note">Cria em “Meu dia” cada passo seu, nas datas combinadas.</p></div>';
@@ -2636,7 +2691,7 @@ document.addEventListener("click",async function(e){
   if(a!=="del")PCUI.confDel=false;
   if(a==="open"){PCUI.open=id;render();window.scrollTo(0,0);return}
   if(a==="back"){PCUI.open=null;render();return}
-  if(a==="create"){var m=$("#pc-m").value,n=$("#pc-n").value.trim();var np=parcNew(m,n);PARC.items.push(np);parcPut(np);PCUI.open=np.id;PCUI.nm="";render();window.scrollTo(0,0);return}
+  if(a==="create"){var m=$("#pc-m").value,n=$("#pc-n").value.trim();var np=parcNew(m,n);np.post=($("#pc-d")||{}).value||"";PARC.items.push(np);if(np.post){parcCamp(np);parcSync(np)}parcPut(np);PCUI.open=np.id;PCUI.nm="";render();window.scrollTo(0,0);return}
   if(a==="seedfix"){Object.keys(cfg().marcas).forEach(function(m){var np2=parcNew(m,"","Fechada");PARC.items.push(np2);parcPut(np2)});render();return}
   if(a==="avulso"){state.pr=prNew();savePr();state.pub="roteiro";render();window.scrollTo(0,0);return}
   if(a==="back2"){var pid=state.pr.parcId;PCUI.open=pid&&parcGet(pid)?pid:null;state.pub="parc";render();window.scrollTo(0,0);return}
@@ -2644,7 +2699,7 @@ document.addEventListener("click",async function(e){
   if(a==="addbrief"){var x=$("#pc-bx").value.trim();if(!x){PCUI.msg="Cole o texto do briefing.";render();return}p.briefs.push({id:"bf"+Date.now(),t:$("#pc-bt").value.trim()||"Briefing",x:x,at:Date.now()});PCUI.bt="";PCUI.bx="";parcLog(p,"Briefing guardado");parcPut(p);PCUI.msg="Briefing guardado.";render();return}
   if(a==="delbrief"){p.briefs.splice(i,1);parcPut(p);render();return}
   if(a==="delros"){p.roteiros.splice(i,1);parcPut(p);render();return}
-  if(a==="tobrain"){var cc2=parcCamp(p),t=((cc2&&cc2.rep&&cc2.rep.apr)||p.aprend||"").trim();if(!t){PCUI.msg="Escreva o que aprendeu primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
+  if(a==="tobrain"){var cc2=parcCamp(p),t=((cc2&&cc2.rep&&cc2.rep.apr)||p.aprend||"").trim();if(!t){PCUI.msg="Escreva o que aprendeu primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado na minha base.";render();return}
   if(a==="del"){if(!PCUI.confDel){PCUI.confDel=true;render();return}if(p.campId&&state.camp[p.campId]){delete state.camp[p.campId];savePub();dbSet("camp",p.campId,{del:true,at:Date.now()},"Removida")}PARC.items=PARC.items.filter(function(x){return x.id!==p.id});parcLocal();if(C.parc)C.parc.doc(p.id).set({del:true,at:Date.now()});PCUI.open=null;PCUI.confDel=false;render();return}
   if(a==="roteiro"||a==="openros"){
     var r=state.pr;r.marca=marcaList().indexOf(p.marca)>=0?p.marca:"Outra marca";r.parcId=p.id;r.err="";r.busy="";
@@ -2781,12 +2836,12 @@ function brainCtx(){
 function wrapBrain(s0){if(!s0||s0._br)return s0;return {own:s0.own,_br:1,limits:function(){return s0.limits.apply(s0,arguments)},json:function(p,o){var c=brainCtx();return s0.json(c?c+"\n\n"+p:p,o)}}}
 function brHtml(){
   var n=BR.items.length,vazias=BRCATS.filter(function(c){return !BR.items.some(function(x){return x.cat===c[0]})});
-  var h='<div><h2>Meu cérebro</h2><p class="sub">Escreva aqui do seu jeito. Tudo o que você guarda passa a valer em todo roteiro, guia e sugestão do app. Quanto mais você alimenta, mais o app fala como você.</p></div>';
+  var h='<div><h2>Minha base</h2><p class="sub">Escreva aqui do seu jeito. Tudo o que você guarda passa a valer em todo roteiro, guia e sugestão do app. Quanto mais você alimenta, mais o app fala como você.</p></div>';
   h+='<div class="card"><h3>'+n+' anotaç'+(n===1?'ão':'ões')+'</h3><p class="note">'+(vazias.length?'Ainda vazio: '+vazias.map(function(c){return c[1]}).join(', ')+'.':'Todas as áreas já têm anotações. Continue refinando.')+'</p></div>';
   var ns=BR.items.filter(function(x){return x.seed}).length;
   if(ns)h+='<div class="card"><h3>Primeira versão pronta</h3><p class="note">Montei com o que já se sabe sobre você. Leia, corrija o que estiver diferente e apague o que não for verdade. Fica marcado como “Revisar” até você confirmar.</p><div class="btns"><button class="btn small" data-brb="okall">Confirmar todas ('+ns+')</button></div></div>';
   var qs=BRQ[BRUI.cat]||BRQ.voz,q=qs[BRUI.q%qs.length];
-  h+='<div class="card"><h3>Alimentar o cérebro</h3><div class="pills">'+BRCATS.map(function(c){return '<button class="pill" data-brcat="'+c[0]+'" aria-pressed="'+(BRUI.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'
+  h+='<div class="card"><h3>Acrescentar à base</h3><div class="pills">'+BRCATS.map(function(c){return '<button class="pill" data-brcat="'+c[0]+'" aria-pressed="'+(BRUI.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'
    +'<p class="note">Para pensar: <b>'+esc(q)+'</b></p><div class="btns"><button class="btn ghost small" data-brb="outra">Outra pergunta</button></div>'
    +'<textarea data-br="novo" aria-label="Nova anotação" placeholder="Escreva ou cole aqui: um áudio transcrito, uma legenda, uma lembrança, uma regra...">'+esc(BRUI.txt)+'</textarea>'
    +'<div class="btns"><button class="btn" data-brb="add">Guardar em “'+esc(brLabel(BRUI.cat))+'”</button>'+(S?'<button class="btn ghost small" data-brb="digest">Separar por assunto com IA</button>':'')+'</div>'
