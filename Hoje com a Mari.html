@@ -750,6 +750,7 @@ function addHero(){
 }
 /* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
 var S=null,D=null;
+var NOAI="Para criar com inteligência artificial fora do Claude, coloque a sua chave em Mais → Ajustes → Inteligência artificial. O resto do app funciona normalmente.";
 var TIPOS=[["ebook","eBook"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
 var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
 function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}
@@ -761,6 +762,11 @@ function crErr(e){
   if(c==="not_granted")return "Para criar com o Claude, permita o uso quando o aviso aparecer.";
   if(c==="rate_limited")return "Muitas tentativas seguidas. Espere um pouco e tente de novo.";
   if(c==="cancelled")return "";
+  if(c==="no_key")return NOAI;
+  if(c==="bad_key")return "A chave da API não foi aceita. Confira em Ajustes → Inteligência artificial.";
+  if(c==="net")return "Sem conexão com a internet. Seus textos continuam salvos.";
+  if(c==="parse")return "A resposta veio incompleta. Tente de novo.";
+  if(c==="api")return "O serviço de IA recusou o pedido (código "+(e.status||"?")+"). Confira a chave e o saldo da conta.";
   return "Não consegui gerar agora. Seus textos continuam salvos. Tente de novo em instantes.";
 }
 async function crRun(label,fn){
@@ -771,7 +777,7 @@ async function crRun(label,fn){
 function qa(){var c=state.cr;return c.perguntas.map(function(q,i){return "P: "+q+"\nR: "+(c.respostas[i]||"(sem resposta)")}).join("\n\n")}
 function crAction(a,el){
   var c=state.cr;
-  if(!S&&(a==="ask"||a==="outline"||a==="write"||a==="sug"||a==="gerarguia"||a.indexOf("voz")===0||a.indexOf("apl")===0)){c.err="Este recurso usa o Claude e só funciona quando o app é aberto dentro do Claude.";render();return}
+  if(!S&&(a==="ask"||a==="outline"||a==="write"||a==="sug"||a==="gerarguia"||a.indexOf("voz")===0||a.indexOf("apl")===0)){c.err=NOAI;render();return}
   if(a==="gerarguia"){gerarGuia();return}
   if(a==="savemodel"){cfg().doc=clone(c.material);cfgSave();el.textContent="Modelo salvo";return}
   if(a==="gclear"){gImgs=[];render();return}
@@ -899,7 +905,7 @@ function renderCriar(){
   var h='<div class="stack"><div class="btns">'+(state.tab==="criar"?'<button class="btn ghost small" data-hub="inicio">← Criar</button>':state.tab==="pub"?'<button class="btn ghost small" data-pub="camp">← Publis</button>':'<button class="btn ghost small" data-pback="1">← Produtos</button>')+'</div>'
    +(isDirect(c.tipo)&&!G?'<div><h2>'+esc(tipoLabel(c.tipo))+'</h2><p class="sub">Edite o texto, preencha o que está em [PREENCHER] e salve o PDF.</p></div>':G?'<div><h2>Guia de captação e edição</h2><p class="sub">Conte o que o vídeo precisa ser, mostre referências e o app monta o direcionamento para a editora, em PDF.</p></div>':'<div><h2>Criar material</h2><p class="sub">Escreva a ideia, responda algumas perguntas e o material sai montado com a sua identidade.</p></div>');
   if(!S&&!c.material){
-    h+='<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão. Abra o link pelo Claude para criar materiais.</div></div>';
+    h+='<div class="draft">'+NOAI+'</div></div>';
     $("#view").innerHTML=h;return;
   }
   if(!G)h+='<div class="note">Passo '+(c.step+1)+' de 4</div>';
@@ -984,7 +990,7 @@ function renderHub(){
 /* ---- Roteiro ---- */
 function hubRoteiro(){
   var r=state.rot,h='<div><h2>Roteiro</h2><p class="sub">Escreva a ideia. O app monta o roteiro e você edita e coloca no seu jeito.</p></div>';
-  if(!S)return h+'<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão.</div>';
+  if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
   h+='<div class="card"><div class="pills">'+["Reels","Story","Carrossel"].map(function(f){return '<button class="pill" data-rotfmt="'+f+'" aria-pressed="'+(r.formato===f)+'">'+f+'</button>'}).join('')+'</div>'
@@ -1253,7 +1259,7 @@ function campAdd(m,t,d,env){var id="c"+Date.now(),o={m:m,t:t,d:d,env:env||"",v:"
 function guiaTxt(m){var g=cfg().marcas[m];if(!g)return "(sem guia desta marca: siga só o briefing)";return "Ângulo: "+g.ang+"\nUsar: "+(g.usar.join("; ")||"-")+"\nEvitar: "+(g.evitar.join("; ")||"-")+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+(g.temas.join("; ")||"-")}
 function pubRoteiro(){
   var r=state.pr,h='<div><h2>Roteiro de publi</h2><p class="sub">Cole o briefing da marca. O app escreve nos 5 blocos de publi, na sua voz, e você edita.</p></div>';
-  if(!S)return h+'<div class="draft">Este recurso usa o Claude e só aparece quando o app é aberto dentro do Claude, com a sua permissão.</div>';
+  if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
   h+='<div class="card"><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
@@ -1489,6 +1495,7 @@ function htmlAjustes(){
    +'<div class="card"><h3>Minhas regras</h3><p class="note">Vale para tudo que o Claude escrever no app: o que você nunca faz, expressões que ama, limites. Exemplo: “nunca falar de rotina escolar do filho”.</p><textarea data-cfg="regras" placeholder="Escreva uma regra por linha...">'+esc(C2.regras||"")+'</textarea></div>'
    +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (legenda, roteiro, áudio transcrito). Fica neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea></div>'
    +'<div class="card"><h3>Limites das publis</h3><div class="fields"><label>Contratos por mês<input type="text" inputmode="numeric" data-ed="lim|contratos" data-num="1" value="'+esc(C2.lim.contratos)+'"></label><label>Meta por mês (R$)<input type="text" inputmode="decimal" data-ed="lim|meta" data-num="1" value="'+esc(C2.lim.meta)+'"></label></div><label class="lab">Categorias que você recusa (separe por vírgula)<input type="text" data-ed="lim|recusa" value="'+esc(C2.lim.recusa)+'"></label></div>'
+   +htmlAI()
    +'<div class="card"><h3>Voltar ao padrão</h3><p class="note">Desfaz as suas edições de marcas, etapas, critérios, checklist, Tray, regras e modelo de documento. Campanhas, ideias e calendário não são apagados.</p><div class="btns"><button class="btn ghost small" data-cfx="reset-all">'+(state.confirmReset?'Toque de novo para confirmar':'Voltar tudo ao padrão')+'</button></div></div>';
 }
 
@@ -1641,6 +1648,86 @@ document.addEventListener("change",function(e){
   if(el.id==="core"){state.core=el.checked;state.rec=0;render()}
 });
 
+
+/* ============ IA própria (fora do Claude) + backup ============ */
+var AIMSG="";
+function aiGet(){try{return JSON.parse(localStorage.getItem("hoje-ai")||"{}")||{}}catch(e){return {}}}
+function aiSet(o){try{localStorage.setItem("hoje-ai",JSON.stringify(o))}catch(e){}}
+function blobB64(b){return new Promise(function(res,rej){var f=new FileReader();f.onload=function(){res(String(f.result).split(",")[1]||"")};f.onerror=function(){rej({code:"img"})};f.readAsDataURL(b)})}
+function jsonFrom(t){t=String(t||"").replace(/```json|```/g,"");var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw {code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw {code:"parse"}}}
+function makeAI(){
+  if(!aiGet().key)return null;
+  return {own:true,
+    limits:async function(){return {images:{maxCount:6,mediaTypes:["image/jpeg","image/png","image/webp"]}}},
+    json:async function(prompt,opt){
+      opt=opt||{};var c2=aiGet();if(!c2.key)throw {code:"no_key"};
+      var model=opt.modelTier==="quick"?(c2.quick||"claude-haiku-5-5"):(c2.model||"claude-sonnet-5-5");
+      var content=[];
+      if(opt.images){for(var i=0;i<opt.images.length;i++){content.push({type:"image",source:{type:"base64",media_type:opt.images[i].type||"image/jpeg",data:await blobB64(opt.images[i])}})}}
+      content.push({type:"text",text:prompt});
+      var r;
+      try{r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":c2.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:model,max_tokens:8000,messages:[{role:"user",content:content}]})})}catch(e){throw {code:"net"}}
+      if(r.status===401||r.status===403)throw {code:"bad_key"};
+      if(r.status===429)throw {code:"rate_limited"};
+      if(!r.ok)throw {code:"api",status:r.status};
+      var j=await r.json();
+      var t=(j.content||[]).filter(function(x){return x.type==="text"}).map(function(x){return x.text}).join("");
+      return jsonFrom(t);
+    }};
+}
+async function aiRefresh(){
+  if(S&&!S.own)return;
+  S=makeAI();LIM=null;
+  if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){}}
+}
+function htmlAI(){
+  var cf=aiGet(),dentro=!!(S&&!S.own),tem=!!cf.key;
+  var st=dentro?"Dentro do Claude a IA já funciona, sem chave.":tem?"Chave salva neste aparelho (termina em …"+esc(String(cf.key).slice(-4))+").":"Nenhuma chave salva.";
+  return '<div class="card"><h3>Inteligência artificial</h3>'
+   +'<p class="note">Para escrever roteiros, guias e sugestões quando o app é aberto fora do Claude, cole aqui a sua chave da API da Anthropic (console.anthropic.com → API Keys). A chave fica só neste aparelho e vai direto para a Anthropic; o uso é cobrado na sua conta da API. Use uma chave só para este app.</p>'
+   +'<p class="note"><b>'+st+'</b></p>'
+   +'<label class="lab">Colar chave<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="key" placeholder="sk-ant-..."></label>'
+   +'<div class="fields"><label>Modelo principal<input type="text" data-ai="model" value="'+esc(cf.model||"claude-sonnet-5-5")+'"></label><label>Modelo rápido<input type="text" data-ai="quick" value="'+esc(cf.quick||"claude-haiku-5-5")+'"></label></div>'
+   +'<div class="btns"><button class="btn small" data-aib="test">Testar conexão</button>'+(tem?'<button class="btn ghost small" data-aib="clear">Remover chave</button>':'')+'</div>'
+   +(AIMSG?'<p class="note" id="ai-msg">'+esc(AIMSG)+'</p>':'')+'</div>'
+   +'<div class="card"><h3>Backup dos seus dados</h3><p class="note">Fora do Claude, tudo fica guardado neste navegador. Exporte um arquivo de vez em quando e use “Importar” para levar para outro aparelho ou recuperar. A chave da API não entra no backup.</p>'
+   +'<div class="btns"><button class="btn small" data-aib="export">Exportar backup</button><label class="btn ghost small" style="cursor:pointer">Importar backup<input type="file" accept="application/json,.json" data-ai="import" style="display:none"></label></div>'
+   +(BKMSG?'<p class="note">'+esc(BKMSG)+'</p>':'')+'</div>';
+}
+var BKMSG="";
+document.addEventListener("click",async function(e){
+  var b=e.target.closest&&e.target.closest("[data-aib]");if(!b)return;
+  var a=b.dataset.aib;
+  if(a==="clear"){var o=aiGet();delete o.key;aiSet(o);if(S&&S.own)S=null;LIM=null;AIMSG="Chave removida.";await aiRefresh();render();return}
+  if(a==="test"){
+    if(!S){AIMSG="Cole a chave primeiro.";render();return}
+    AIMSG="Testando...";render();
+    try{await S.json('Responda SOMENTE com JSON {"ok":true}',{modelTier:"quick"});AIMSG="Funcionando."}catch(err){AIMSG=crErr(err)||"Não consegui testar."}
+    render();return;
+  }
+  if(a==="export"){
+    var dump={app:"hoje-com-a-mari",v:1,at:new Date().toISOString(),data:{}};
+    try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("hoje-")===0&&k!=="hoje-ai")dump.data[k]=localStorage.getItem(k)}}catch(err){}
+    try{await D.save({filename:"hoje-com-a-mari-backup-"+new Date().toISOString().slice(0,10)+".json",data:JSON.stringify(dump)});BKMSG="Backup salvo."}catch(err){BKMSG=(err&&err.code==="declined")?"Salvar cancelado.":"Não consegui salvar o backup."}
+    render();
+  }
+});
+document.addEventListener("change",async function(e){
+  var el=e.target,k=el.dataset&&el.dataset.ai;if(!k)return;
+  if(k==="key"){var v=el.value.trim();el.value="";if(!v)return;var o=aiGet();o.key=v;aiSet(o);AIMSG="Chave salva. Toque em Testar conexão.";await aiRefresh();render();return}
+  if(k==="model"||k==="quick"){var o2=aiGet();o2[k]=el.value.trim();aiSet(o2);return}
+  if(k==="import"){
+    var f=el.files&&el.files[0];if(!f)return;
+    try{
+      var j=JSON.parse(await f.text());
+      if(!j||j.app!=="hoje-com-a-mari"||!j.data)throw 0;
+      Object.keys(j.data).forEach(function(kk){if(kk.indexOf("hoje-")===0&&kk!=="hoje-ai"){try{localStorage.setItem(kk,j.data[kk])}catch(x){}}});
+      loadLocal();BKMSG="Backup importado.";
+    }catch(err){BKMSG="Esse arquivo não é um backup do app."}
+    render();
+  }
+});
+
 /* ============ INÍCIO ============ */
 loadLocal();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
@@ -1664,14 +1751,18 @@ function listen(name,apply){
     listen("ideas",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,text:x.text,at:x.at||0})});state.ideas=a});
   }catch(e){}
 })();
+function fallbackD(){return {save:function(o){return new Promise(function(res,rej){try{var b=o.data instanceof Blob?o.data:new Blob([o.data],{type:/\.pdf$/.test(o.filename)?"application/pdf":/\.json$/.test(o.filename)?"application/json":"text/html"});var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);res()}catch(e){rej(e)}})}}}
+D=fallbackD();
 (async function(){
-  try{if(!window.claude||!window.claude.use){D={save:function(o){return new Promise(function(res,rej){try{var b=o.data instanceof Blob?o.data:new Blob([o.data],{type:/\.pdf$/.test(o.filename)?"application/pdf":"text/html"});var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);res()}catch(e){rej(e)}})}};return}
+  try{
+    if(!window.claude||!window.claude.use){await aiRefresh();render();return}
     try{S=await window.claude.use("sample")}catch(e){}
-    try{D=await window.claude.use("downloads")}catch(e){}
-    try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){LIM=null}
-    if((state.tab==="produtos"||state.tab==="criar")&&!typing())render();
+    try{var d2=await window.claude.use("downloads");if(d2)D=d2}catch(e){}
+    if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){LIM=null}}else{await aiRefresh()}
+    if(!typing())render();
   }catch(e){}
 })();
 </script>
+
 
 </body></html>
