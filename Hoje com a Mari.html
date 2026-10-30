@@ -370,6 +370,13 @@ h3{font-size:21px}
 .sl .slh{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .sl .slh b{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .sl textarea{min-height:64px}
+
+.cr{display:grid;gap:12px}
+.cr .crs{display:grid;gap:3px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.cr .crs:last-of-type{border-bottom:0}
+.cr .crh{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.cr .crt{white-space:pre-wrap}
+.cr .crp{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 </style>
 
 <div class="wrap">
@@ -869,7 +876,8 @@ function calItems(iso){
 function calFilter(x){return CAL.f==="todos"||x.k===CAL.f||(CAL.f==="p"&&x.pub)}
 var CALTAGC={f:"",s:"m",a:"t",m:"l",r:"",p:"l",z:"t",t:"",d:""};
 function calEditor(it){
-  var h='<div class="card" style="background:var(--bg)"><h3>Conteúdo</h3>'
+  if(CAL.mode==="ler")return calRead(it);
+  var h='<div class="card cal-open" style="background:var(--bg)"><h3>Conteúdo</h3><div class="btns"><button class="btn small ghost" data-calx="ler">‹ Ver conteúdo completo</button></div>'
    +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
    +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+calLbl(s)+'</button>'}).join('')+'</div>'
    +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
@@ -900,7 +908,7 @@ function calHtml(){
   h+='</div><p class="note cal-leg"><b class="k-f"></b>Feed <b class="k-s"></b>Stories <b class="k-a"></b>Assinatura <b class="k-m"></b>Melhores Amigos <b class="k-r"></b>Teste <b class="k-p"></b>Publi <b class="k-z"></b>Prazo <b class="k-t"></b>Tarefa</p>';
   h+=semDataHtml();
   var sel=CAL.sel,its2=calItems(sel).filter(calFilter),dd=new Date(sel+"T12:00:00");
-  h+='<div class="card"><h3>'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][dd.getDay()]+', '+sel.slice(8,10)+'/'+sel.slice(5,7)+'</h3>'
+  h+='<div class="card cal-dayc"><h3>'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][dd.getDay()]+', '+sel.slice(8,10)+'/'+sel.slice(5,7)+'</h3>'
    +(its2.length?its2.map(function(x){return(x.id&&CAL.edit===x.id)?calEditor(calGet(x.id)):'<div class="cal-i tap" role="button" tabindex="0" data-calgo="'+esc(x.go)+'"><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span> '+esc(x.t)+(x.st?' <span class="note">· '+esc(calLbl(x.st))+' '+calDots(x.st)+'</span>':'')+' <b aria-hidden="true">›</b></div>'}).join(''):'<p class="note">Nada marcado neste dia.</p>')
    +((sel<today&&CALD.items.some(function(z){return z.d===sel&&z.st!=="Publicado"}))?'<div class="btns"><button class="btn small ghost" data-calx="pubday">Marcar o dia como publicado</button></div>':'')
    +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
@@ -937,9 +945,12 @@ document.addEventListener("click",function(e){
     if(a==="prev"||a==="next"){mo+=a==="next"?1:-1;if(mo<1){mo=12;y--}if(mo>12){mo=1;y++}CAL.m=y+"-"+String(mo).padStart(2,"0");render();return}
     if(a==="today"){CAL.m=isoToday().slice(0,7);CAL.sel=isoToday();render();return}
     if(a==="close"){CAL.edit=null;render();return}
+    if(a==="ler"){CAL.mode="ler";render();return}
+    if(a==="editar"){CAL.mode="edit";render();return}
+    if(a==="copyall"){var c9=calGet(q[1]);if(c9)copyText(calFullText(c9),x);return}
     if(a==="add"){var tx=($("#cal-t").value||"").trim();if(!tx)return;var kk=$("#cal-k").value;
       if(kk==="tarefa"){MD.items.push(mdNew({t:tx,tipo:"gravar",d:CAL.sel}));mdLocal()}
-      else{var it=calNew({t:tx,canal:kk,d:CAL.sel,fmt:kk==="Stories"||kk==="Melhores Amigos"?"Story":"Reels"});CALD.items.push(it);calSave();CAL.edit=it.id}
+      else{var it=calNew({t:tx,canal:kk,d:CAL.sel,fmt:kk==="Stories"||kk==="Melhores Amigos"?"Story":"Reels"});CALD.items.push(it);calSave();CAL.edit=it.id;CAL.mode="edit"}
       render();return}
     if(a==="copy"){var c0=calGet(q[1]);if(c0)copyText(c0.t+"\n"+c0.canal+" · "+c0.fmt+(c0.marca?" · "+c0.marca:"")+" · "+c0.d+"\n\n"+c0.nota+"\n\nLegenda: "+c0.leg,x);return}
     if(a==="hoje"){var c1=calGet(q[1]);if(c1){MD.items.push(mdNew({t:c1.canal+": "+c1.t,tipo:"gravar",d:c1.d||isoToday(),parc:(PARC.items.filter(function(p){return p.marca===c1.marca})[0]||{}).id||""}));mdLocal();x.textContent="Adicionado ao Meu dia"}return}
@@ -952,7 +963,7 @@ document.addEventListener("click",function(e){
   var g=t.closest("[data-calgo]");if(!g)return;
   var q2=g.dataset.calgo.split("|"),k=q2[0];
   if(k==="open"){CAL.m=null;CAL.sel=null;CAL.edit=null;state.tab="cal"}
-  else if(k==="ci"){var c3=calGet(q2[1]);if(!c3)return;CAL.edit=CAL.edit===c3.id&&state.tab==="cal"?null:c3.id;CAL.sel=c3.d||isoToday();CAL.m=CAL.sel.slice(0,7);state.tab="cal"}
+  else if(k==="ci"){var c3=calGet(q2[1]);if(!c3)return;CAL.edit=CAL.edit===c3.id&&state.tab==="cal"?null:c3.id;CAL.mode="ler";CAL.sel=c3.d||isoToday();CAL.m=CAL.sel.slice(0,7);state.tab="cal"}
   else if(k==="plano"){state.tab="hoje";state.hmode="plano";state.sel=q2[1]}
   else if(k==="md"){MDUI.date=q2[1];state.tab="hoje";state.hmode="meu"}
   else if(k==="canais"){state.tab="mais";state.more="canais"}
@@ -1214,7 +1225,7 @@ function gravCal(){var D=isoToday(),l=CALD.items.filter(function(x){return x.d==
   return '<div class="card"><h3>Do seu calendário de hoje</h3>'+l.map(function(x){return'<div class="item"><b>'+esc(x.t)+'</b> <span class="note">· '+esc(x.canal)+' · '+esc(calLbl(x.st))+'</span>'+(x.nota?'<p style="white-space:pre-wrap">'+esc(x.nota.slice(0,500))+(x.nota.length>500?'…':'')+'</p>':'<p class="note">Sem roteiro ainda. Abra para escrever ou pedir à IA.</p>')+'<div class="btns"><button class="btn small ghost" data-calgo="ci|'+x.id+'">Abrir e editar</button></div></div>'}).join('')+'</div>'}
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-idx]");if(!x)return;var q=x.dataset.idx.split("|"),a=q[0],id=q[1];var it=state.ideas.filter(function(z){return z.id===id})[0];if(!it)return;
   var first=String(it.text).split(/\n/)[0].slice(0,100),rest=String(it.text).length>first.length?it.text:"";
-  if(a==="cal"){var n=calNew({t:first,nota:rest,d:"",st:"Ideia"});CALD.items.push(n);calSave();CAL.edit=n.id;state.tab="cal"}
+  if(a==="cal"){var n=calNew({t:first,nota:rest,d:"",st:"Ideia"});CALD.items.push(n);calSave();CAL.edit=n.id;CAL.mode="edit";state.tab="cal"}
   else if(a==="tar"){MD.items.push(mdNew({t:first,nota:rest,tipo:"gravar",d:""}));mdLocal()}
   else if(a==="base"){brAdd("decisao",it.text)}
   state.ideas=state.ideas.filter(function(z){return z.id!==id});dbSet("ideas",id,{del:true,at:Date.now()},"Ideia movida");saveLocal();render();window.scrollTo(0,0)});
@@ -1466,6 +1477,34 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
   else if(a==="rm"){it.slides.splice(+q[1],1)}
   else if(a==="copy"){copyText((it.slides||[]).map(function(z){return z.t+": "+(z.txt||"")}).join("\n\n"),x);return}
   it.at=Date.now();calSave();render()});
+
+
+/* ============ v37: ler o conteúdo completo no calendário ============ */
+CAL.mode="edit";
+function calFull(it){var out=[],d=DAYS.filter(function(x){return x.date===it.d})[0];
+  if(it.nota)out.push({h:"Roteiro e anotações",t:it.nota});
+  if(it.slides&&it.slides.length)out.push({h:"Slides",t:it.slides.map(function(z){return z.t+": "+(z.txt||"(vazio)")}).join("\n\n")});
+  if(it.leg)out.push({h:"Legenda",t:it.leg});
+  if(it.link)out.push({h:"Link",t:it.link});
+  if(d){var base="Do plano do dia "+d.n+"/"+d.date.slice(5,7)+": ";
+    if(it.canal==="Feed principal"&&d.feed&&((it.fmt==="Carrossel")===/carross/i.test(d.feed.kind))){
+      out.push({h:base+d.feed.kind,t:d.feed.title+"\n\n"+d.feed.body,p:1});if(d.feed.legenda)out.push({h:base+"legenda",t:d.feed.legenda,p:1})}
+    else if(it.canal==="Reels teste"&&d.feed&&/Reel teste/.test(d.feed.body)){out.push({h:base+"Reel teste",t:d.feed.body.slice(d.feed.body.indexOf("Reel teste")),p:1})}
+    else if(it.canal==="Stories"){d.stories.forEach(function(st,i){out.push({h:base+"Story "+(i+1),t:st[1]+(d.copy&&d.copy["s"+(i+1)]?"\n\n"+cpText(d,"s"+(i+1)):""),p:1})})}
+    else if(it.canal==="Melhores Amigos"){out.push({h:base+"Melhores Amigos",t:(d.copy&&d.copy.ma?cpText(d,"ma"):d.ma),p:1})}
+    else if(it.canal==="Assinatura"){out.push({h:base+"Assinatura",t:(d.copy&&d.copy.ass?cpText(d,"ass"):d.ass),p:1})}}
+  return out}
+function calFullText(it){return it.t+"\n"+it.canal+(it.fmt?" · "+it.fmt:"")+(it.marca?" · "+it.marca:"")+" · "+(it.d||"sem data")+"\n\n"+calFull(it).map(function(z){return z.h+":\n"+z.t}).join("\n\n")}
+function calRead(it){var secs=calFull(it);
+  var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[CALKIND[it.canal]||"f"]+'">'+esc(it.canal+(it.marca?" · "+it.marca:""))+'</span>'+(it.fmt?' <span class="tag">'+esc(it.fmt)+'</span>':'')+'<h3 style="margin:6px 0 2px">'+esc(it.t)+'</h3><span class="note">'+esc(calLbl(it.st))+' '+calDots(it.st)+(it.d?' · '+it.d.slice(8,10)+'/'+it.d.slice(5,7):'')+'</span></div>';
+  if(!secs.length)h+='<p class="note">Este conteúdo ainda não tem roteiro. Toque em Editar para escrever, ou use Roteiro com IA.</p>';
+  secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
+  h+='<div class="btns"><button class="btn" data-calx="editar">Editar</button><button class="btn ghost" data-calx="copyall|'+it.id+'">Copiar tudo</button><button class="btn small ghost" data-calx="close">Fechar</button></div>';
+  if(calNext(it.st)||calPrev(it.st))h+='<div class="btns">'+(calPrev(it.st)?'<button class="btn small ghost" data-cst="'+it.id+'|'+calPrev(it.st)+'">‹ Voltar para '+calLbl(calPrev(it.st))+'</button>':'')+(calNext(it.st)?'<button class="btn small" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button>':'')+'</div>';
+  return h+'</div>'}
+document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;
+  var sel=t.closest("[data-cald]")?".cal-dayc":(t.closest("[data-calgo^='ci|']")||t.closest("[data-calx='ler']")||t.closest("[data-calx='editar']")||t.closest("[data-cst]")?".cal-open":null);
+  if(!sel)return;setTimeout(function(){var el=document.querySelector(sel);if(el)el.scrollIntoView({block:"start",behavior:"smooth"})},80)},true);
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
