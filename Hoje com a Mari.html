@@ -216,7 +216,7 @@ summary{color:var(--accent)}
 .nb{display:flex;flex-direction:column;align-items:center;gap:3px}
 @media (prefers-reduced-motion:reduce){.tile{transition:none}}
 .stickbar{position:sticky;bottom:98px;z-index:4;display:flex;gap:8px;padding:8px;background:var(--surface);border:1px solid var(--gold);border-radius:18px;box-shadow:0 8px 24px rgba(43,32,36,.14)}.stickbar .btn{flex:1}
-</style>
+.tap{cursor:pointer;-webkit-tap-highlight-color:transparent}.tap:active{opacity:.6}p.tap{border-radius:10px;padding:6px 8px;margin:4px -8px;background:rgba(127,127,127,.08)}li.tap{padding:4px 0}.row .tap{flex:1;padding:6px 0}</style>
 
 <div class="wrap">
   <div class="top">
@@ -1501,6 +1501,11 @@ var TRAYDIR={
   roteiro:[["Story 1","Obrigada por ter acompanhado a corrida da Tray comigo.","Texto: “Fim da corrida”"],["Story 2","Se você ainda não viu a oferta, o link exclusivo tá aqui. Ela abre dia 10/11.","Link exclusivo"],["Story 3","O resultado da corrida sai em 13/11, e eu volto aqui contando tudo, sem enrolação.","Texto: “Resultado em 13/11”"]],
   takes:["3 takes frontais, mesmo cenário."],leg:"Fim da corrida Tray. [LINK EXCLUSIVO] #publi",cta:"Veja a oferta no link.",stickers:["Link exclusivo"],evitar:["Anunciar resultado antes de 13/11."],dica:"Prometa o retorno do resultado: isso mantém a audiência atenta."}
 };
+function trayRow(m){
+  var id="tray-"+m[0],has=!!TRAYDIR[m[0]],tx=m[1]+(parseNum(m[2])?" (+"+m[2]+")":"");
+  if(!has)return chk(id,tx);
+  return '<div class="row'+(state.checks[id]?' chkd':'')+'"><input type="checkbox" id="c-'+id+'" data-chk="'+id+'"'+(state.checks[id]?' checked':'')+' aria-label="Feito"><span class="tap" role="button" tabindex="0" data-trx="open|'+m[0]+'">'+esc(tx)+' <b aria-hidden="true">'+(state.trayOpen===m[0]?'▾':'›')+'</b></span></div>';
+}
 function trayDirText(id){
   var d=TRAYDIR[id];if(!d)return"";
   var t=["OBJETIVO: "+d.obj,"FORMATO: "+d.fmt+" · "+d.dur,"","ROTEIRO"];
@@ -1524,9 +1529,9 @@ function trayDirHtml(id){
   var open=state.trayOpen===id,h='<div class="btns" style="margin:2px 0 8px 28px"><button class="btn small ghost" data-trx="open|'+id+'">'+(open?'Fechar direção':'Ver direção completa')+'</button></div>';
   if(!open)return h;
   h+='<div class="card" style="margin:0 0 10px"><p><b>Objetivo:</b> '+esc(d.obj)+'</p><p class="note">'+esc(d.fmt)+' · '+esc(d.dur)+'</p><h3>Roteiro</h3>';
-  d.roteiro.forEach(function(b){h+='<p><b>'+esc(b[0])+'</b><br>“'+esc(b[1])+'”<br><span class="note">Na tela: '+esc(b[2])+'</span></p>'});
-  h+='<h3>Takes sugeridos</h3><ul>'+d.takes.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul>'
-   +'<h3>Legenda ou texto</h3><p>'+esc(d.leg)+'</p><p><b>CTA:</b> '+esc(d.cta)+'</p><p class="note"><b>Stickers:</b> '+esc(d.stickers.join('; '))+'</p>'
+  d.roteiro.forEach(function(b,bi){h+='<p class="tap" role="button" tabindex="0" data-trx="cpf|'+id+'|'+bi+'"><b>'+esc(b[0])+'</b><br>“'+esc(b[1])+'”<br><span class="note">Na tela: '+esc(b[2])+'</span><br><span class="note">Toque para copiar a fala</span></p>'});
+  h+='<h3>Takes sugeridos</h3><ul>'+d.takes.map(function(x,ti){return'<li class="tap" role="button" tabindex="0" data-trx="tk|'+id+'|'+ti+'">'+(state.trayTk&&state.trayTk[id+ti]?'✓ ':'')+esc(x)+'</li>'}).join('')+'</ul>'
+   +'<h3>Legenda ou texto</h3><p class="tap" role="button" tabindex="0" data-trx="cpl|'+id+'">'+esc(d.leg)+'<br><span class="note">Toque para copiar</span></p><p><b>CTA:</b> '+esc(d.cta)+'</p><p class="note"><b>Stickers:</b> '+esc(d.stickers.join('; '))+'</p>'
    +'<h3>Evitar</h3><ul>'+d.evitar.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="note"><b>Dica:</b> '+esc(d.dica)+'</p>'
    +'<div class="btns"><button class="btn small" data-trx="copy|'+id+'">Copiar tudo</button><button class="btn small ghost" data-trx="pdf|'+id+'">Gerar PDF</button><button class="btn small ghost" data-trx="dia|'+id+'">Pôr no Meu dia</button></div></div>';
   return h;
@@ -1545,7 +1550,7 @@ function pubTray(){
       w.m.forEach(function(m,mi){h+='<div class="btns" style="flex-wrap:nowrap"><input type="text" data-ed="tray|'+wi+'|m|'+mi+'|1" value="'+esc(m[1])+'"><input type="text" inputmode="numeric" style="width:64px" data-ed="tray|'+wi+'|m|'+mi+'|2" data-num="1" value="'+esc(m[2])+'" aria-label="Pontos"><button class="btn ghost small" data-cfx="tray-delm|'+wi+'|'+mi+'" aria-label="Remover missão">×</button></div>'});
       h+='<div class="btns"><button class="btn ghost small" data-cfx="tray-addm|'+wi+'">Adicionar missão</button><button class="btn ghost small" data-cfx="tray-delw|'+wi+'">Remover esta semana</button></div>';
     }else{
-      h+='<h3>'+esc(w.t)+'</h3>'+w.m.map(function(m){return chk("tray-"+m[0],m[1]+(parseNum(m[2])?" (+"+m[2]+")":""))+trayDirHtml(m[0])}).join('');
+      h+='<h3>'+esc(w.t)+'</h3>'+w.m.map(function(m){return trayRow(m)+trayDirHtml(m[0])}).join('');
     }
     h+='</div>';
   });
@@ -1562,6 +1567,9 @@ function pubClick(el){
   var tx=el.closest("[data-trx]");
   if(tx){var tq=tx.dataset.trx.split("|"),tid=tq[1];
     if(tq[0]==="open"){state.trayOpen=state.trayOpen===tid?null:tid;render();return true}
+    if(tq[0]==="cpf"){copyText(TRAYDIR[tid].roteiro[+tq[2]][1],tx);return true}
+    if(tq[0]==="cpl"){copyText(TRAYDIR[tid].leg,tx);return true}
+    if(tq[0]==="tk"){state.trayTk=state.trayTk||{};var kk=tid+tq[2];state.trayTk[kk]=!state.trayTk[kk];render();return true}
     if(tq[0]==="copy"){copyText(trayDirText(tid),tx);return true}
     if(tq[0]==="pdf"){pubOpenMat("relatorio",trayMat(tid,trayMissaoNome(tid)));return true}
     if(tq[0]==="dia"){var nm=trayMissaoNome(tid);MD.items.push(mdNew({t:"Tray: "+nm,tipo:"gravar",parc:"Tray",d:isoToday()}));mdLocal();tx.textContent="Adicionado ao Meu dia";return true}
