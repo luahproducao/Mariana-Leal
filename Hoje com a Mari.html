@@ -673,16 +673,7 @@ function renderHoje(){
     +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ma"><span class="tag m">Melhores Amigos</span><div>'+esc(d.ma)+'</div>'+edNote(d,"ma")+'</div></div><div class="meta">'+stSelect(d.id+"-ma")+'</div>'+edHtml(d,"ma")+'</div>'
     +'<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-ed="ass"><span class="tag m">Assinatura</span><div>'+esc(d.ass)+'</div>'+edNote(d,"ass")+'</div></div><div class="meta">'+stSelect(d.id+"-as")+'</div>'+edHtml(d,"ass")+'</div></div>';
   if(d.funnel)h+='<div class="block"><h3>Antes de qualquer chamada para a assinatura</h3><div class="item">'+d.funnel.map(function(t,k){return chk(d.id+"-fun"+k,t)}).join("")+'</div></div>';
-  h+='<div class="block"><h3>Avisar a Laila</h3><div class="btns"><button class="btn" id="avisar">Copiar aviso para a Laila</button></div><p class="note">Monta uma mensagem com o que você já gravou e o seu recado. É só colar no WhatsApp.</p></div>';
-  var r=state.results[d.id]||{};
-  h+='<div class="block"><h3>Depois de postar · 30 segundos</h3><div class="fields">'
-    +'<label>Alcance<input type="text" id="r-alc" value="'+esc(r.alc||"")+'" inputmode="numeric"></label>'
-    +'<label>Curtidas<input type="text" id="r-cur" value="'+esc(r.cur||"")+'" inputmode="numeric"></label>'
-    +'<label>Respostas nos stories<input type="text" id="r-res" value="'+esc(r.res||"")+'" inputmode="numeric"></label>'
-    +'<label>Salvamentos<input type="text" id="r-sal" value="'+esc(r.sal||"")+'" inputmode="numeric"></label></div>'
-    +'<label class="lab">O que eu aprendi hoje<textarea id="r-apr" placeholder="O que funcionou, o que não funcionou...">'+esc(r.apr||"")+'</textarea></label>'
-    +'<div class="btns"><button class="btn small" id="saveres">Salvar resultado</button></div></div>';
-  h+='<div class="block"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia..." aria-label="Recado para a equipe">'+esc(state.notes[d.id]||"")+'</textarea><div class="btns"><button class="btn small ghost" id="savenote">Salvar recado</button><button class="btn small ghost" data-rest="1">Hoje vou descansar</button></div></div>';
+  if(!SIMPLE)h+=avisoHtml(d)+resultHtml(d)+recadoHtml(d);
   if(SIMPLE)h+=qiBox();
   h+='<p class="note">Roteiros completos e briefings das marcas ficam no <a class="link" href="'+TRELLO+'" target="_blank" rel="noopener">Trello Operação Marketing</a>.</p></div>';
   $("#view").innerHTML=h;
@@ -864,7 +855,7 @@ function calEditor(it){
    +'<label class="lab">Roteiro, takes e anotações<textarea data-cif="nota" style="min-height:140px" placeholder="Escreva o roteiro, os takes e o que lembrar. Ou peça uma primeira versão à IA.">'+esc(it.nota)+'</textarea></label>'
    +(it.nota?'':tplBtn(it))
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
-   +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+'<div class="adv">'+metHtml(it)+'</div>'
+   +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
    +(calNext(it.st)?'<div class="btns"><button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button></div>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
@@ -890,7 +881,7 @@ function calHtml(){
    +((sel<today&&CALD.items.some(function(z){return z.d===sel&&z.st!=="Publicado"}))?'<div class="btns"><button class="btn small ghost" data-calx="pubday">Marcar o dia como publicado</button></div>':'')
    +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
    +'<label class="lab">Onde<select id="cal-k">'+Object.keys(CALKIND).map(function(c){return'<option>'+c+'</option>'}).join('')+'<option value="tarefa">Tarefa só para mim (Meu dia)</option></select></label>'
-   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>'+sx(resHtml());
+   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>'+resultCal()+resHtml();
   return h;
 }
 function renderCal(){$("#view").innerHTML='<div class="stack">'+calHtml()+'</div>'}
@@ -1225,7 +1216,7 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
 function hubS(html){if(!SIMPLE||HK.all)return html;var p=html.split('<button class="card click tile"'),keep=[p[0]];p.slice(1).forEach(function(z){if(z.indexOf('data-hub="ideias"')>=0||z.indexOf('data-hub="roteiro"')>=0)keep.push(z)});return keep.join('<button class="card click tile"')+'</div><div class="btns"><button class="btn ghost small" data-hkall="1">Mais ferramentas</button></div>'}
 function backBtn(){if(SIMPLE&&state.tab==="pub")$("#view").insertAdjacentHTML("afterbegin",'<div class="btns"><button class="btn ghost small" data-tab="mais">← Mais</button></div>')}
 function atalhosHtml(){
-  var L=[["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Quem faz o quê","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
+  var L=[["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Avisar a Laila, recados e andamento","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
   var h='<div><h2>Mais</h2><p class="sub">Tudo o que não é do dia a dia fica aqui.</p></div>'+L.map(function(x){return'<div class="card tap" role="button" tabindex="0" data-go="'+x[2]+'"><h3>'+x[0]+'</h3><p class="note">'+x[1]+'</p></div>'}).join('');
   h+='<div class="card"><h3>Modo do app</h3><p class="note">'+(SIMPLE?'Agora você vê só o essencial: Hoje, Calendário e Criar. O modo completo mostra tudo de uma vez.':'Agora você vê tudo. O modo simples deixa só Hoje, Calendário e Criar.')+'</p><div class="btns"><button class="btn small" data-simple="'+(SIMPLE?'off':'on')+'">'+(SIMPLE?'Mostrar tudo (modo completo)':'Voltar ao modo simples')+'</button></div></div>';
   return h}
@@ -1275,6 +1266,28 @@ document.addEventListener("click",function(e){
   var d2=dayById(state.sel);if(!d2)return;var key=d2.id+"|"+x.dataset.ed;ED.open=ED.open===key?null:key;render();
   if(ED.open){var el=document.querySelector(".ed");if(el)el.scrollIntoView({block:"center"})}});
 
+
+/* ===== v33: blocos movidos do Hoje ===== */
+function avisoHtml(d){var h='';
+  h+='<div class="block" data-dayid="'+d.id+'"><h3>Avisar a Laila</h3><div class="btns"><button class="btn" id="avisar">Copiar aviso para a Laila</button></div><p class="note">Monta uma mensagem com o que você já gravou e o seu recado. É só colar no WhatsApp.</p></div>';
+  return h}
+function resultHtml(d){var h='';
+  var r=state.results[d.id]||{};
+  h+='<div class="block" data-dayid="'+d.id+'"><h3>Depois de postar · 30 segundos</h3><div class="fields">'
+    +'<label>Alcance<input type="text" id="r-alc" value="'+esc(r.alc||"")+'" inputmode="numeric"></label>'
+    +'<label>Curtidas<input type="text" id="r-cur" value="'+esc(r.cur||"")+'" inputmode="numeric"></label>'
+    +'<label>Respostas nos stories<input type="text" id="r-res" value="'+esc(r.res||"")+'" inputmode="numeric"></label>'
+    +'<label>Salvamentos<input type="text" id="r-sal" value="'+esc(r.sal||"")+'" inputmode="numeric"></label></div>'
+    +'<label class="lab">O que eu aprendi hoje<textarea id="r-apr" placeholder="O que funcionou, o que não funcionou...">'+esc(r.apr||"")+'</textarea></label>'
+    +'<div class="btns"><button class="btn small" id="saveres">Salvar resultado</button></div></div>';
+  return h}
+function recadoHtml(d){var h='';
+  h+='<div class="block" data-dayid="'+d.id+'"><h3>Recado para a equipe</h3><textarea id="note" placeholder="Algo que travou, uma dúvida, uma ideia..." aria-label="Recado para a equipe">'+esc(state.notes[d.id]||"")+'</textarea><div class="btns"><button class="btn small ghost" id="savenote">Salvar recado</button><button class="btn small ghost" data-rest="1">Hoje vou descansar</button></div></div>';
+  return h}
+function resultCal(){var d=DAYS.filter(function(x){return x.date===CAL.sel})[0];if(!d)return '';var r=state.results[d.id];return detHtml("rd","Depois de postar · resultado do dia"+(r?" (anotado)":""),resultHtml(d))}
+function equipeAlinhar(){var d=dayById(state.sel);if(!d)return '';return '<div class="card"><h3>Alinhar com a equipe · '+esc(d.title)+'</h3><p class="note">Monte o aviso para a Laila com o que já foi gravado e deixe um recado. O dia vem da faixa de dias do plano.</p><div class="pills" role="group" aria-label="Dia">'+DAYS.map(function(x){return '<button class="pill" data-eqday="'+x.id+'" aria-pressed="'+(x.id===d.id)+'">'+x.w+' '+x.n+'</button>'}).join('')+'</div></div>'+avisoHtml(d)+recadoHtml(d)}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-eqday]");if(x){state.sel=x.dataset.eqday;render()}});
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -1309,7 +1322,7 @@ function htmlEquipe(){
   }).join("");
   var done=APPMS.filter(function(m){return state.checks[m[0]]}).length;
   var venda=PRODS.filter(function(p){return getProd(p.id).s==="venda"}).length,and=PRODS.filter(function(p){var s=getProd(p.id).s;return s==="roteiro"||s==="feito"}).length;
-  return '<div><h2>Visão da equipe</h2><p class="sub">Onde cada entrega está, os resultados que a Mari registrou e os recados.</p></div>'
+  return '<div><h2>Visão da equipe</h2><p class="sub">Aviso para a Laila, recados e onde cada entrega está.</p></div>'+equipeAlinhar()
    +'<div class="scroll"><table><thead><tr><th>Dia</th><th>Entregas</th><th>Resultado e recado</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
    +'<div class="card tap" role="button" tabindex="0" data-go="tab=mais;more=prazos"><h3>App Estoque Crescente</h3><p>'+done+' de '+APPMS.length+' marcos concluídos.</p><p class="note">Toque para ver os marcos</p></div>'
    +'<div class="card tap" role="button" tabindex="0" data-go="tab=criar"><h3>Mini produtos</h3><p class="note">Toque para ir para Criar</p><p>'+venda+' à venda, '+and+' em andamento, de '+PRODS.length+'.</p></div>'
@@ -2368,10 +2381,10 @@ document.addEventListener("click",function(e){
   var ld=el.closest("[data-ldel]");if(ld){var pr=ld.dataset.ldel.split(":"),a2=T("listas."+pr[0],[]).slice();a2.splice(parseInt(pr[1],10),1);setT("listas."+pr[0],a2);render();return}
   var cx=el.closest("[data-crx]");if(cx){crAction(cx.dataset.crx,cx);return}
   var ct=el.closest("[data-crtipo]");if(ct){state.cr.tipo=ct.dataset.crtipo;saveCr();render();return}
-  if(el.id==="avisar"){copyText(avisoTexto(dayById(state.sel)),el);return}
+  if(el.id==="avisar"){var dv=el.closest("[data-dayid]");copyText(avisoTexto(dayById(dv?dv.dataset.dayid:state.sel)),el);return}
   if(el.id==="copyficha"){copyText(fichaText(),el);return}
-  if(el.id==="savenote"){var v=$("#note").value;state.notes[state.sel]=v;dbSet("notes",state.sel,{text:v,at:Date.now()},"Recado salvo");render();return}
-  if(el.id==="saveres"){var o={alc:$("#r-alc").value,cur:$("#r-cur").value,res:$("#r-res").value,sal:$("#r-sal").value,apr:$("#r-apr").value,at:Date.now()};state.results[state.sel]=o;dbSet("results",state.sel,o,"Resultado salvo");render();return}
+  if(el.id==="savenote"){var v=$("#note").value,dn=el.closest("[data-dayid]"),dk=dn?dn.dataset.dayid:state.sel;state.notes[dk]=v;dbSet("notes",dk,{text:v,at:Date.now()},"Recado salvo");render();return}
+  if(el.id==="saveres"){var o={alc:$("#r-alc").value,cur:$("#r-cur").value,res:$("#r-res").value,sal:$("#r-sal").value,apr:$("#r-apr").value,at:Date.now()};var dr=el.closest("[data-dayid]"),rk=dr?dr.dataset.dayid:state.sel;state.results[rk]=o;dbSet("results",rk,o,"Resultado salvo");render();return}
   if(el.id==="addidea"){var tx2=$("#idea").value.trim();if(!tx2)return;var id2="i"+Date.now(),o2={text:tx2,at:Date.now()};state.ideas.push({id:id2,text:tx2,at:o2.at});dbSet("ideas",id2,o2,"Ideia guardada");render();return}
 });
 document.addEventListener("input",function(e){
