@@ -746,7 +746,7 @@ function addSeg(){
 function addHero(){
   var t=state.tab,H=null;
   if(t==="criar"&&(state.hub||"inicio")==="inicio")H=["@mariana.leaal","Seu espaço de criação","Ideias, roteiros, ações e materiais. Tudo no seu jeito."];
-  else if(t==="pub"&&state.pub!=="mat")H=["Publicidade","Publis","Campanhas, prazos, roteiros e pagamentos em um lugar só."];
+  else if(t==="pub"&&state.pub!=="mat")H=["Publicidade","Publis","Do briefing ao pagamento, cada parceria no seu painel."];
   else if(t==="mais")H=["Mais","Seu painel","Prazos, equipe, canais, ideias e ajustes."];
   if(H)$("#view").insertAdjacentHTML("afterbegin",'<div class="hero2"><span class="pilltag">'+H[0]+'</span><h2>'+H[1]+'</h2><p>'+H[2]+'</p></div>');
 }
@@ -1129,7 +1129,7 @@ function isDirect(t){return DIRECT.indexOf(t)>=0}
 function pad2(n){return String(n).padStart(2,"0")}
 function addDays(iso,n){var d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate())}
 function fd(iso){return iso?iso.slice(8,10)+"/"+iso.slice(5,7):"?"}
-var PUBS=[["camp","Campanhas"],["parc","Parcerias"],["roteiro","Roteiro"],["fit","Fit"],["marcas","Marcas"],["tray","Tray"]];
+var PUBS=[["parc","Parcerias"],["marcas","Marcas"],["camp","Prazos e dinheiro"],["fit","Fit"],["tray","Tray"]];
 var D_GUIA={
  "Bling":{ang:"Plataforma completa de negócios: gestão de ponta a ponta.",usar:["plataforma completa de negócios","gestão de ponta a ponta","centralizador da operação","Loja Virtual Nativa (ao falar da loja virtual)"],evitar:["chamar só de “meu ERP”, “sistema de notas” ou “plataforma de e-commerce”","azul predominante","citar concorrentes","criticar marketplaces"],visual:"Elementos verdes. Lilás só quando o assunto for loja virtual. Carrossel no template oficial do Canva.",temas:["estoque sem planilha","lucro real por produto","nota fiscal sem medo","pedidos de vários canais num lugar só","Lei de Murphy na loja"]},
  "Melhor Envio":{ang:"Frete como estratégia de venda: frete grátis a partir de um valor para subir o ticket, comparando Correios e transportadoras.",usar:["cotações reais, mesmo pacote e mesmo CEP","cupom MARILEAL (confirmar a validade a cada campanha)"],evitar:["cotação inventada ou sem print real"],visual:"",temas:["embalar para não ter devolução","custo de troca","prazo x preço","rotina de envio em 15 minutos"]},
@@ -1154,11 +1154,11 @@ var D_PCK=["Briefing salvo com entregáveis, datas, termos obrigatórios e o que
 var D_FITC=[["aud","Combina com a audiência dela (lojista iniciante)?"],["vida","Combina com a vida e a loja da Mari?"],["nar","Dá para contar uma história real com a marca?"],["cred","Ela consegue falar com credibilidade?"],["pos","Ajuda ou prejudica o posicionamento? (5 = ajuda muito)"],["conf","Sem conflito com Bling, Tray, Melhor Envio e Ton? (5 = nenhum conflito)"],["rec","Tem potencial de recorrência?"],["val","O valor financeiro compensa? (não entra na média de fit)"]];
 function clone(o){return JSON.parse(JSON.stringify(o))}
 var CF=null,cfT=null;
-function cfgDef(){return {marcas:clone(D_GUIA),etapas:clone(D_ETAPAS),pck:D_PCK.slice(),fit:clone(D_FITC),lim:{contratos:7,meta:20000,recusa:"emagrecedor, gummy"},tray:clone(D_TRAY),doc:null,regras:""}}
+function cfgDef(){return {marcas:mxFill(clone(D_GUIA)),etapas:clone(D_ETAPAS),pck:D_PCK.slice(),fit:clone(D_FITC),lim:{contratos:7,meta:20000,recusa:"emagrecedor, gummy"},tray:clone(D_TRAY),doc:null,regras:""}}
 function cfg(){if(!CF)CF=cfgDef();return CF}
 var RULES0=null;
 function applyRegras(){if(RULES0===null)RULES0=RULES;var r=(cfg().regras||"").trim();RULES=RULES0+(r?"\nREGRAS EXTRAS DA MARI (siga sempre): "+r:"")}
-function cfgMerge(j){var d=cfgDef();Object.keys(d).forEach(function(k){if(j&&j[k]!==undefined&&j[k]!==null)d[k]=j[k]});return d}
+function cfgMerge(j){var d=cfgDef();Object.keys(d).forEach(function(k){if(j&&j[k]!==undefined&&j[k]!==null)d[k]=j[k]});if(d.marcas)mxFill(d.marcas);return d}
 function cfgLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-cfg")||"null");if(j)CF=cfgMerge(j)}catch(e){}applyRegras()}
 function cfgSave(){
   try{localStorage.setItem("hoje-cfg",JSON.stringify(cfg()))}catch(e){}
@@ -1183,10 +1183,10 @@ function loadPub(){
   try{state.camp=JSON.parse(localStorage.getItem("hoje-camp")||"{}")}catch(e){state.camp={}}
   try{state.pr=JSON.parse(localStorage.getItem("hoje-pr")||"null")}catch(e){}
   if(!state.pr)state.pr=prNew();
-  state.pub="camp";state.campOpen=null;
+  state.pub="parc";state.campOpen=null;
   state.fit={n:"",cat:"",agora:false,depois:false,s:{aud:3,vida:3,nar:3,cred:3,pos:3,conf:5,rec:3,val:3}};
 }
-function prNew(){return {marca:"Bling",briefing:"",obj:"",instr:"",res:null,ck:{},busy:"",err:""}}
+function prNew(){return {fmt:"Reels",gan:[],chk:null,parcId:null,marca:"Bling",briefing:"",obj:"",instr:"",res:null,ck:{},busy:"",err:""}}
 function savePr(){try{localStorage.setItem("hoje-pr",JSON.stringify(state.pr))}catch(e){}}
 function campSave(id){savePub();dbSet("camp",id,state.camp[id],"Campanha salva")}
 function stBadge(date,done){
@@ -1200,7 +1200,7 @@ function nextEtapa(c){var es=cfg().etapas;for(var i=0;i<es.length;i++){if(!(c.do
 /* ---- painel ---- */
 function renderPub(){
   if(state.pub==="mat"){renderCriar();return}
-  var pills='<div class="pills">'+PUBS.map(function(m){return '<button class="pill" data-pub="'+m[0]+'" aria-pressed="'+(state.pub===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>';
+  var pills='<div class="pills">'+PUBS.map(function(m){return '<button class="pill" data-pub="'+m[0]+'" aria-pressed="'+(state.pub===m[0]||(m[0]==="parc"&&state.pub==="roteiro"))+'">'+m[1]+'</button>'}).join('')+'</div>';
   var v=state.pub,inner=v==="parc"?pubParc():v==="roteiro"?pubRoteiro():v==="fit"?pubFit():v==="marcas"?pubMarcas():v==="tray"?pubTray():pubCamp();
   $("#view").innerHTML='<div class="stack">'+pills+inner+'</div>';
   if(v==="tray")updTray();
@@ -1261,12 +1261,12 @@ function campAdd(m,t,d,env){var id="c"+Date.now(),o={m:m,t:t,d:d,env:env||"",v:"
 /* ---- roteiro de publi ---- */
 function guiaTxt(m){var g=cfg().marcas[m];if(!g)return "(sem guia desta marca: siga só o briefing)";return "Ângulo: "+g.ang+"\nUsar: "+(g.usar.join("; ")||"-")+"\nEvitar: "+(g.evitar.join("; ")||"-")+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+(g.temas.join("; ")||"-")}
 function pubRoteiro(){
-  var r=state.pr,h='<div><h2>Roteiro de publi</h2><p class="sub">Cole o briefing da marca. O app escreve nos 5 blocos de publi, na sua voz, e você edita.</p></div>';
+  var r=state.pr,h='<div class="btns"><button class="btn ghost small" data-pcb="back2">← '+(r.parcId&&parcGet(r.parcId)?'Painel da parceria':'Parcerias')+'</button></div><div><h2>Roteiro de publi</h2><p class="sub">Cole o briefing da marca. O app escreve nos 5 blocos de publi, na sua voz, e você edita.</p></div>';
   if(!S)return h+'<div class="draft">'+NOAI+'</div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
   if(r.parcId&&parcGet(r.parcId))h+='<div class="draft">Painel: '+esc(parcTitle(parcGet(r.parcId)))+'. O briefing, as regras e o seu ângulo já vieram do painel.</div>';
-  h+='<div class="card"><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
+  h+='<div class="card"><div class="pills">'+PRF.map(function(f){return '<button class="pill" data-prfmt="'+f[0]+'" aria-pressed="'+((r.fmt||"Reels")===f[0])+'">'+f[1]+'</button>'}).join('')+'</div><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
    +'<label class="lab">Briefing da marca (cole aqui)<textarea data-pr="pb" style="min-height:140px" placeholder="Entregáveis, mensagem principal, termos obrigatórios, o que evitar, cupom, link...">'+esc(r.briefing)+'</textarea></label>'
    +'<label class="lab">Sua ideia ou ângulo (opcional)<input type="text" data-pr="po" value="'+esc(r.obj)+'" placeholder="Ex.: contar o dia em que quase vendi sem conferir o estoque"></label>'
    +'<p class="note">Não cole aqui o briefing confidencial de marcas que pediram sigilo.</p><div class="btns"><button class="btn" data-pra="gerar">Escrever roteiro</button></div></div>';
@@ -1277,17 +1277,18 @@ function pubRoteiro(){
     h+='<label class="lab">Legenda<textarea data-pr="pl">'+esc(x.legenda)+'</textarea></label>'
      +'<label class="lab">Para confirmar antes de gravar (um por linha)<textarea data-pr="pc">'+esc((x.confirmar||[]).join("\n"))+'</textarea></label>'
      +'<label class="lab">Ajuste extra (opcional)<input type="text" data-pr="pa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais direto, mais animado"></label>'
-     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
+     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button><button class="btn ghost small" data-pra="ganchos">Variações de gancho</button><button class="btn ghost small" data-pra="checar">Checar com a marca</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
      +'';
   }
+  h+=prExtras(r);
   h+='<div class="card"><h3>Antes de postar</h3>'+cfg().pck.map(function(t,i){return '<div class="row'+(r.ck[i]?' chkd':'')+'"><input type="checkbox" id="pk'+i+'" data-prck="'+i+'"'+(r.ck[i]?' checked':'')+'><label for="pk'+i+'">'+esc(t)+'</label></div>'}).join('')+'<div class="btns"><button class="btn ghost small" data-tg="edPck">'+(state.edPck?'Fechar edição':'Editar checklist')+'</button></div>'+(state.edPck?'<label class="lab">Um item por linha<textarea style="min-height:200px" data-ed="pck" data-lines="1">'+esc(cfg().pck.join("\n"))+'</textarea></label>':'')+'</div>';
   {
   }
   return h;
 }
 function normPr(x,old){
-  var bl=(x.blocos||[]).slice(0,5).map(function(b,i){var o=(old&&old.blocos&&old.blocos[i])||{};return {nome:String(b.nome||o.nome||""),tempo:String(b.tempo||o.tempo||""),fala:String(b.fala||""),tela:String(b.tela||"")}});
-  while(bl.length<5)bl.push({nome:"",tempo:"",fala:"",tela:""});
+  var bl=(x.blocos||[]).slice(0,10).map(function(b,i){var o=(old&&old.blocos&&old.blocos[i])||{};return {nome:String(b.nome||o.nome||""),tempo:String(b.tempo||o.tempo||""),fala:String(b.fala||""),tela:String(b.tela||"")}});
+  while(bl.length<1)bl.push({nome:"",tempo:"",fala:"",tela:""});
   return {titulo:String(x.titulo||(old&&old.titulo)||""),blocos:bl,legenda:String(x.legenda||""),confirmar:(x.confirmar||[]).map(String)};
 }
 async function prRun(label,fn){var r=state.pr;r.busy=label;r.err="";savePr();render();try{await fn()}catch(e){r.err=crErr(e)}r.busy="";savePr();render()}
@@ -1297,17 +1298,20 @@ function prMat(r){
 }
 function pubRoteiroAction(a,el){
   var r=state.pr;
+  if(a==="ganchos"){if(!r.res)return;prRun("Criando variações de gancho...",async function(){var x=await S.json(RULES+"\n\nTarefa: criar 5 alternativas de GANCHO (primeiros 3 segundos) para este roteiro de "+(r.fmt||"Reels")+" da marca "+r.marca+", cada uma com uma abordagem diferente (pergunta, confissão, número real, contraste, cena). Perfil da marca:\n"+guiaFull(r.marca)+"\n\nRoteiro atual:\n"+JSON.stringify(r.res)+"\n\n"+vozGuia(r.instr||"")+"\nNunca invente números: use [PREENCHER]. Responda SOMENTE com JSON {\"ganchos\":[{\"tipo\":\"\",\"fala\":\"\",\"tela\":\"\"}]}.",{modelTier:"default"});r.gan=(x.ganchos||[]).slice(0,5).map(function(g){return {tipo:String(g.tipo||""),fala:String(g.fala||""),tela:String(g.tela||"")}})});return}
+  if(a==="usegan"){var g0=(r.gan||[])[parseInt(el.dataset.gi,10)];if(g0&&r.res&&r.res.blocos[0]){r.res.blocos[0].fala=g0.fala;if(g0.tela)r.res.blocos[0].tela=g0.tela;savePr();render()}return}
+  if(a==="checar"){if(!r.res)return;prRun("Conferindo com o perfil da marca...",async function(){var x=await S.json(RULES+"\n\nConfira este roteiro de "+r.marca+" contra o perfil da marca e as regras da Mari. Verifique: termos a usar e a evitar, obrigatório na legenda (selo, #publi, marcações), CTA, invenção de números ou condições, tom, e se segue o briefing. Seja específico.\n\nPerfil:\n"+guiaFull(r.marca)+"\n\nBriefing:\n"+(r.briefing||"(não informado)")+"\n\nRoteiro:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON {\"itens\":[{\"ok\":true,\"ponto\":\"\",\"ajuste\":\"\"}]} com até 8 itens.",{modelTier:"default"});r.chk=(x.itens||[]).slice(0,8).map(function(c){return {ok:!!c.ok,ponto:String(c.ponto||""),ajuste:String(c.ajuste||"")}})});return}
   if(a==="gerar"){
     if(!r.briefing.trim()&&!r.obj.trim()){r.err="Cole o briefing ou escreva a sua ideia.";render();return}
     prRun("Escrevendo o roteiro...",async function(){
       var p=RULES+"\n\nTarefa: roteiro de Reels de publicidade (parceria paga) com a marca "+r.marca+". Estrutura obrigatória, em 5 blocos: 1. GANCHO (0-3s): frase que para o dedo, com situação, número real ou pergunta; 2. HISTÓRIA (3-15s): o que aconteceu com ela ou com a seguidora; 3. VIRADA (15-25s): o que mudou, a solução prática; 4. MARCA (25-40s): onde a ferramenta entrou, com tela real e sem dados de clientes; 5. CTA (últimos 5s): uma ação só, cupom na legenda. A marca entra numa situação real: primeiro a história, depois a ferramenta. Nunca invente valores, descontos, resultados ou condições: use [PREENCHER]. Inclua selo de parceria paga e #publi na legenda. A Mari não usa palavrão, evita lista de erros sem solução e não fala de rotina escolar do filho.\n\nGuia da marca:\n"+guiaTxt(r.marca)+"\n\nBriefing da marca:\n"+(r.briefing||"(não informado)")+"\n\nIdeia da Mari: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"blocos\":[{\"nome\":\"1. Gancho\",\"tempo\":\"0-3s\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]} com exatamente 5 blocos.";
-      r.res=normPr(await S.json(p,{modelTier:"default"}));r.ck={};
+      r.res=normPr(await S.json(prPrompt(r),{modelTier:"default"}));r.res.fmt=r.fmt||"Reels";r.ck={};r.gan=[];r.chk=null;
     });return;
   }
   if(a==="voz"){
     if(!(state.voz||"").trim()&&!(r.instr||"").trim()){r.err="Cole um texto seu em “Meu jeito de falar” (em Criar material) ou escreva um ajuste.";render();return}
     prRun("Reescrevendo no seu jeito...",async function(){
-      var x=await S.json(RULES+"\n\n"+vozGuia(r.instr||"")+"\n\nMantenha fatos, sentido, estrutura de 5 blocos e os trechos [PREENCHER]. Roteiro atual:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.",{modelTier:"default"});
+      var x=await S.json(RULES+"\n\n"+vozGuia(r.instr||"")+"\n\nMantenha fatos, sentido, a mesma estrutura de blocos e os trechos [PREENCHER]. Roteiro atual:\n"+JSON.stringify(r.res)+"\n\nResponda SOMENTE com JSON no mesmo formato {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.",{modelTier:"default"});
       r.res=normPr(x,r.res);
     });return;
   }
@@ -1352,7 +1356,7 @@ function pubFit(){
 }
 /* ---- marcas + documento ---- */
 function pubMarcas(){
-  var M=cfg().marcas,h='<div><h2>Marcas</h2><p class="sub">O que usar, o que evitar e o que funciona com cada marca. Edite e acrescente do seu jeito.</p></div>'
+  var M=cfg().marcas,h=(MXMSG?'<div class="draft">'+esc(MXMSG)+'</div>':'')+'<div><h2>Marcas</h2><p class="sub">O que usar, o que evitar e o que funciona com cada marca. Edite e acrescente do seu jeito.</p></div>'
    +'<div class="card"><h3>Documento para marcas</h3><p class="sub">Para enviar quando uma marca pedir parceria. Você edita o texto e pode salvar como o seu modelo.</p><div class="btns"><button class="btn" data-campx="doc">Montar o documento</button>'+(cfg().doc?'<button class="btn ghost small" data-cfx="doc-restore">Voltar ao modelo original</button>':'')+'</div>'+(cfg().doc?'<p class="note">Usando o seu modelo salvo.</p>':'')+'</div>';
   Object.keys(M).forEach(function(m){var g=M[m],ed=state.edMarca===m,pm='marcas|'+m+'|';
     h+='<div class="card"><h3>'+esc(m)+'</h3>';
@@ -1361,7 +1365,7 @@ function pubMarcas(){
        +(g.usar.length?'<p><span class="tag l">Usar</span> '+g.usar.map(esc).join('; ')+'</p>':'')
        +(g.evitar.length?'<p><span class="tag t">Evitar</span> '+g.evitar.map(esc).join('; ')+'</p>':'')
        +(g.visual?'<p><span class="tag m">Visual</span> '+esc(g.visual)+'</p>':'')
-       +(g.temas.length?'<p class="note"><b>Temas:</b> '+g.temas.map(esc).join(', ')+'</p>':'')
+       +(g.temas.length?'<p class="note"><b>Temas:</b> '+g.temas.map(esc).join(', ')+'</p>':'')+mxView(g)
        +'<div class="btns"><button class="btn ghost small" data-cfx="marca-edit|'+esc(m)+'">Editar</button></div>';
     }else{
       h+='<label class="lab">Nome da marca<input type="text" data-edname="'+esc(m)+'" value="'+esc(m)+'"></label>'
@@ -1370,7 +1374,7 @@ function pubMarcas(){
        +'<label class="lab">Evitar (um por linha)<textarea data-ed="'+esc(pm)+'evitar" data-lines="1">'+esc(g.evitar.join("\n"))+'</textarea></label>'
        +'<label class="lab">Visual<input type="text" data-ed="'+esc(pm)+'visual" value="'+esc(g.visual||"")+'"></label>'
        +'<label class="lab">Temas que funcionam (um por linha)<textarea data-ed="'+esc(pm)+'temas" data-lines="1">'+esc(g.temas.join("\n"))+'</textarea></label>'
-       +'<div class="btns"><button class="btn small" data-cfx="marca-edit|">Pronto</button><button class="btn ghost small" data-cfx="marca-del|'+esc(m)+'">Remover marca</button></div>';
+       +mxEdit(g,pm)+'<div class="btns">'+(S?'<button class="btn small" data-mxb="ia" data-m="'+esc(m)+'">Completar com IA</button>':'')+'<button class="btn small" data-cfx="marca-edit|">Pronto</button><button class="btn ghost small" data-cfx="marca-del|'+esc(m)+'">Remover marca</button></div>';
     }
     h+='</div>';
   });
@@ -1442,7 +1446,7 @@ function pubClick(el){
     if(a==="seed"){state.campOpen=campAdd("Bling","Carrossel Black Friday","2026-11-09","2026-11-05");render();return true}
     if(a==="doc"){pubOpenMat("midia",docMarcas());return true}
     if(a.indexOf("rel|")===0){pubOpenMat("relatorio",relMat(a.slice(4)));return true}
-    if(a.indexOf("roteiro|")===0){var c=state.camp[a.slice(8)];state.pr.marca=marcaList().indexOf(c.m)>=0?c.m:"Outra marca";savePr();state.pub="roteiro";render();window.scrollTo(0,0);return true}
+    if(a.indexOf("roteiro|")===0){var c=state.camp[a.slice(8)];state.pr.marca=marcaList().indexOf(c.m)>=0?c.m:"Outra marca";state.pr.parcId=null;savePr();state.pub="roteiro";render();window.scrollTo(0,0);return true}
     if(a.indexOf("del|")===0){var id=a.slice(4);delete state.camp[id];savePub();dbSet("camp",id,{del:true,at:Date.now()},"Removida");state.campOpen=null;render();return true}
   }
   var cf=el.closest("[data-cfx]");
@@ -1844,14 +1848,87 @@ document.addEventListener("click",function(e){
   PCUI.msg=n?n+" tarefa(s) criadas em “Meu dia”, nas datas combinadas.":"As tarefas desta parceria já estão criadas.";render();
 });
 
+
+/* ============ PUBLIS v2: perfil de marca, formatos, painel completo ============ */
+var D_GUIA_X={
+ "Bling":{prod:"Plataforma completa de negócios: estoque, pedidos de vários canais, notas fiscais e financeiro num lugar só. Loja Virtual Nativa para quem vende no site.",pub:"Lojistas que já vendem e estão desorganizados. O público da Mari costuma começar no plano básico e às vezes para depois de alguns meses, então o conteúdo precisa mostrar o ganho de usar a ferramenta de verdade, passo a passo.",fmt:"2 reels e 1 combo de stories por campanha; carrossel em datas especiais, no template oficial do Canva.",leg:"#publi e selo de parceria paga."},
+ "Melhor Envio":{prod:"Plataforma de frete que compara Correios e transportadoras e permite oferecer frete grátis a partir de um valor.",cta:"Cupom MARILEAL na legenda (confirmar a validade a cada campanha).",hist:"Storytelling real da Loyall: loja há 7 anos, clientes levavam em média 2 produtos por pedido. Base do roteiro de Black Friday para lojistas iniciantes.",fmt:"1 reels e 3 stories por campanha.",leg:"Selo de parceria paga e #publi."},
+ "Tray":{prod:"Plataforma de loja virtual. Oferta de Black Friday com link exclusivo.",pub:"Lojista que ainda vende só pelo Instagram. O site entra como complemento, nunca como substituto.",cta:"Link exclusivo da Tray (clique você mesma antes de postar).",fmt:"Criativos de anúncio (a marca edita), sequência de stories sobre o site e reels.",leg:"Selo de parceria paga em todo conteúdo."},
+ "Ton":{prod:"Maquininha e serviços financeiros para quem está começando.",pub:"Iniciantes. É a marca mais próxima do público atual da Mari.",fmt:"1 reels em collab no feed e stories."},
+ "Meta":{prod:"Business Agent: IA do WhatsApp que atende os clientes da loja.",hist:"A Mari gravou a tela do atendimento da IA como material. Adaptar o exemplo do briefing ao modelo dela: lojista que usa a IA para atender clientes da Loyall no WhatsApp.",fmt:"Reels com a tela do atendimento.",leg:"Marcações @whatsappforbusiness, #publicidade e #publi."},
+ "99 Food":{prod:"Delivery para a rotina corrida de quem empreende e cuida da casa.",fmt:"1 reels (primeira entrega já postada em 04/10)."}
+};
+var MXF=[["prod","O que a marca é e o que a Mari mostra dela","t"],["pub","Quem é o público da marca e como a Mari fala com ele","t"],["obj","Objeções do público (uma por linha)","l"],["gan","Ganchos que funcionam (um por linha)","l"],["cta","CTA padrão","t"],["hist","Como a Mari já usou a marca na vida real","t"],["res","O que já funcionou e o que não","t"],["fmt","Formatos que a marca costuma pedir","t"],["leg","Obrigatório na legenda (selo, hashtags, marcações)","t"],["tom","Tom da marca x tom da Mari","t"]];
+function mxFill(M){Object.keys(M).forEach(function(k){var g=M[k],x=D_GUIA_X[k]||{};MXF.forEach(function(f){if(g[f[0]]===undefined)g[f[0]]=x[f[0]]!==undefined?x[f[0]]:(f[2]==="l"?[]:"")})});return M}
+var MXMSG="";
+function mxView(g){return MXF.map(function(f){var v=g[f[0]];if(f[2]==="l")v=(v||[]).join("; ");return v?'<p class="note"><b>'+esc(f[1].replace(/ \(uma por linha\)/,""))+':</b> '+esc(v)+'</p>':''}).join('')}
+function mxEdit(g,pm){return MXF.map(function(f){var v=g[f[0]];return '<label class="lab">'+esc(f[1])+'<textarea data-ed="'+esc(pm)+f[0]+'"'+(f[2]==="l"?' data-lines="1"':'')+'>'+esc(f[2]==="l"?(v||[]).join("\n"):(v||""))+'</textarea></label>'}).join('')}
+function guiaFull(m){var g=cfg().marcas[m];if(!g)return "(sem perfil desta marca: siga só o briefing)";var L=function(a){return (a||[]).join("; ")||"-"};
+ return "Ângulo: "+g.ang+"\nO que é e o que a Mari mostra: "+(g.prod||"-")+"\nPúblico da marca: "+(g.pub||"-")+"\nObjeções do público: "+L(g.obj)+"\nGanchos que funcionam: "+L(g.gan)+"\nCTA padrão: "+(g.cta||"-")+"\nComo a Mari já usou: "+(g.hist||"-")+"\nJá funcionou ou não: "+(g.res||"-")+"\nFormatos pedidos: "+(g.fmt||"-")+"\nObrigatório na legenda: "+(g.leg||"-")+"\nTom: "+(g.tom||"-")+"\nUsar: "+L(g.usar)+"\nEvitar: "+L(g.evitar)+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+L(g.temas)}
+document.addEventListener("click",async function(e){
+  var b=e.target.closest&&e.target.closest("[data-mxb]");if(!b)return;
+  var m=b.dataset.m,g=cfg().marcas[m];if(!g)return;if(!S){MXMSG=NOAI;render();return}
+  var src=PARC.items.filter(function(x){return x.marca===m}).map(function(x){return "Parceria "+parcTitle(x)+":\nBriefings: "+x.briefs.map(function(q){return q.x}).join("\n---\n").slice(0,2500)+"\nRegras: "+x.regras+"\nAprendizados: "+x.aprend+"\nRoteiros aprovados: "+x.roteiros.filter(function(r){return r.st==="Aprovado"||r.st==="Postado"}).map(function(r){return JSON.stringify(r.res)}).join("\n").slice(0,2500)}).join("\n\n");
+  MXMSG="Completando o perfil...";render();
+  try{
+    var x=await S.json("Complete o perfil da marca "+m+" para a influenciadora Mari usando SOMENTE o que está no perfil atual, nos painéis das parcerias e no cérebro dela. Não invente fatos, números, resultados nem condições comerciais: o que não houver, deixe vazio. Perfil atual:\n"+guiaFull(m)+"\n\nPainéis desta marca:\n"+(src||"(nenhum)")+"\n\nResponda SOMENTE com JSON {\"prod\":\"\",\"pub\":\"\",\"obj\":[\"\"],\"gan\":[\"\"],\"cta\":\"\",\"hist\":\"\",\"res\":\"\",\"fmt\":\"\",\"leg\":\"\",\"tom\":\"\"}. Preencha apenas o que estiver vazio no perfil atual.",{modelTier:"default"});
+    var n=0;MXF.forEach(function(f){var k=f[0],cur=g[k],emp=f[2]==="l"?!(cur&&cur.length):!String(cur||"").trim(),v=x[k];if(emp&&v&&(f[2]==="l"?v.length:String(v).trim())){g[k]=f[2]==="l"?v.map(String).filter(Boolean):String(v);n++}});
+    cfgSave();MXMSG=n?n+" campo(s) sugerido(s) pela IA. Revise antes de usar.":"Nada novo para sugerir com o que já existe."
+  }catch(err){MXMSG=crErr(err)||"Não consegui agora."}
+  render();
+});
+/* ---- formatos de roteiro ---- */
+var PRF=[["Reels","Reels"],["Stories","Stories"],["Carrossel","Carrossel"],["Collab","Collab no feed"],["Anuncio","Criativo de anúncio"]];
+var PRFS={
+ Reels:"Estrutura obrigatória, em exatamente 5 blocos: 1. GANCHO (0-3s): frase que para o dedo, com situação, número real ou pergunta; 2. HISTÓRIA (3-15s): o que aconteceu com ela ou com a seguidora; 3. VIRADA (15-25s): o que mudou, a solução prática; 4. MARCA (25-40s): onde a ferramenta entrou, com tela real e sem dados de clientes; 5. CTA (últimos 5s): uma ação só, cupom na legenda.",
+ Stories:"Sequência de 6 a 7 stories. Cada bloco é uma tela: nome “Tela 1”, “Tela 2”...; tempo em segundos; fala curta; “tela” traz o texto na tela e o sticker (enquete, caixinha, link). Ordem: 1 situação real, 2 o problema, 3 a solução mostrada com tela real, 4 um exemplo ou prova, 5 interação (enquete ou caixinha), última tela com CTA e link.",
+ Carrossel:"Carrossel com capa, 6 a 8 slides e um slide final de CTA. Cada bloco é um slide: nome “Capa”, “Slide 2”...; deixe tempo vazio; “fala” é o texto do slide (no máximo 25 palavras); “tela” descreve o visual. A capa precisa prometer algo concreto. A legenda é longa, com CTA.",
+ Collab:"Reels em collab no feed com a marca, em 5 blocos (gancho, história, virada, marca, CTA). Comece cada fala com “MARI:” ou “MARCA:” para dividir quem fala. A marca aparece na virada ou no CTA, nunca no gancho.",
+ Anuncio:"Criativo curto de 15 a 30s para a marca usar em anúncio, em 4 blocos: gancho de dor (3s), prova ou demonstração, benefício claro, CTA direto. Sem apresentação longa, com legenda na tela, em vertical. A marca edita o vídeo."
+};
+function parcExemplos(m){
+  var ex=[];PARC.items.forEach(function(p){if(p.marca!==m)return;p.roteiros.forEach(function(r){if((r.st==="Aprovado"||r.st==="Postado")&&r.res)ex.push((r.res.titulo||"Roteiro")+": "+r.res.blocos.map(function(b){return b.fala}).join(" / "))})});
+  return ex.slice(-2).length?"\nROTEIROS JÁ APROVADOS DESTA MARCA (use só como referência de tom, não copie):\n"+ex.slice(-2).join("\n"):"";
+}
+function prPrompt(r){
+  var fm=r.fmt||"Reels",nm=(PRF.filter(function(x){return x[0]===fm})[0]||[0,fm])[1];
+  return RULES+"\n\nTarefa: roteiro de "+nm+" de publicidade (parceria paga) com a marca "+r.marca+". "+PRFS[fm]+" A marca entra numa situação real: primeiro a história, depois a ferramenta. Nunca invente valores, descontos, resultados ou condições: use [PREENCHER]. Inclua selo de parceria paga, #publi e tudo o que a marca exige na legenda. A Mari não usa palavrão, evita lista de erros sem solução e não fala de rotina escolar do filho.\n\nPERFIL DA MARCA:\n"+guiaFull(r.marca)+parcExemplos(r.marca)+"\n\nBriefing e painel da parceria:\n"+(r.briefing||"(não informado)")+"\n\nIdeia da Mari: "+(r.obj||"(não informado)")+"\n\n"+vozGuia(r.instr||"")+"\n\nResponda SOMENTE com JSON {\"titulo\":\"\",\"blocos\":[{\"nome\":\"\",\"tempo\":\"\",\"fala\":\"\",\"tela\":\"\"}],\"legenda\":\"\",\"confirmar\":[\"\"]}.";
+}
+function prExtras(r){
+  var h="";
+  if(r.gan&&r.gan.length)h+='<div class="card"><h3>Variações de gancho</h3>'+r.gan.map(function(g,i){return '<div class="card" style="background:var(--bg)"><span class="tag">'+esc(g.tipo)+'</span><p>'+esc(g.fala)+'</p>'+(g.tela?'<p class="note">Na tela: '+esc(g.tela)+'</p>':'')+'<div class="btns"><button class="btn small" data-pra="usegan" data-gi="'+i+'">Usar este gancho</button></div></div>'}).join('')+'</div>';
+  if(r.chk&&r.chk.length)h+='<div class="card"><h3>Checagem com o perfil da marca</h3>'+r.chk.map(function(c){return '<p>'+(c.ok?'<span class="tag l">ok</span>':'<span class="tag t">ajustar</span>')+' '+esc(c.ponto)+(c.ok?'':'<br><span class="note">'+esc(c.ajuste)+'</span>')+'</p>'}).join('')+'</div>';
+  return h;
+}
+document.addEventListener("click",function(e){
+  var f=e.target.closest&&e.target.closest("[data-prfmt]");if(!f)return;
+  state.pr.fmt=f.dataset.prfmt;savePr();render();
+});
+
 /* ============ PAINEL DA PARCERIA ============ */
 var PARC={items:[]},PCUI={open:null,confDel:false,busy:"",msg:"",bt:"",bx:"",nm:"",mc:""};
 var PCST=["Prospecção","Negociando","Fechada","Em produção","Entregue","Encerrada"],PCROS=["Rascunho","Enviado à marca","Aprovado","Postado"];
 function parcLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-parc")||"[]");PARC.items=Array.isArray(j)?j:[]}catch(e){PARC.items=[]}}
 function parcLocal(){try{localStorage.setItem("hoje-parc",JSON.stringify(PARC.items))}catch(e){}}
 function parcPut(p){p.at=Date.now();parcLocal();if(C.parc)C.parc.doc(p.id).set({json:JSON.stringify(p),at:p.at}).then(function(){setSync("Parceria salva para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
-function parcGet(id){return PARC.items.filter(function(x){return x.id===id})[0]}
-function parcNew(marca,nome,status){return {id:"pc"+Date.now()+Math.floor(Math.random()*1000),marca:marca,nome:nome||"",status:status||"Prospecção",contato:"",post:"",entregaveis:"",briefs:[],regras:"",angulo:"",duvidas:"",aprend:"",roteiros:[],at:Date.now()}}
+function parcFix(p){["valor","nf","nfData","pagoEm"].forEach(function(k){if(p[k]===undefined)p[k]=""});if(!p.m)p.m={};if(!p.rel)p.rel={};if(!p.log)p.log=[];return p}
+function parcGet(id){var p=PARC.items.filter(function(x){return x.id===id})[0];return p?parcFix(p):p}
+function parcLog(p,t){parcFix(p);p.log.push({at:Date.now(),t:t});if(p.log.length>60)p.log.shift()}
+function brl(n){return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function pcNum(v){var x=parseFloat(String(v||"").replace(/[^\d,.-]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));return isNaN(x)?0:x}
+function pcVence(p){if(!p.nfData)return "";var e=cfg().etapas.filter(function(x){return x.id==="e10"})[0];return addDays(p.nfData,(e&&parseInt(e.off,10))||30)}
+function pcSteps(p){
+  var ro=p.roteiros,has=function(a){return ro.some(function(r){return a.indexOf(r.st)>=0})};
+  return [["fechada","Parceria fechada",["Fechada","Em produção","Entregue","Encerrada"].indexOf(p.status)>=0,0],["briefing","Briefing recebido",p.briefs.length>0,0],["roteiro","Roteiro escrito",ro.length>0,0],["aprovado","Roteiro aprovado pela marca",has(["Aprovado","Postado"]),0],["gravado","Vídeo gravado",!!p.m.gravado,1],["postado","Postado",has(["Postado"])||!!p.m.postado||p.status==="Entregue"||p.status==="Encerrada",1],["relatorio","Relatório enviado",!!p.m.relatorio,1],["nf","Nota fiscal emitida",!!p.nfData,0],["pago","Pagamento recebido",!!p.pagoEm,0]];
+}
+function parcRel(p){
+  var r=p.rel||{};function v(x){return x||"[PREENCHER]"}
+  return {titulo:"Relatório · "+p.marca,subtitulo:(p.nome||"Parceria")+(p.post?" · postagem em "+fd(p.post):""),intro:"Resumo dos resultados da parceria, para envio à marca.",
+   secoes:[{titulo:"Resultados",corpo:"Dados do Instagram, conforme os prints anexados.",itens:["Alcance: "+v(r.alc),"Visualizações: "+v(r.vis),"Interações: "+v(r.int),"Cliques no link: "+v(r.cli),"Uso do cupom ou vendas: "+v(r.ven)]},{titulo:"O que funcionou",corpo:v(r.apr),itens:[]},{titulo:"Prints",corpo:"[PREENCHER: anexar prints de alcance, interações e cliques]",itens:[]},{titulo:"Próximos passos",corpo:"[PREENCHER: sugestão de renovação ou ajuste]",itens:[]}],
+   fechamento:"Relatório preparado por Mariana Leal (@mariana.leaal)."};
+}
+
+function parcNew(marca,nome,status){return {id:"pc"+Date.now()+Math.floor(Math.random()*1000),marca:marca,nome:nome||"",status:status||"Prospecção",contato:"",post:"",entregaveis:"",briefs:[],regras:"",angulo:"",duvidas:"",aprend:"",roteiros:[],valor:"",nf:"",nfData:"",pagoEm:"",m:{},rel:{},log:[{at:Date.now(),t:"Painel criado"}],at:Date.now()}}
 function parcTitle(p){return p.marca+(p.nome?" · "+p.nome:"")}
 function parcCtx(p){
   var h="PAINEL DA PARCERIA: "+parcTitle(p)+"\nStatus: "+p.status+(p.post?"\nPostagem prevista: "+p.post.split("-").reverse().join("/"):"");
@@ -1866,41 +1943,53 @@ function parcCtx(p){
 }
 function pcTa(f,label,v,ph,min){return '<label class="lab">'+label+'<textarea data-pcf="'+f+'"'+(min?' style="min-height:'+min+'px"':'')+' placeholder="'+esc(ph||"")+'">'+esc(v)+'</textarea></label>'}
 function pubParc(){
-  var h='';
-  var p=PCUI.open?parcGet(PCUI.open):null;
+  var h='',p=PCUI.open?parcGet(PCUI.open):null;
   if(!p){
     PCUI.open=null;
-    h+='<div><h2>Parcerias</h2><p class="sub">Um painel para cada parceria. Guarde os briefings, as regras, o seu ângulo e os roteiros. O app usa tudo isso para escrever com a marca e com você.</p></div>';
+    h+='<div><h2>Parcerias</h2><p class="sub">Cada parceria tem um painel: do briefing ao pagamento. Aqui você vê o que precisa de atenção.</p></div>';
+    var rec=0,atr=0,prod=0;PARC.items.forEach(function(x){parcFix(x);if(x.nfData&&!x.pagoEm){rec+=pcNum(x.valor);if(daysUntil(pcVence(x))<0)atr++}if(x.status==="Em produção")prod++});
+    h+='<div class="card"><div class="fields"><div><div class="note">A receber</div><h3>'+brl(rec)+'</h3></div><div><div class="note">Em produção</div><h3>'+prod+'</h3></div></div>'+(atr?'<p class="note" style="color:var(--bad)">'+atr+' pagamento(s) com prazo vencido.</p>':'')+'</div>';
     h+='<div class="card"><h3>Nova parceria</h3><label class="lab">Marca<select id="pc-m">'+marcaList().map(function(m){return '<option'+(m===PCUI.mc?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
      +'<label class="lab">Nome da parceria (opcional)<input type="text" id="pc-n" value="'+esc(PCUI.nm)+'" placeholder="Ex.: Black Friday, Reels de novembro"></label>'
-     +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button></div></div>';
-    var l=PARC.items.slice().sort(function(a,b){return (b.at||0)-(a.at||0)});
+     +'<div class="btns"><button class="btn" data-pcb="create">Criar painel</button><button class="btn ghost small" data-pcb="avulso">Roteiro avulso</button></div></div>';
+    var l=PARC.items.slice().sort(function(a,b){var an=pcSteps(a).filter(function(x){return !(x[2])}).length?0:1,bn=pcSteps(b).filter(function(x){return !(x[2])}).length?0:1;return an-bn||(a.post||"9").localeCompare(b.post||"9")});
     if(!l.length)h+='<div class="card"><p class="sub">Nenhum painel ainda. Crie um ou comece pelas marcas que você já tem.</p><div class="btns"><button class="btn ghost small" data-pcb="seedfix">Criar painel de cada marca fixa</button></div></div>';
-    h+=l.map(function(x){return '<button class="card click" data-pcb="open" data-id="'+x.id+'" style="text-align:left;width:100%"><span class="tag">'+esc(x.status)+'</span><h3>'+esc(parcTitle(x))+'</h3><p class="sub">'+x.briefs.length+' briefing(s) · '+x.roteiros.length+' roteiro(s)'+(x.post?' · postagem '+esc(x.post.split("-").reverse().slice(0,2).join("/")):'')+'</p></button>'}).join('');
+    h+=l.map(function(x){var nx=pcSteps(x).filter(function(q){return !q[2]})[0];return '<button class="card click" data-pcb="open" data-id="'+x.id+'" style="text-align:left;width:100%"><span class="tag">'+esc(x.status)+'</span><h3>'+esc(parcTitle(x))+'</h3><p class="sub">'+(nx?'Próximo passo: '+esc(nx[1]):'Tudo concluído')+(x.post?' · postagem '+fd(x.post):'')+(pcNum(x.valor)?' · '+brl(pcNum(x.valor)):'')+'</p></button>'}).join('');
     return h;
   }
   h+='<div class="btns"><button class="btn ghost small" data-pcb="back">← Parcerias</button></div>';
   h+='<div><h2>'+esc(parcTitle(p))+'</h2></div>';
   if(PCUI.busy)h+='<div class="card"><h3>'+esc(PCUI.busy)+'</h3></div>';
   if(PCUI.msg)h+='<div class="draft">'+esc(PCUI.msg)+'</div>';
+  var st=pcSteps(p),nxt=st.filter(function(q){return !q[2]})[0],done=st.filter(function(q){return q[2]}).length;
+  h+='<div class="card"><h3>Caminho da parceria · '+done+' de '+st.length+'</h3>'+st.map(function(q){return '<div class="row'+(q[2]?' chkd':'')+'">'+(q[3]?'<input type="checkbox" data-pcm="'+q[0]+'"'+(q[2]?' checked':'')+' id="m-'+q[0]+'"><label for="m-'+q[0]+'">'+esc(q[1])+'</label>':'<span style="width:22px;display:inline-block">'+(q[2]?'✓':'○')+'</span><span>'+esc(q[1])+'</span>')+'</div>'}).join('')
+   +(nxt?'<p class="note"><b>Próximo passo:</b> '+esc(nxt[1])+'</p>':'<p class="note"><b>Tudo concluído.</b> Guarde os aprendizados no cérebro.</p>')+'</div>';
   h+='<div class="card"><h3>Dados</h3><div class="fields"><label>Nome<input type="text" data-pcf="nome" value="'+esc(p.nome)+'"></label><label>Status<select data-pcf="status">'+PCST.map(function(x){return '<option'+(x===p.status?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields"><label>Postagem prevista<input type="date" data-pcf="post" value="'+esc(p.post)+'"></label><label>Contato na marca<input type="text" data-pcf="contato" value="'+esc(p.contato)+'" placeholder="Nome e canal"></label></div>'
    +pcTa("entregaveis","Entregáveis",p.entregaveis,"Ex.: 1 reels + 3 stories",70)+'<div class="btns"><button class="btn small" data-pcb="plan">Criar tarefas nos dias</button></div><p class="note">Cria em “Meu dia” cada passo seu, nas datas combinadas a partir da data de postagem.</p></div>';
-  h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais na hora de escrever. Não cole briefing que a marca pediu para manter em sigilo.</p>'
+  h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais. Não cole briefing que a marca pediu para manter em sigilo.</p>'
    +'<label class="lab">Título<input type="text" id="pc-bt" value="'+esc(PCUI.bt)+'" placeholder="Ex.: Briefing inicial, ajuste de 05/11"></label>'
    +'<label class="lab">Texto do briefing<textarea id="pc-bx" style="min-height:120px" placeholder="Cole aqui...">'+esc(PCUI.bx)+'</textarea></label><div class="btns"><button class="btn small" data-pcb="addbrief">Guardar briefing</button></div>';
   h+=p.briefs.slice().map(function(b,i){return {b:b,i:i}}).reverse().map(function(o){return '<div class="card" style="background:var(--bg)"><input type="text" data-pcbt="'+o.i+'" value="'+esc(o.b.t)+'" aria-label="Título do briefing"><textarea data-pcbx="'+o.i+'" style="min-height:100px">'+esc(o.b.x)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(o.b.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px">'+(S?'<button class="btn small" data-pcb="ler" data-i="'+o.i+'">Ler com IA</button>':'')+'<button class="btn ghost small" data-pcb="delbrief" data-i="'+o.i+'">Apagar</button></span></div></div>'}).join('')+'</div>';
   h+='<div class="card"><h3>Combinados e meu ângulo</h3>'
    +pcTa("regras","Regras e combinados (obrigatório, evitar, cupom e link, prazos)",p.regras,"Uma por linha...",100)
    +pcTa("angulo","Como eu quero falar desta marca",p.angulo,"Ex.: contar o dia em que quase comprei sem conferir o estoque...",80)
-   +pcTa("duvidas","Dúvidas para perguntar à marca",p.duvidas,"Uma por linha...",70)
-   +pcTa("aprend","Aprendizados e resultados",p.aprend,"O que funcionou, o que não, números...",80)
-   +'<div class="btns"><button class="btn ghost small" data-pcb="tobrain">Guardar aprendizados no meu cérebro</button></div></div>';
+   +pcTa("duvidas","Dúvidas para perguntar à marca",p.duvidas,"Uma por linha...",70)+'</div>';
   h+='<div class="card"><h3>Roteiros desta parceria</h3>'
-   +p.roteiros.map(function(r,i){return '<div class="card" style="background:var(--bg)"><b>'+esc((r.res&&r.res.titulo)||"Roteiro")+'</b><div class="fields"><label>Situação<select data-pcrs="'+i+'">'+PCROS.map(function(x){return '<option'+(x===r.st?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><div class="btns"><button class="btn small" data-pcb="openros" data-i="'+i+'">Abrir e editar</button><button class="btn ghost small" data-pcb="delros" data-i="'+i+'">Apagar</button></div></div>'}).join('')
+   +p.roteiros.map(function(r,i){return '<div class="card" style="background:var(--bg)"><b>'+esc((r.res&&r.res.titulo)||"Roteiro")+'</b> <span class="tag">'+esc((PRF.filter(function(f){return f[0]===((r.res&&r.res.fmt)||"Reels")})[0]||[0,"Reels"])[1])+'</span><div class="fields"><label>Situação<select data-pcrs="'+i+'">'+PCROS.map(function(x){return '<option'+(x===r.st?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><div class="btns"><button class="btn small" data-pcb="openros" data-i="'+i+'">Abrir e editar</button><button class="btn ghost small" data-pcb="delros" data-i="'+i+'">Apagar</button></div></div>'}).join('')
    +(S?'<div class="btns"><button class="btn" data-pcb="roteiro">Escrever roteiro com este painel</button></div>':'<p class="note">'+esc(NOAI)+'</p>')+'</div>';
+  var venc=pcVence(p),fin=p.pagoEm?'Pago em '+fd(p.pagoEm)+'.':(p.nfData?(daysUntil(venc)<0?'Prazo vencido em '+fd(venc)+' ('+(-daysUntil(venc))+' dia(s) de atraso).':'Vence em '+fd(venc)+' ('+daysUntil(venc)+' dia(s)).'):'Preencha a data da nota para calcular o vencimento.');
+  h+='<div class="card"><h3>Financeiro</h3><div class="fields"><label>Valor (R$)<input type="text" inputmode="decimal" data-pcf="valor" value="'+esc(p.valor)+'"></label><label>Nota fiscal (número)<input type="text" data-pcf="nf" value="'+esc(p.nf)+'"></label></div>'
+   +'<div class="fields"><label>Data da nota<input type="date" data-pcf="nfData" value="'+esc(p.nfData)+'"></label><label>Pago em<input type="date" data-pcf="pagoEm" value="'+esc(p.pagoEm)+'"></label></div><p class="note"><b>'+fin+'</b></p></div>';
+  var rl=p.rel||{};
+  h+='<div class="card"><h3>Resultados e relatório</h3><div class="fields"><label>Alcance<input type="text" inputmode="numeric" data-pcr="alc" value="'+esc(rl.alc||"")+'"></label><label>Visualizações<input type="text" inputmode="numeric" data-pcr="vis" value="'+esc(rl.vis||"")+'"></label></div>'
+   +'<div class="fields"><label>Interações<input type="text" inputmode="numeric" data-pcr="int" value="'+esc(rl.int||"")+'"></label><label>Cliques no link<input type="text" inputmode="numeric" data-pcr="cli" value="'+esc(rl.cli||"")+'"></label></div>'
+   +'<label class="lab">Cupom ou vendas<input type="text" data-pcr="ven" value="'+esc(rl.ven||"")+'"></label>'
+   +'<label class="lab">O que funcionou e o que eu aprendi<textarea data-pcr="apr" style="min-height:80px">'+esc(rl.apr||"")+'</textarea></label>'
+   +'<div class="btns"><button class="btn small" data-pcb="relpdf">Gerar relatório em PDF</button><button class="btn ghost small" data-pcb="tobrain">Guardar aprendizado no meu cérebro</button></div></div>';
   var cs=Object.keys(state.camp||{}).map(function(k){return state.camp[k]}).filter(function(c){return c&&c.m===p.marca&&!c.del});
-  if(cs.length)h+='<div class="card"><h3>Campanhas desta marca</h3>'+cs.map(function(c){return '<p class="sub">'+esc(c.t||"Campanha")+' · postagem '+esc(String(c.d||"").split("-").reverse().slice(0,2).join("/"))+'</p>'}).join('')+'</div>';
+  if(cs.length)h+='<div class="card"><h3>Campanhas desta marca</h3>'+cs.map(function(c){return '<p class="sub">'+esc(c.t||"Campanha")+' · postagem '+fd(c.d)+'</p>'}).join('')+'</div>';
+  if(p.log.length)h+='<details class="card"><summary><b>Histórico ('+p.log.length+')</b></summary>'+p.log.slice().reverse().map(function(x){return '<p class="note">'+new Date(x.at).toLocaleDateString("pt-BR")+' · '+esc(x.t)+'</p>'}).join('')+'</details>';
   h+='<div class="btns"><button class="btn ghost small" data-pcb="del">'+(PCUI.confDel?'Toque de novo para apagar o painel':'Apagar este painel')+'</button></div>';
   return h;
 }
@@ -1913,11 +2002,14 @@ document.addEventListener("click",async function(e){
   if(a==="back"){PCUI.open=null;render();return}
   if(a==="create"){var m=$("#pc-m").value,n=$("#pc-n").value.trim();var np=parcNew(m,n);PARC.items.push(np);parcPut(np);PCUI.open=np.id;PCUI.nm="";render();window.scrollTo(0,0);return}
   if(a==="seedfix"){Object.keys(cfg().marcas).forEach(function(m){var np2=parcNew(m,"","Fechada");PARC.items.push(np2);parcPut(np2)});render();return}
+  if(a==="avulso"){state.pr=prNew();savePr();state.pub="roteiro";render();window.scrollTo(0,0);return}
+  if(a==="back2"){var pid=state.pr.parcId;PCUI.open=pid&&parcGet(pid)?pid:null;state.pub="parc";render();window.scrollTo(0,0);return}
   if(!p)return;
-  if(a==="addbrief"){var x=$("#pc-bx").value.trim();if(!x){PCUI.msg="Cole o texto do briefing.";render();return}p.briefs.push({id:"bf"+Date.now(),t:$("#pc-bt").value.trim()||"Briefing",x:x,at:Date.now()});PCUI.bt="";PCUI.bx="";parcPut(p);PCUI.msg="Briefing guardado.";render();return}
+  if(a==="relpdf"){pubOpenMat("relatorio",parcRel(p));parcLog(p,"Relatório gerado");parcPut(p);return}
+  if(a==="addbrief"){var x=$("#pc-bx").value.trim();if(!x){PCUI.msg="Cole o texto do briefing.";render();return}p.briefs.push({id:"bf"+Date.now(),t:$("#pc-bt").value.trim()||"Briefing",x:x,at:Date.now()});PCUI.bt="";PCUI.bx="";parcLog(p,"Briefing guardado");parcPut(p);PCUI.msg="Briefing guardado.";render();return}
   if(a==="delbrief"){p.briefs.splice(i,1);parcPut(p);render();return}
   if(a==="delros"){p.roteiros.splice(i,1);parcPut(p);render();return}
-  if(a==="tobrain"){var t=p.aprend.trim();if(!t){PCUI.msg="Escreva os aprendizados primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
+  if(a==="tobrain"){var t=((p.rel&&p.rel.apr)||p.aprend||"").trim();if(!t){PCUI.msg="Escreva o que aprendeu primeiro.";render();return}brAdd("aprend",parcTitle(p)+": "+t);PCUI.msg="Guardado no cérebro.";render();return}
   if(a==="del"){if(!PCUI.confDel){PCUI.confDel=true;render();return}PARC.items=PARC.items.filter(function(x){return x.id!==p.id});parcLocal();if(C.parc)C.parc.doc(p.id).set({del:true,at:Date.now()});PCUI.open=null;PCUI.confDel=false;render();return}
   if(a==="roteiro"||a==="openros"){
     var r=state.pr;r.marca=marcaList().indexOf(p.marca)>=0?p.marca:"Outra marca";r.parcId=p.id;r.err="";r.busy="";
@@ -1946,7 +2038,7 @@ document.addEventListener("click",function(e){
   var r=state.pr,p=r.parcId?parcGet(r.parcId):null;if(!p||!r.res)return;
   var cp=JSON.parse(JSON.stringify(r.res)),ex=r.roId?p.roteiros.filter(function(x){return x.id===r.roId})[0]:null;
   if(ex){ex.res=cp;ex.at=Date.now()}else{var nr={id:"ro"+Date.now(),res:cp,st:"Rascunho",at:Date.now()};p.roteiros.push(nr);r.roId=nr.id}
-  parcPut(p);savePr();b.textContent="Guardado no painel";
+  parcLog(p,"Roteiro guardado");parcPut(p);savePr();b.textContent="Guardado no painel";
 });
 document.addEventListener("input",function(e){var el=e.target;if(el.id==="pc-bt")PCUI.bt=el.value;else if(el.id==="pc-bx")PCUI.bx=el.value;else if(el.id==="pc-n")PCUI.nm=el.value});
 document.addEventListener("change",function(e){
@@ -1954,12 +2046,15 @@ document.addEventListener("change",function(e){
   var p=PCUI.open?parcGet(PCUI.open):null;
   if(el.id==="pc-m"){PCUI.mc=el.value;return}
   if(!p)return;
-  if(el.dataset.pcf){p[el.dataset.pcf]=el.value;parcPut(p);if(el.dataset.pcf==="nome"){var h2=document.querySelector("#view h2");if(h2)h2.textContent=parcTitle(p)}return}
+  if(el.dataset.pcm){p.m[el.dataset.pcm]=el.checked?isoToday():"";parcLog(p,(el.checked?"Marcado: ":"Desmarcado: ")+el.dataset.pcm);parcPut(p);render();return}
+  if(el.dataset.pcr){p.rel[el.dataset.pcr]=el.value;parcPut(p);return}
+  if(el.dataset.pcf){var k=el.dataset.pcf;p[k]=el.value;if(k==="status"||k==="nfData"||k==="pagoEm")parcLog(p,k==="status"?"Status: "+el.value:(k==="nfData"?"Nota emitida em ":"Pago em ")+el.value);parcPut(p);if(k==="nome"){var h2=document.querySelector("#view h2");if(h2)h2.textContent=parcTitle(p)}if(k==="status"||k==="nfData"||k==="pagoEm"||k==="valor"||k==="post")render();return}
   if(el.dataset.pcbx!==undefined&&el.dataset.pcbx!==""){var b=p.briefs[parseInt(el.dataset.pcbx,10)];if(b){b.x=el.value;parcPut(p)}return}
   if(el.dataset.pcbt!==undefined&&el.dataset.pcbt!==""){var b2=p.briefs[parseInt(el.dataset.pcbt,10)];if(b2){b2.t=el.value;parcPut(p)}return}
-  if(el.dataset.pcrs!==undefined&&el.dataset.pcrs!==""){var r2=p.roteiros[parseInt(el.dataset.pcrs,10)];if(r2){r2.st=el.value;parcPut(p)}}
+  if(el.dataset.pcrs!==undefined&&el.dataset.pcrs!==""){var r2=p.roteiros[parseInt(el.dataset.pcrs,10)];if(r2){r2.st=el.value;parcLog(p,"Roteiro: "+el.value);parcPut(p);render()}}
 });
 
+document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
 /* ============ MEU CÉREBRO ============ */
 var BR={items:[]},BRUI={cat:"voz",q:0,txt:"",props:[],busy:"",msg:""};
 var BRCATS=[["voz","Meu jeito de falar"],["historia","Minha história"],["publico","Meu público"],["negocio","Loja, marca e produtos"],["marcas","Parcerias e marcas"],["aprend","O que aprendi"],["decisao","Decisões e rumo"]];
