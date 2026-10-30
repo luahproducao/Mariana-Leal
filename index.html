@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#FAF6F1"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
-<title>Hoje com a Mari</title><title>Hoje com a Mari</title>
+<title>Hoje com a Mari</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hoje com a Mari">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Montserrat:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -245,6 +246,11 @@ body::after{content:"";position:fixed;left:0;right:0;top:0;height:300px;z-index:
 .plic{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);color:var(--gold);flex:0 0 auto}
 .cal-d{background-image:linear-gradient(180deg,rgba(176,141,87,.07),transparent)}
 .btn:not(.ghost){background-image:linear-gradient(180deg,rgba(255,255,255,.14),transparent)}
+
+.rvi{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--line,rgba(176,141,87,.3))}
+.rvi b{display:block;margin-top:4px}
+.onb{border-left:3px solid var(--gold)}
+.onb ol{margin:8px 0;padding-left:20px;display:grid;gap:8px}
 </style>
 
 <div class="wrap">
@@ -738,7 +744,7 @@ function calNew(o){var it={id:"c"+Date.now()+Math.floor(Math.random()*1000),d:""
 function calIso(y,m,d){return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0")}
 function calItems(iso){
   var a=[];
-  CALD.items.forEach(function(x){if(x.d===iso)a.push({k:CALKIND[x.canal]||"f",tag:x.canal+(x.marca?" · "+x.marca:""),t:x.t,st:x.st,id:x.id,pub:x.tipo==="Publi"||!!x.marca,go:"ci|"+x.id})});
+  CALD.items.forEach(function(x){if(x.d===iso&&!x.skip)a.push({k:CALKIND[x.canal]||"f",tag:x.canal+(x.marca?" · "+x.marca:""),t:x.t,st:x.st,id:x.id,pub:x.tipo==="Publi"||!!x.marca,go:"ci|"+x.id})});
   DAYS.forEach(function(d){if(d.date===iso)a.push({k:"d",tag:"Plano do dia",t:d.title+" · roteiro, stories e legenda prontos",go:"plano|"+d.id})});
   ASSIN.forEach(function(x){var m=String(x[0]).match(/(\d{2})\/(\d{2})/);if(m&&"2026-"+m[2]+"-"+m[1]===iso)a.push({k:"a",tag:"Assinatura",t:x[1],go:"canais"})});
   PRAZOS.forEach(function(x,i){if(x.date===iso)a.push({k:"z",tag:"Prazo · "+x.brand,t:x.t,go:"prz|"+i})});
@@ -757,8 +763,9 @@ function calEditor(it){
    +'<div class="fields"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
    +'<label class="lab">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
    +'<label class="lab">Roteiro, takes e anotações<textarea data-cif="nota" style="min-height:140px" placeholder="Escreva o roteiro, os takes e o que lembrar. Ou peça uma primeira versão à IA.">'+esc(it.nota)+'</textarea></label>'
+   +(it.nota?'':tplBtn(it))
    +'<label class="lab">Legenda<textarea data-cif="leg" style="min-height:80px">'+esc(it.leg)+'</textarea></label>'
-   +'<label class="lab">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'
+   +'<label class="lab">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
@@ -768,7 +775,7 @@ function calEditor(it){
 function calHtml(){
   var today=isoToday();if(!CAL.m)CAL.m=today.slice(0,7);if(!CAL.sel)CAL.sel=today;
   var y=+CAL.m.slice(0,4),mo=+CAL.m.slice(5,7),first=new Date(y,mo-1,1).getDay(),nd=new Date(y,mo,0).getDate();
-  var h='<p class="sub">Feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p>'+acStrip()+plBox()+ornHtml()
+  var h='<p class="sub">Feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p>'+acStrip()+rvHtml()+plBox()+ornHtml()
    +'<div class="pills">'+CALK.map(function(k){return'<button class="pill" data-calf="'+k[0]+'" aria-pressed="'+(CAL.f===k[0])+'">'+k[1]+'</button>'}).join('')+'</div>'
    +'<div class="cal-h"><button class="btn small ghost" data-calx="prev" aria-label="Mês anterior">‹</button><b>'+CALMES[mo-1]+' '+y+'</b><button class="btn small ghost" data-calx="next" aria-label="Próximo mês">›</button><button class="btn small ghost" data-calx="today">Hoje</button></div>'
    +'<div class="cal-g">'+["D","S","T","Q","Q","S","S"].map(function(x){return'<span class="cal-w">'+x+'</span>'}).join('');
@@ -782,12 +789,12 @@ function calHtml(){
    +((sel<today&&CALD.items.some(function(z){return z.d===sel&&z.st!=="Publicado"}))?'<div class="btns"><button class="btn small ghost" data-calx="pubday">Marcar o dia como publicado</button></div>':'')
    +'<h3 style="margin-top:14px">Adicionar neste dia</h3><label class="lab">O que é<input type="text" id="cal-t" placeholder="Ex.: reels sobre preço mínimo"></label>'
    +'<label class="lab">Onde<select id="cal-k">'+Object.keys(CALKIND).map(function(c){return'<option>'+c+'</option>'}).join('')+'<option value="tarefa">Tarefa só para mim (Meu dia)</option></select></label>'
-   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>';
+   +'<div class="btns"><button class="btn" data-calx="add">Adicionar</button></div></div>'+resHtml();
   return h;
 }
 function renderCal(){$("#view").innerHTML='<div class="stack">'+calHtml()+'</div>'}
 function calHoje(D){
-  var its=CALD.items.filter(function(x){return x.d===D});
+  var its=CALD.items.filter(function(x){return x.d===D&&!x.skip});
   var h='<div class="block"><h3>No calendário editorial'+(its.length?' ('+its.length+')':'')+'</h3>';
   if(!its.length)h+='<p class="note">Nada planejado para este dia no calendário.</p>';
   its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div><div class="meta"><button class="btn small'+(x.st==="Publicado"?' ghost':'')+'" data-cstc="'+x.id+'">'+esc(x.st)+' ›</button></div></div>'});
@@ -1007,13 +1014,61 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
   if(a==="mic"){plMic();return}
 });
 
+
+/* ============ REVISÃO SEMANAL, RESULTADOS, MODELOS, PRIMEIRO ACESSO ============ */
+var RV={open:false};
+function rvStale(){var t=isoToday();return CALD.items.filter(function(x){return x.d&&x.d<t&&x.st!=="Publicado"&&!x.skip}).sort(function(a,b){return a.d<b.d?1:-1})}
+function rvHtml(){
+  var l=rvStale();if(!l.length)return '';
+  if(!RV.open)return '<button class="card tap plmini" data-rvx="open"><span class="plic" aria-hidden="true">!</span><span><b>'+l.length+' conteúdo'+(l.length===1?'':'s')+' com data passada</b> ainda sem situação. Toque para revisar.</span></button>';
+  var h='<div class="card"><div class="ckhead"><h3>Revisão: o que aconteceu?</h3><button class="btn small ghost" data-rvx="close">Fechar</button></div><p class="note">Para cada item, diga se foi ao ar, se muda de dia ou se saiu do plano.</p>';
+  h+=l.slice(0,12).map(function(x){return'<div class="rvi"><div><span class="date">'+x.d.slice(8,10)+'/'+x.d.slice(5,7)+'</span> <span class="tag">'+esc(x.canal)+'</span><b>'+esc(x.t)+'</b></div><div class="btns"><button class="btn small" data-rvx="pub|'+x.id+'">Foi ao ar</button><button class="btn small ghost" data-rvx="mov|'+x.id+'">Mudar para hoje</button><button class="btn small ghost" data-rvx="skip|'+x.id+'">Saiu do plano</button></div></div>'}).join('');
+  if(l.length>12)h+='<p class="note">Mostrando 12 de '+l.length+'. Resolva estes e os próximos aparecem.</p>';
+  h+='<div class="btns"><button class="btn small ghost" data-rvx="all">Marcar todos como publicados</button></div></div>';return h}
+function resHtml(){
+  var l=CALD.items.filter(function(x){return x.st==="Publicado"&&(x.mlk||x.mcm||x.msv||x.mal)});
+  if(!l.length)return '<div class="card"><h3>Resultados</h3><p class="note">Quando um conteúdo for publicado, abra ele no calendário e anote curtidas, comentários, salvamentos e alcance. Aqui aparece o que mais funcionou.</p></div>';
+  function n(v){return +String(v||0).replace(/\D/g,"")||0}
+  var by=l.slice().sort(function(a,b){return (n(b.msv)*3+n(b.mcm)*2+n(b.mlk))-(n(a.msv)*3+n(a.mcm)*2+n(a.mlk))});
+  var med=Math.round(l.reduce(function(a,x){return a+n(x.mlk)},0)/l.length);
+  var h='<div class="card"><h3>Resultados</h3><p class="note">'+l.length+' conteúdo'+(l.length===1?'':'s')+' com números. Média de '+med+' curtidas. Pontuação: salvamento vale 3, comentário 2, curtida 1.</p>';
+  h+=by.slice(0,5).map(function(x,i){return'<div class="cal-i tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag">'+(i+1)+'º</span> '+esc(x.t)+' <span class="note">· '+esc(x.canal)+' · '+n(x.mlk)+' curt., '+n(x.mcm)+' com., '+n(x.msv)+' salv.</span> <b aria-hidden="true">›</b></div>'}).join('');
+  return h+'</div>'}
+function metHtml(it){
+  if(it.st!=="Publicado")return '';
+  return '<h3 style="margin-top:12px">Como foi</h3><div class="fields"><label>Curtidas<input type="number" inputmode="numeric" data-cif="mlk" value="'+esc(it.mlk||"")+'"></label><label>Comentários<input type="number" inputmode="numeric" data-cif="mcm" value="'+esc(it.mcm||"")+'"></label></div>'
+   +'<div class="fields"><label>Salvamentos<input type="number" inputmode="numeric" data-cif="msv" value="'+esc(it.msv||"")+'"></label><label>Alcance<input type="number" inputmode="numeric" data-cif="mal" value="'+esc(it.mal||"")+'"></label></div>'
+   +'<label class="lab">O que funcionou ou não funcionou<textarea data-cif="func" style="min-height:70px" placeholder="Ex.: o gancho do primeiro segundo segurou; a legenda longa não.">'+esc(it.func||"")+'</textarea></label>'
+   +'<div class="btns"><button class="btn small ghost" data-rvx="learn|'+it.id+'">Guardar aprendizado no cérebro</button></div>'}
+var CALTPL={"Feed principal":"GANCHO (1º segundo): \nPROBLEMA OU HISTÓRIA: \nO QUE EU FAÇO NA PRÁTICA: \nCHAMADA FINAL (um passo só): \nTAKES: rosto + mão/tela + detalhe do produto\nTEXTO NA TELA: ",
+"Stories":"STORY 1 (abertura, rosto): \nSTORY 2 (o conteúdo, tela ou bastidor): \nSTORY 3 (enquete, caixinha ou link): \nADESIVO: \nSE FOR PUBLI: link rastreável e “Parceria paga” visíveis",
+"Melhores Amigos":"ABERTURA (como se falasse com uma amiga): \nBASTIDOR OU OPINIÃO QUE NÃO VAI NO FEED: \nPERGUNTA PARA ELAS RESPONDEREM: \nO QUE QUERO SABER DELAS: ",
+"Assinatura":"PROMESSA DO CONTEÚDO (o que a assinante leva): \nPASSO A PASSO OU BASTIDOR: \nMATERIAL EXTRA (planilha, modelo, áudio): \nCHAMADA PARA RESPONDER OU PERGUNTAR: ",
+"Reels teste":"HIPÓTESE (o que quero testar): \nGANCHO A: \nGANCHO B: \nMEDIR: salvamentos e retenção até 3s\nDECISÃO: se passar da média, vira Reels de feed"};
+function tplBtn(it){return CALTPL[it.canal]?'<div class="btns"><button class="btn small ghost" data-rvx="tpl|'+it.id+'">Usar modelo de '+esc(it.canal)+'</button></div>':''}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-rvx]");if(!x)return;var q=x.dataset.rvx.split("|"),a=q[0];
+  if(a==="open"){RV.open=true;render();return}
+  if(a==="close"){RV.open=false;render();return}
+  if(a==="all"){rvStale().forEach(function(z){z.st="Publicado";z.at=Date.now()});calSave();RV.open=false;render();return}
+  var it=calGet(q[1]);if(!it)return;
+  if(a==="pub"){it.st="Publicado";it.at=Date.now();calSave();render();return}
+  if(a==="mov"){it.d=isoToday();it.at=Date.now();calSave();render();return}
+  if(a==="skip"){it.skip=true;it.at=Date.now();calSave();render();return}
+  if(a==="tpl"){var m=CALTPL[it.canal]||"";it.nota=(it.nota?it.nota+"\n\n":"")+m;it.at=Date.now();calSave();render();return}
+  if(a==="learn"){var tx=(it.func||"").trim();if(!tx){CAL.msg="Escreva o que funcionou antes de guardar.";render();return}brAdd("aprend",it.canal+" · "+it.t+": "+tx);CAL.msg="Guardado no cérebro.";render();return}
+});
+function onbHtml(){var d=false;try{d=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(d)return '';
+  return '<div class="card onb"><h3>Como usar o app</h3><ol><li><b>Hoje</b> mostra o checklist, o que está em andamento e o que vai ao ar.</li><li><b>Calendário</b> guarda tudo: feed, stories, assinatura, Melhores Amigos e publis. Toque num dia para abrir.</li><li><b>O que estou planejando</b>: escreva ou fale do seu jeito e o texto vai para a aba certa.</li><li><b>Publis</b> tem cada marca, a corrida Tray e os PDFs de briefing.</li><li><b>Mais &gt; Cérebro</b> é onde o app aprende sobre você. Quanto mais você alimenta, melhor ele escreve.</li></ol><div class="btns"><button class="btn small" data-onb="1">Entendi</button></div></div>'}
+document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-onb]");if(!x)return;try{localStorage.setItem("hoje-onb","1")}catch(er){}render()});
+function instHtml(){return '<div class="card"><h3>Instalar na tela inicial</h3><p><b>iPhone (Safari):</b> toque em Compartilhar e depois em “Adicionar à Tela de Início”.</p><p><b>Android (Chrome):</b> menu ⋮ e depois “Instalar app” ou “Adicionar à tela inicial”.</p><p class="note">Instalado, ele abre em tela cheia, como um app. Avisos e lembretes no celular não funcionam em app web; use o alarme do celular para os horários importantes.</p></div>'}
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
   var inner="";
   if(state.more==="produtos"){renderProdutos();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="cerebro"){$("#view").innerHTML='<div class="stack">'+pillsMais()+brHtml()+'</div>';return}
-  if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+'</div>';return}
+  if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+instHtml()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlIdeias();
   $("#view").innerHTML='<div class="stack">'+pillsMais()+inner+'</div>';
@@ -2287,7 +2342,7 @@ function mdHtml(){
   var h='<div class="btns" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,-1)+'" aria-label="Dia anterior">‹</button><div style="text-align:center"><h2 style="margin:0">'+esc(mdFmt(D).replace(/^./,function(c){return c.toUpperCase()}).replace("-feira","-feira"))+'</h2>'+(D!==today?'<button class="btn ghost small" data-mdb="dia" data-d="'+today+'">Voltar para hoje</button>':'<span class="note">Hoje</span>')+'</div><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,1)+'" aria-label="Próximo dia">›</button></div>';
   h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length+CALD.items.filter(function(x){return x.d===d2&&x.st!=="Publicado"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
   if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
-  h+=ckHtml(D)+acStrip()+plBox()+ornHtml()+calHoje(D);
+  h+=onbHtml()+ckHtml(D)+rvHtml()+acStrip()+plBox()+ornHtml()+calHoje(D);
   var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
   if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
   var tot=mine.filter(function(x){return x.st==="pendente"}).length;
