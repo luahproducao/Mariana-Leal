@@ -967,7 +967,7 @@ function hubGo(k){
   if(k==="material"&&isDirect(c.tipo)){if(c.material)pushDraft({tipo:c.tipo,titulo:c.material.titulo,data:JSON.parse(JSON.stringify(c))});state.cr=crNew()}
   state.hub=k;saveCr();render();window.scrollTo(0,0);
 }
-var HUBI={ideias:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',roteiro:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',guia:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',material:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',rascunhos:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
+var HUBI={cerebro:'<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>',ideias:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',roteiro:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',calendario:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',guia:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>',material:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',rascunhos:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
 function hubCard(k,t,d,tag){return '<button class="card click tile" data-hub="'+k+'"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">'+(HUBI[k]||"")+'</svg></span>'+(tag?'<span class="tag">'+esc(tag)+'</span>':'')+'<h3>'+esc(t)+'</h3><p class="sub">'+esc(d)+'</p></button>'}
 function renderHub(){
   var hb=state.hub||"inicio";
@@ -975,6 +975,7 @@ function renderHub(){
   if(hb==="inicio"){
     var np=Object.keys(state.plano||{}).length;
     $("#view").innerHTML='<div class="tiles">'
+     +hubCard("cerebro","Meu cérebro",BR.items.length?BR.items.length+" anotação(ões). Tudo o que você guarda aqui vale em cada roteiro e guia.":"Ensine o app a falar e pensar como você. Comece por aqui.","Novo").replace('class="card click tile"','class="card click tile" style="grid-column:1/-1"')
      +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
      +hubCard("roteiro","Roteiro","Transforme uma ideia em roteiro de Reels, Story ou Carrossel, na sua voz.")
      +hubCard("calendario","Calendário de ações",np?np+" ação(ões) planejada(s).":"Organize o que vai gravar e postar, dia a dia.")
@@ -984,7 +985,7 @@ function renderHub(){
     return;
   }
   var back='<div class="btns"><button class="btn ghost small" data-hub="inicio">← Criar</button></div>';
-  var body=hb==="ideias"?'<div class="stack">'+htmlIdeias()+'</div>':hb==="roteiro"?hubRoteiro():hb==="calendario"?hubPlano():hubDrafts();
+  var body=hb==="cerebro"?'<div class="stack">'+brHtml()+'</div>':hb==="ideias"?'<div class="stack">'+htmlIdeias()+'</div>':hb==="roteiro"?hubRoteiro():hb==="calendario"?hubPlano():hubDrafts();
   $("#view").innerHTML='<div class="stack">'+back+body+'</div>';
 }
 /* ---- Roteiro ---- */
@@ -1677,7 +1678,7 @@ function makeAI(){
 }
 async function aiRefresh(){
   if(S&&!S.own)return;
-  S=makeAI();LIM=null;
+  S=wrapBrain(makeAI());LIM=null;
   if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){}}
 }
 function htmlAI(){
@@ -1722,14 +1723,92 @@ document.addEventListener("change",async function(e){
       var j=JSON.parse(await f.text());
       if(!j||j.app!=="hoje-com-a-mari"||!j.data)throw 0;
       Object.keys(j.data).forEach(function(kk){if(kk.indexOf("hoje-")===0&&kk!=="hoje-ai"){try{localStorage.setItem(kk,j.data[kk])}catch(x){}}});
-      loadLocal();BKMSG="Backup importado.";
+      loadLocal();brLoad();BKMSG="Backup importado.";
     }catch(err){BKMSG="Esse arquivo não é um backup do app."}
     render();
   }
 });
 
+
+/* ============ MEU CÉREBRO ============ */
+var BR={items:[]},BRUI={cat:"voz",q:0,txt:"",props:[],busy:"",msg:""};
+var BRCATS=[["voz","Meu jeito de falar"],["historia","Minha história"],["publico","Meu público"],["negocio","Loja, marca e produtos"],["marcas","Parcerias e marcas"],["aprend","O que aprendi"],["decisao","Decisões e rumo"]];
+var BRQ={voz:["Que expressões você sempre usa com as seguidoras?","O que você nunca falaria, mesmo que a marca peça?","Como você começa um vídeo quando está animada? E quando vai falar de dinheiro?"],historia:["Como você começou a loja? Conte como se fosse para uma amiga.","Qual foi o maior perrengue que virou aprendizado?","O que mudou na sua vida desde que virou influenciadora?"],publico:["Quem é a seguidora que mais conversa com você? O que ela vive?","Que dúvida as seguidoras mais repetem?","O que elas ainda não entendem sobre dinheiro e estoque?"],negocio:["Como funciona o Estoque Crescente em uma frase simples?","O que a Loyall vende e para quem?","O que você quer lançar nos próximos meses?"],marcas:["Que tipo de marca você aceitaria de olhos fechados? E quais recusaria?","Como você gosta de falar de uma parceria sem parecer anúncio?","O que a marca costuma pedir que não combina com você?"],aprend:["Qual conteúdo seu mais funcionou e por que você acha?","O que você tentou e não deu certo?","O que você faria diferente na próxima campanha?"],decisao:["Para onde você quer levar o perfil em 6 meses?","O que ficou decidido sobre cursos, app ou assinatura?","Qual regra nova você quer seguir daqui para frente?"]};
+function brLabel(k){var r=BRCATS.filter(function(c){return c[0]===k})[0];return r?r[1]:"Outros"}
+function brLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-brain")||"[]");BR.items=Array.isArray(j)?j:[]}catch(e){BR.items=[]}}
+function brLocal(){try{localStorage.setItem("hoje-brain",JSON.stringify(BR.items))}catch(e){}}
+function brPut(it){brLocal();if(C.brain)C.brain.doc(it.id).set({cat:it.cat,text:it.text,pin:!!it.pin,at:it.at}).then(function(){setSync("Cérebro salvo para a equipe")},function(){setSync("Salvo só neste aparelho")});else setSync("Salvo só neste aparelho")}
+function brAdd(cat,text){var t=String(text||"").trim();if(!t)return null;var it={id:"b"+Date.now()+Math.floor(Math.random()*1000),cat:cat,text:t,pin:false,at:Date.now()};BR.items.push(it);brPut(it);return it}
+function brSorted(a){return a.slice().sort(function(x,y){return (y.pin?1:0)-(x.pin?1:0)||(y.at||0)-(x.at||0)})}
+function brainCtx(){
+  var a=BR.items.filter(function(x){return x.text&&x.text.trim()});if(!a.length)return "";
+  var out="CÉREBRO DA MARI (o que ela mesma ensinou ao app. Trate como verdade sobre ela, respeite sempre e escreva no jeito dela. Se algo aqui contradisser o pedido, avise em vez de ignorar):\n",lim=7000,used=out.length;
+  BRCATS.concat([["outro","Outros"]]).forEach(function(c){
+    var l=brSorted(a.filter(function(x){return (x.cat||"outro")===c[0]}));if(!l.length)return;
+    var blk="## "+c[1]+"\n";
+    l.forEach(function(x){var ln="- "+x.text.trim().replace(/\n+/g," / ")+"\n";if(used+blk.length+ln.length<lim)blk+=ln});
+    if(used+blk.length<lim){out+=blk;used+=blk.length}
+  });
+  return out;
+}
+function wrapBrain(s0){if(!s0||s0._br)return s0;return {own:s0.own,_br:1,limits:function(){return s0.limits.apply(s0,arguments)},json:function(p,o){var c=brainCtx();return s0.json(c?c+"\n\n"+p:p,o)}}}
+function brHtml(){
+  var n=BR.items.length,vazias=BRCATS.filter(function(c){return !BR.items.some(function(x){return x.cat===c[0]})});
+  var h='<div><h2>Meu cérebro</h2><p class="sub">Escreva aqui do seu jeito. Tudo o que você guarda passa a valer em todo roteiro, guia e sugestão do app. Quanto mais você alimenta, mais o app fala como você.</p></div>';
+  h+='<div class="card"><h3>'+n+' anotaç'+(n===1?'ão':'ões')+'</h3><p class="note">'+(vazias.length?'Ainda vazio: '+vazias.map(function(c){return c[1]}).join(', ')+'.':'Todas as áreas já têm anotações. Continue refinando.')+'</p></div>';
+  var qs=BRQ[BRUI.cat]||BRQ.voz,q=qs[BRUI.q%qs.length];
+  h+='<div class="card"><h3>Alimentar o cérebro</h3><div class="pills">'+BRCATS.map(function(c){return '<button class="pill" data-brcat="'+c[0]+'" aria-pressed="'+(BRUI.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'
+   +'<p class="note">Para pensar: <b>'+esc(q)+'</b></p><div class="btns"><button class="btn ghost small" data-brb="outra">Outra pergunta</button></div>'
+   +'<textarea data-br="novo" aria-label="Nova anotação" placeholder="Escreva ou cole aqui: um áudio transcrito, uma legenda, uma lembrança, uma regra...">'+esc(BRUI.txt)+'</textarea>'
+   +'<div class="btns"><button class="btn" data-brb="add">Guardar em “'+esc(brLabel(BRUI.cat))+'”</button>'+(S?'<button class="btn ghost small" data-brb="digest">Separar por assunto com IA</button>':'')+'</div>'
+   +(S?'':'<p class="note">Para a IA separar um texto grande por assunto, coloque a chave em Ajustes → Inteligência artificial. Guardar manualmente funciona sempre.</p>')
+   +(BRUI.busy?'<p class="note">'+esc(BRUI.busy)+'</p>':'')+(BRUI.msg?'<p class="note"><b>'+esc(BRUI.msg)+'</b></p>':'')+'</div>';
+  if(BRUI.props.length){
+    h+='<div class="card"><h3>O app separou assim. Marque o que quer guardar</h3>'+BRUI.props.map(function(x,i){return '<label class="lab" style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" data-brp="'+i+'"'+(x.on?' checked':'')+' style="margin-top:4px"><span><span class="tag">'+esc(brLabel(x.cat))+'</span><br>'+esc(x.texto)+'</span></label>'}).join('')
+     +'<div class="btns"><button class="btn" data-brb="saveprops">Guardar marcadas</button><button class="btn ghost small" data-brb="dropprops">Descartar</button></div></div>';
+  }
+  BRCATS.forEach(function(c){
+    var l=brSorted(BR.items.filter(function(x){return x.cat===c[0]}));if(!l.length)return;
+    h+='<div><h3>'+esc(c[1])+'</h3></div>'+l.map(function(x){return '<div class="card"><textarea data-bre="'+x.id+'" aria-label="Anotação">'+esc(x.text)+'</textarea><div class="meta" style="padding:0"><span class="note">'+(x.pin?'Fixada · ':'')+new Date(x.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px"><button class="btn ghost small" data-brb="pin" data-id="'+x.id+'">'+(x.pin?'Desafixar':'Fixar')+'</button><button class="btn ghost small" data-brb="del" data-id="'+x.id+'">Apagar</button></span></div></div>'}).join('');
+  });
+  var ctx=brainCtx();
+  h+='<details class="card"><summary><b>O que o app lê antes de cada pedido</b></summary><p class="note">Anotações fixadas e mais recentes entram primeiro. Cabem cerca de 7 mil caracteres ('+ctx.length+' agora).</p><pre style="white-space:pre-wrap;font:inherit;font-size:13px;color:var(--muted)">'+esc(ctx||"Nada ainda.")+'</pre></details>';
+  return h;
+}
+document.addEventListener("click",async function(e){
+  var t=e.target,pc=t.closest&&t.closest("[data-brcat]");
+  if(pc){BRUI.cat=pc.dataset.brcat;BRUI.q=0;BRUI.msg="";render();return}
+  var b=t.closest&&t.closest("[data-brb]");if(!b)return;
+  var a=b.dataset.brb,id=b.dataset.id;
+  if(a==="outra"){BRUI.q++;render();return}
+  if(a==="add"){var ta=document.querySelector('[data-br="novo"]');var tx=ta?ta.value:BRUI.txt;if(!String(tx).trim()){BRUI.msg="Escreva algo antes de guardar.";render();return}brAdd(BRUI.cat,tx);BRUI.txt="";BRUI.msg="Guardado em “"+brLabel(BRUI.cat)+"”.";render();return}
+  if(a==="pin"){var it=BR.items.filter(function(x){return x.id===id})[0];if(it){it.pin=!it.pin;brPut(it);render()}return}
+  if(a==="del"){BR.items=BR.items.filter(function(x){return x.id!==id});brLocal();if(C.brain)C.brain.doc(id).set({del:true,at:Date.now()});render();return}
+  if(a==="dropprops"){BRUI.props=[];render();return}
+  if(a==="saveprops"){var n=0;BRUI.props.forEach(function(x){if(x.on&&brAdd(x.cat,x.texto))n++});BRUI.props=[];BRUI.msg=n+" guardada(s).";render();return}
+  if(a==="digest"){
+    var ta2=document.querySelector('[data-br="novo"]');var tx2=String(ta2?ta2.value:BRUI.txt).trim();BRUI.txt=tx2;
+    if(!tx2){BRUI.msg="Cole um texto para o app separar.";render();return}
+    if(!S){BRUI.msg=NOAI;render();return}
+    BRUI.busy="Lendo seu texto...";BRUI.msg="";render();
+    try{
+      var r=await S.json("Leia o texto da Mari e extraia até 8 aprendizados duráveis sobre ela (jeito de falar, expressões, história, público, negócio, marcas, decisões, o que funcionou ou não). Use as palavras dela quando possível, uma ideia por item, sem inventar nem interpretar além do texto e sem repetir o que já está no cérebro. Categorias permitidas: voz, historia, publico, negocio, marcas, aprend, decisao.\n\nTexto:\n"+tx2+"\n\nResponda SOMENTE com JSON {\"itens\":[{\"cat\":\"\",\"texto\":\"\"}]}.",{modelTier:"default"});
+      var ok=BRCATS.map(function(c){return c[0]});
+      BRUI.props=(r.itens||[]).filter(function(x){return x&&x.texto&&ok.indexOf(x.cat)>=0}).map(function(x){return {cat:x.cat,texto:String(x.texto),on:true}});
+      BRUI.msg=BRUI.props.length?"":"Não encontrei nada novo para guardar nesse texto.";
+    }catch(err){BRUI.msg=crErr(err)||"Não consegui ler agora."}
+    BRUI.busy="";render();
+  }
+});
+document.addEventListener("input",function(e){var el=e.target;if(el.dataset&&el.dataset.br==="novo")BRUI.txt=el.value});
+document.addEventListener("change",function(e){
+  var el=e.target;if(!el.dataset)return;
+  if(el.dataset.bre){var it=BR.items.filter(function(x){return x.id===el.dataset.bre})[0];if(it){it.text=el.value;it.at=it.at||Date.now();brPut(it)}return}
+  if(el.dataset.brp!==undefined&&el.dataset.brp!==""){var x=BRUI.props[parseInt(el.dataset.brp,10)];if(x)x.on=el.checked}
+});
+
 /* ============ INÍCIO ============ */
-loadLocal();state.sel=pickDay();render();
+loadLocal();brLoad();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
@@ -1738,7 +1817,7 @@ function listen(name,apply){
   try{
     if(!window.claude||!window.claude.use)return;
     var db=await window.claude.use("db");if(!db)return;
-    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts"].forEach(function(n){C[n]=db.collection(n)});
+    ["checks","st","notes","results","prod","ideas","plano","camp","cfg","drafts","brain"].forEach(function(n){C[n]=db.collection(n)});
     listen("checks",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.done)o[d.id]=true});state.checks=o});
     listen("st",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.s)o[d.id]=x.s});state.st=o});
     listen("notes",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&x.text)o[d.id]=x.text});state.notes=o});
@@ -1748,6 +1827,7 @@ function listen(name,apply){
     listen("camp",function(s){var o={};s.docs.forEach(function(d){var x=d.data();if(x&&!x.del&&x.m)o[d.id]=x});state.camp=o;savePub()});
     listen("cfg",function(s){s.docs.forEach(function(d){if(d.id==="main"){try{var j=JSON.parse(d.data().json);CF=cfgMerge(j);try{localStorage.setItem("hoje-cfg",JSON.stringify(CF))}catch(e){}}catch(e){}}});applyRegras()});
     listen("drafts",function(s){var a=[],ids={};s.docs.forEach(function(d){ids[d.id]=1;var x=d.data();if(x&&!x.del&&x.json){try{var o=JSON.parse(x.json);o.id=d.id;a.push(o)}catch(e){}}});var loc=state.drafts.filter(function(d){return !ids[d.id]});loc.forEach(draftSync);a=a.concat(loc);a.sort(function(p,q){return (q.at||0)-(p.at||0)});state.drafts=a.slice(0,50);saveDrafts()});
+    listen("brain",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,cat:x.cat||"outro",text:x.text,pin:!!x.pin,at:x.at||0})});BR.items=a;brLocal()});
     listen("ideas",function(s){var a=[];s.docs.forEach(function(d){var x=d.data();if(x&&x.text&&!x.del)a.push({id:d.id,text:x.text,at:x.at||0})});state.ideas=a});
   }catch(e){}
 })();
@@ -1756,7 +1836,7 @@ D=fallbackD();
 (async function(){
   try{
     if(!window.claude||!window.claude.use){await aiRefresh();render();return}
-    try{S=await window.claude.use("sample")}catch(e){}
+    try{S=wrapBrain(await window.claude.use("sample"))}catch(e){}
     try{var d2=await window.claude.use("downloads");if(d2)D=d2}catch(e){}
     if(S){try{var lm=await S.limits();LIM=(lm&&lm.images)||null}catch(e){LIM=null}}else{await aiRefresh()}
     if(!typing())render();
