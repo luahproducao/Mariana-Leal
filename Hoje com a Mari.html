@@ -714,6 +714,7 @@ function calItems(iso){
   ASSIN.forEach(function(x){var m=String(x[0]).match(/(\d{2})\/(\d{2})/);if(m&&"2026-"+m[2]+"-"+m[1]===iso)a.push({k:"a",tag:"Assinatura",t:x[1],go:"canais"})});
   PRAZOS.forEach(function(x,i){if(x.date===iso)a.push({k:"z",tag:"Prazo · "+x.brand,t:x.t,go:"prz|"+i})});
   Object.keys(state.camp||{}).forEach(function(id){var c=state.camp[id];if(c&&c.d===iso)a.push({k:"p",tag:"Publi · "+c.m,t:(c.t||"Publi")+" · dia da postagem",pub:true,go:"camp|"+id})});
+  AC.items.forEach(function(x){if(x.ini===iso)a.push({k:"p",tag:x.tipo,t:"Começa: "+x.nome,go:"acgo|"+x.id});if(x.fim===iso)a.push({k:"p",tag:x.tipo,t:"Termina: "+x.nome,go:"acgo|"+x.id})});
   (MD.items||[]).forEach(function(it){if(it.d===iso&&it.st!=="cancelado")a.push({k:"t",tag:it.quem||"Mari",t:it.t+(it.st==="feito"?" ✓":""),go:"md|"+iso})});
   return a;
 }
@@ -738,7 +739,7 @@ function calEditor(it){
 function calHtml(){
   var today=isoToday();if(!CAL.m)CAL.m=today.slice(0,7);if(!CAL.sel)CAL.sel=today;
   var y=+CAL.m.slice(0,4),mo=+CAL.m.slice(5,7),first=new Date(y,mo-1,1).getDay(),nd=new Date(y,mo,0).getDate();
-  var h='<div><h2>Calendário editorial</h2><p class="sub">O lugar único de tudo o que vai ao ar: feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p></div>'
+  var h='<div><h2>Calendário editorial</h2><p class="sub">O lugar único de tudo o que vai ao ar: feed, stories, assinatura, Melhores Amigos, reels teste, publis, prazos e tarefas. O que está aqui aparece no Hoje.</p></div>'+acStrip()+plBox()
    +'<div class="pills">'+CALK.map(function(k){return'<button class="pill" data-calf="'+k[0]+'" aria-pressed="'+(CAL.f===k[0])+'">'+k[1]+'</button>'}).join('')+'</div>'
    +'<div class="cal-h"><button class="btn small ghost" data-calx="prev" aria-label="Mês anterior">‹</button><b>'+CALMES[mo-1]+' '+y+'</b><button class="btn small ghost" data-calx="next" aria-label="Próximo mês">›</button><button class="btn small ghost" data-calx="today">Hoje</button></div>'
    +'<div class="cal-g">'+["D","S","T","Q","Q","S","S"].map(function(x){return'<span class="cal-w">'+x+'</span>'}).join('');
@@ -801,6 +802,7 @@ document.addEventListener("click",function(e){
   else if(k==="plano"){state.tab="hoje";state.hmode="plano";state.sel=q2[1]}
   else if(k==="md"){MDUI.date=q2[1];state.tab="hoje";state.hmode="meu"}
   else if(k==="canais"){state.tab="mais";state.more="canais"}
+  else if(k==="acgo"){var ac0=acGet(q2[1]);if(ac0)String(ac0.go||"tab=cal").split(";").forEach(function(kv){var qq=kv.split("=");state[qq[0]]=qq[1]})}
   else if(k==="prz"){var pz=PRAZOS[+q2[1]];if(pz&&pz.brand==="Tray"){state.tab="pub";state.pub="tray"}else{var p3=PARC.items.filter(function(z){return pz&&z.marca===pz.brand})[0];state.tab="pub";state.pub="parc";if(p3)PCUI.open=p3.id}}
   else if(k==="camp"){var p2=PARC.items.filter(function(z){return z.campId===q2[1]})[0];state.tab="pub";state.pub="parc";if(p2)PCUI.open=p2.id}
   render();window.scrollTo(0,0);
@@ -819,6 +821,110 @@ async function calIA(id){
   }catch(e){CAL.msg=crErr(e)||"Não consegui agora. Tente de novo."}
   CAL.busy=false;render();
 }
+
+
+/* ============ AÇÕES EM ANDAMENTO + CAIXA DE PLANEJAMENTO ============ */
+var ACSEED=[{id:"tray",nome:"Corrida Tray · Desafio Black Friday",tipo:"Desafio",ini:"2026-10-20",fim:"2026-11-13",go:"tab=pub;pub=tray",notas:[]},{id:"black",nome:"Esquenta da Black Friday da Loyall",tipo:"Campanha",ini:"2026-11-02",fim:"2026-11-27",go:"tab=cal",notas:[]}];
+var AC={items:[],add:false,open:null,delc:null,f:{nome:"",tipo:"Campanha",ini:"",fim:"",go:"tab=cal"}};
+var ACGO=[["tab=cal","Calendário"],["tab=pub;pub=tray","Aba da Tray"],["tab=pub;pub=parc","Parcerias"],["tab=hoje","Hoje"]];
+function acSave(){try{localStorage.setItem("hoje-acoes",JSON.stringify(AC.items))}catch(e){}}
+function acLoad(){var j=null;try{j=JSON.parse(localStorage.getItem("hoje-acoes")||"null")}catch(e){}
+  if(Array.isArray(j)){AC.items=j;return}AC.items=JSON.parse(JSON.stringify(ACSEED));acSave()}
+function acGet(id){return AC.items.filter(function(x){return x.id===id})[0]}
+function acAtivas(){var t=isoToday();return AC.items.filter(function(a){return a.fim>=t&&daysUntil(a.ini)<=3}).sort(function(a,b){return a.fim<b.fim?-1:1})}
+function acFmt(iso){return iso?iso.slice(8,10)+"/"+iso.slice(5,7):""}
+function acInfo(a){var n=daysUntil(a.ini),f=daysUntil(a.fim),tot=Math.max(1,daysUntil(a.fim)-daysUntil(a.ini)+1),dia=-n+1;
+  var base=n>0?"Começa em "+n+" dia"+(n===1?"":"s")+" ("+acFmt(a.ini)+")":"Dia "+dia+" de "+tot+" · "+(f===0?"termina hoje":"termina em "+f+" dia"+(f===1?"":"s")+" ("+acFmt(a.fim)+")");
+  if(a.id==="tray"){var all=[],nx=null;cfg().tray.forEach(function(w){if(String(w.t).indexOf("encerrada")>=0)return;w.m.forEach(function(m){all.push(m);if(!nx&&!state.checks["tray-"+m[0]])nx=m})});
+    var fe=all.filter(function(m){return state.checks["tray-"+m[0]]}).length;base+=" · missões "+fe+" de "+all.length+(nx?" · próxima: "+nx[1]:"")}
+  return base}
+function acStrip(){
+  var at=acAtivas();
+  var h='<div class="block"><h3>Em andamento'+(at.length?' ('+at.length+')':'')+'</h3>';
+  if(!at.length)h+='<p class="note">Nenhum desafio, campanha ou ação ativa agora.</p>';
+  at.forEach(function(a){h+='<div class="card tap" role="button" tabindex="0" data-acgo="'+a.id+'"><div><span class="tag t">'+esc(a.tipo)+'</span></div><h3>'+esc(a.nome)+'</h3><p class="note">'+esc(acInfo(a))+'</p>'
+    +'<div class="btns"><button class="btn small ghost" data-acx="note|'+a.id+'">Anotar</button>'+((a.notas||[]).length?'<button class="btn small ghost" data-acx="notes|'+a.id+'">'+(AC.open===a.id?'Fechar anotações':'Anotações ('+a.notas.length+')')+'</button>':'')+'<button class="btn small ghost" data-acx="del|'+a.id+'">'+(AC.delc===a.id?'Toque de novo para encerrar':'Encerrar')+'</button></div>'
+    +(AC.open===a.id?acNotasLista(a):'')+'</div>'});
+  if(AC.add){var f=AC.f;h+='<div class="card"><h3>Nova ação</h3><label class="lab">Nome<input type="text" data-acf="nome" value="'+esc(f.nome)+'" placeholder="Ex.: Lançamento do app"></label>'
+    +'<div class="fields"><label>Tipo<select data-acf="tipo">'+["Desafio","Campanha","Ação","Lançamento"].map(function(x){return'<option'+(x===f.tipo?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label><label>Abre ao tocar<select data-acf="go">'+ACGO.map(function(g){return'<option value="'+g[0]+'"'+(g[0]===f.go?' selected':'')+'>'+g[1]+'</option>'}).join('')+'</select></label></div>'
+    +'<div class="fields"><label>Início<input type="date" data-acf="ini" value="'+esc(f.ini)+'"></label><label>Fim<input type="date" data-acf="fim" value="'+esc(f.fim)+'"></label></div>'
+    +'<div class="btns"><button class="btn" data-acx="create">Adicionar</button><button class="btn ghost small" data-acx="cancel">Cancelar</button></div></div>'}
+  else h+='<div class="btns"><button class="btn ghost small" data-acx="new">+ Nova ação</button></div>';
+  return h+'</div>';
+}
+function acNotasLista(a){return '<div style="margin-top:8px">'+(a.notas||[]).map(function(n,i){return '<p class="note">'+esc(new Date(n.at).toLocaleDateString("pt-BR"))+' · '+esc(n.t)+' <button class="btn small ghost" data-acx="rmn|'+a.id+'|'+i+'" aria-label="Apagar anotação">×</button></p>'}).join('')+'</div>'}
+function acNotasHtml(id){var a=acGet(id);if(!a)return"";
+  return '<div class="card"><h3>Minhas atualizações da campanha</h3><p class="note">Anote o que você pensou ou mudou. Fica guardado aqui.</p>'+acNotasLista(a)+'<label class="lab"><textarea id="ac-n" placeholder="Ex.: troquei a ordem dos stories da semana 3"></textarea></label><div class="btns"><button class="btn small" data-acx="addnote|'+id+'">Guardar anotação</button></div></div>'}
+/* planejamento */
+var PL={txt:"",dest:"auto",d:"",canal:"Feed principal",acao:"tray",busy:false,prev:null,msg:""};
+function plDest(){return(!S&&PL.dest==="auto")?"cal":PL.dest}
+function plBox(){
+  var dests=(S?[["auto","Deixar a IA organizar"]]:[]).concat([["cal","Calendário editorial"],["tarefa","Tarefa no Meu dia"],["camp","Anotação de uma campanha"],["cer","Cérebro (decisão ou ideia)"]]);
+  var pd=plDest();
+  var h='<div class="card"><h3>O que estou planejando</h3><p class="note">Escreva do seu jeito: a semana, uma ideia, uma mudança numa campanha. O texto vai para a aba certa.</p>'
+   +'<textarea id="pl-t" data-pl="txt" style="min-height:96px" placeholder="Ex.: semana que vem quero um reels sobre preço mínimo na terça e mudar os stories da Tray da semana 3.">'+esc(PL.txt)+'</textarea>'
+   +'<label class="lab">Onde guardar<select data-pls="dest">'+dests.map(function(x){return'<option value="'+x[0]+'"'+(x[0]===pd?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select></label>';
+  if(pd==="cal")h+='<div class="fields"><label>Dia<input type="date" data-pls="d" value="'+esc(PL.d||CAL.sel||isoToday())+'"></label><label>Canal<select data-pls="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===PL.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>';
+  if(pd==="tarefa")h+='<label class="lab">Dia (vazio = Entrada)<input type="date" data-pls="d" value="'+esc(PL.d)+'"></label>';
+  if(pd==="camp")h+='<label class="lab">Campanha<select data-pls="acao">'+AC.items.map(function(a){return'<option value="'+a.id+'"'+(a.id===PL.acao?' selected':'')+'>'+esc(a.nome)+'</option>'}).join('')+'</select></label>';
+  if(PL.msg)h+='<p class="note">'+esc(PL.msg)+'</p>';
+  if(PL.prev){h+='<h3>Vou guardar assim</h3>'+PL.prev.map(function(x,i){return'<div class="row"><input type="checkbox" id="plk'+i+'" data-plck="'+i+'"'+(x.ok?' checked':'')+'><label for="plk'+i+'"><b>'+esc(plDestNome(x))+'</b>'+(x.data?' · '+esc(acFmt(x.data)):'')+(x.marca?' · '+esc(x.marca):'')+'<br>'+esc(x.titulo)+(x.texto?'<br><span class="note">'+esc(x.texto)+'</span>':'')+'</label></div>'}).join('')
+    +'<div class="btns"><button class="btn" data-plx="confirm">Confirmar</button><button class="btn ghost small" data-plx="discard">Descartar</button></div>'}
+  else h+='<div class="btns"><button class="btn" data-plx="go"'+(PL.busy?' disabled':'')+'>'+(PL.busy?'Organizando…':(pd==="auto"?'Organizar':'Guardar'))+'</button></div>';
+  return h+'</div>';
+}
+function plDestNome(x){var d=x.destino;return d==="calendario"?"Calendário · "+(x.canal||"Feed principal"):d==="tarefa"?"Tarefa no Meu dia":d==="campanha"?"Campanha · "+((acGet(x.acao)||{}).nome||"?"):"Cérebro"}
+function plApply(list){var n={calendario:0,tarefa:0,campanha:0,cerebro:0};
+  list.forEach(function(x){if(!x.ok)return;
+    if(x.destino==="calendario"){CALD.items.push(calNew({t:x.titulo,nota:x.texto||"",canal:CALKIND[x.canal]?x.canal:"Feed principal",fmt:x.formato||"Reels",marca:x.marca||"",d:x.data||isoToday(),tipo:x.marca?"Publi":""}));n.calendario++}
+    else if(x.destino==="tarefa"){MD.items.push(mdNew({t:x.titulo,nota:x.texto||"",tipo:"gravar",d:x.data||"",parc:""}));n.tarefa++}
+    else if(x.destino==="campanha"){var a=acGet(x.acao)||acGet("tray");if(a){a.notas=a.notas||[];a.notas.push({t:(x.titulo+(x.texto?": "+x.texto:"")),at:Date.now()});n.campanha++}}
+    else{brAdd("decisao",x.titulo+(x.texto?": "+x.texto:""));n.cerebro++}});
+  calSave();mdLocal();acSave();
+  var p=[];if(n.calendario)p.push(n.calendario+" no calendário");if(n.tarefa)p.push(n.tarefa+" tarefa(s)");if(n.campanha)p.push(n.campanha+" anotação(ões) de campanha");if(n.cerebro)p.push(n.cerebro+" no cérebro");
+  return p.length?"Guardei: "+p.join(", ")+".":"Nada marcado para guardar."}
+async function plIA(){
+  var txt=PL.txt.trim();if(!txt)return;if(!S){PL.msg=NOAI;render();return}
+  PL.busy=true;PL.msg="";render();
+  try{
+    var hoje=isoToday(),sem=["domingo","segunda","terça","quarta","quinta","sexta","sábado"][new Date(hoje+"T12:00:00").getDay()];
+    var r=await S.json(RULES+"\n\nA Mari escreveu o que está planejando. Separe em itens e diga onde cada um deve ficar. Não invente nada além do que ela escreveu; preserve as palavras dela.\nHoje é "+hoje+" ("+sem+"). Converta “terça”, “semana que vem” etc. em datas YYYY-MM-DD a partir de hoje; se não der para saber, deixe a data vazia.\nDestinos: calendario (conteúdo para postar), tarefa (coisa para ela fazer), campanha (mudança ou ideia para uma campanha ou desafio em andamento), cerebro (decisão, aprendizado ou ideia geral).\nCampanhas ativas: "+JSON.stringify(AC.items.map(function(a){return{id:a.id,nome:a.nome}}))+"\nCanais: Feed principal, Stories, Assinatura, Melhores Amigos, Reels teste. Formatos: Reels, Carrossel, Story, Post estático, Live. Marcas: "+Object.keys(cfg().marcas).join(", ")+".\nTexto dela: "+txt+"\n\nResponda SOMENTE com JSON: {\"itens\":[{\"destino\":\"calendario|tarefa|campanha|cerebro\",\"titulo\":\"curto\",\"texto\":\"detalhe com as palavras dela\",\"data\":\"YYYY-MM-DD ou vazio\",\"canal\":\"\",\"formato\":\"\",\"marca\":\"\",\"acao\":\"id da campanha ou vazio\"}]}",{modelTier:"main"});
+    var its=(r.itens||[]).filter(function(x){return x&&x.titulo}).map(function(x){return{destino:["calendario","tarefa","campanha","cerebro"].indexOf(x.destino)>=0?x.destino:"tarefa",titulo:String(x.titulo),texto:String(x.texto||""),data:/^\d{4}-\d{2}-\d{2}$/.test(x.data||"")?x.data:"",canal:x.canal||"",formato:x.formato||"",marca:x.marca||"",acao:x.acao||"",ok:true}});
+    if(!its.length)PL.msg="Não consegui separar em itens. Escolha onde guardar e tente de novo.";else PL.prev=its;
+  }catch(e){PL.msg=crErr(e)||"Não consegui agora. Escolha onde guardar."}
+  PL.busy=false;render();
+}
+document.addEventListener("input",function(e){var t=e.target;if(t&&t.dataset&&t.dataset.pl==="txt")PL.txt=t.value;if(t&&t.dataset&&t.dataset.acf)AC.f[t.dataset.acf]=t.value});
+document.addEventListener("change",function(e){var t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.pls){PL[t.dataset.pls]=t.value;if(t.dataset.pls==="dest")render();return}
+  if(t.dataset.plck!=null&&PL.prev){PL.prev[+t.dataset.plck].ok=t.checked;return}
+  if(t.dataset.acf){AC.f[t.dataset.acf]=t.value;if(t.dataset.acf==="tipo"||t.dataset.acf==="go")return}
+});
+document.addEventListener("click",function(e){
+  var t=e.target;if(!t.closest)return;
+  var px=t.closest("[data-plx]");
+  if(px){var a=px.dataset.plx;
+    if(a==="discard"){PL.prev=null;render();return}
+    if(a==="confirm"){PL.msg=plApply(PL.prev||[]);PL.prev=null;PL.txt="";render();return}
+    if(a==="go"){var txt=PL.txt.trim();if(!txt){PL.msg="Escreva o que está planejando.";render();return}
+      var pd=plDest();if(pd==="auto"){plIA();return}
+      var first=txt.split(/\n/)[0].slice(0,100),it={destino:pd==="cal"?"calendario":pd==="tarefa"?"tarefa":pd==="camp"?"campanha":"cerebro",titulo:first,texto:txt.length>first.length?txt:"",data:PL.d||(pd==="cal"?(CAL.sel||isoToday()):""),canal:PL.canal,acao:PL.acao,ok:true};
+      PL.msg=plApply([it]);PL.txt="";render();return}
+  }
+  var ax=t.closest("[data-acx]");
+  if(ax){var q=ax.dataset.acx.split("|"),b=q[0];
+    if(b==="new"){AC.add=true;render();return}
+    if(b==="cancel"){AC.add=false;render();return}
+    if(b==="create"){var f=AC.f;if(!f.nome.trim()||!f.ini||!f.fim)return;AC.items.push({id:"a"+Date.now(),nome:f.nome.trim(),tipo:f.tipo,ini:f.ini,fim:f.fim,go:f.go,notas:[]});acSave();AC.add=false;AC.f={nome:"",tipo:"Campanha",ini:"",fim:"",go:"tab=cal"};render();return}
+    if(b==="note"){PL.dest="camp";PL.acao=q[1];render();var el=document.getElementById("pl-t");if(el){el.scrollIntoView({block:"center"});el.focus()}return}
+    if(b==="notes"){AC.open=AC.open===q[1]?null:q[1];render();return}
+    if(b==="del"){if(AC.delc!==q[1]){AC.delc=q[1];render();return}AC.items=AC.items.filter(function(z){return z.id!==q[1]});acSave();AC.delc=null;render();return}
+    if(b==="rmn"){var a2=acGet(q[1]);if(a2){a2.notas.splice(+q[2],1);acSave();render()}return}
+    if(b==="addnote"){var v=(document.getElementById("ac-n")||{}).value;v=String(v||"").trim();var a3=acGet(q[1]);if(a3&&v){a3.notas=a3.notas||[];a3.notas.push({t:v,at:Date.now()});acSave();render()}return}
+  }
+  var ag=t.closest("[data-acgo]");
+  if(ag&&!t.closest("button")){var a4=acGet(ag.dataset.acgo);if(a4){String(a4.go||"tab=cal").split(";").forEach(function(kv){var qq=kv.split("=");state[qq[0]]=qq[1]});render();window.scrollTo(0,0)}}
+});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
@@ -1693,7 +1799,7 @@ function trayPts(){var p=0;cfg().tray.forEach(function(w){w.m.forEach(function(m
 function updTray(){var n=parseNum(T("tray.clientes","")),o=$("#tray-out");if(o)o.innerHTML='<b>'+brl(n*500)+'</b> de bonificação ('+n+' cliente(s) novo(s) na oferta × R$ 500) · pontos: <b>'+(trayPts()+n*30)+'</b> <span class="note">(missões marcadas + 30 por cliente novo confirmado)</span>'}
 function pubTray(){
   var T2=cfg().tray,h='<div><h2>Corrida Tray</h2><p class="sub">Desafio Influencers Black Friday: 20/10 a 10/11, apuração em 13/11. Conversão pesa mais que volume.</p></div>'
-   +'<div class="card"><h3>Vale para toda missão</h3><ul>'+TRAY_BASE.sempre.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="note">'+esc(TRAY_BASE.tom)+'</p><p class="note">Toque em “Ver direção completa” em cada missão para abrir roteiro, takes, legenda e CTA.</p></div>'
+   +acNotasHtml("tray")+'<div class="card"><h3>Vale para toda missão</h3><ul>'+TRAY_BASE.sempre.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="note">'+esc(TRAY_BASE.tom)+'</p><p class="note">Toque em “Ver direção completa” em cada missão para abrir roteiro, takes, legenda e CTA.</p></div>'
    +'<div class="card"><h3>Oferta de 10/11</h3><p>Loja pronta em até 30 dias, 1 ano de plano Avançado, R$ 1.200 em Meta Ads e bônus.</p><p class="note">Prêmio do 1º lugar: viagem a Punta Cana para ela e um acompanhante. Cliente novo confirmado vale +30 pontos e há bônus de eficiência de +10. Sempre com link exclusivo e selo de parceria paga.</p></div>';
   T2.forEach(function(w,wi){
     h+='<div class="card">';
@@ -2098,7 +2204,7 @@ function mdHtml(){
   var h='<div class="btns" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,-1)+'" aria-label="Dia anterior">‹</button><div style="text-align:center"><h2 style="margin:0">'+esc(mdFmt(D).replace(/^./,function(c){return c.toUpperCase()}).replace("-feira","-feira"))+'</h2>'+(D!==today?'<button class="btn ghost small" data-mdb="dia" data-d="'+today+'">Voltar para hoje</button>':'<span class="note">Hoje</span>')+'</div><button class="btn ghost small" data-mdb="dia" data-d="'+addDays(D,1)+'" aria-label="Próximo dia">›</button></div>';
   h+='<div class="pills">'+[0,1,2,3,4,5,6].map(function(i){var d2=addDays(today,i),n=live.filter(function(x){return x.d===d2&&x.st==="pendente"}).length+CALD.items.filter(function(x){return x.d===d2&&x.st!=="Publicado"}).length;return '<button class="pill" data-mdb="dia" data-d="'+d2+'" aria-pressed="'+(d2===D)+'">'+new Date(d2+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","")+' '+d2.slice(8)+(n?' · '+n:'')+'</button>'}).join('')+'</div>';
   if(MDUI.msg)h+='<div class="draft">'+esc(MDUI.msg)+'</div>';
-  h+=calHoje(D);
+  h+=acStrip()+plBox()+calHoje(D);
   var feitos=mine.filter(function(x){return x.st==="feito"}).length,pend=mine.filter(function(x){return x.st==="pendente"&&x.tipo!=="assessoria"}).length;
   if(mine.length)h+='<p class="sub">'+feitos+' de '+mine.length+' feitos neste dia.</p>';
   var tot=mine.filter(function(x){return x.st==="pendente"}).length;
@@ -2407,7 +2513,7 @@ document.addEventListener("change",function(e){
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
 
 /* ============ SINCRONIZAÇÃO (fora do Claude) ============ */
-var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal"];
+var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal","hoje-acoes"];
 var SYN={meta:{},busy:false,timer:null,msg:"",applying:false};
 function synOn(){var c=aiGet();return !!(c.proxy&&c.code)&&!(window.claude&&window.claude.use)}
 function synLoadMeta(){try{SYN.meta=JSON.parse(localStorage.getItem("hoje-sync-meta")||"{}")}catch(e){SYN.meta={}}}
@@ -2427,7 +2533,7 @@ async function synNow(){
     localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
     if(Object.keys(push.meta).length){var r2=await fetch(base,{method:"PUT",headers:{"content-type":"application/json","x-app-code":c.code},body:JSON.stringify(push)});if(!r2.ok)throw 0}
     localStorage.setItem("hoje-sync-init","1");
-    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
     SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
   }catch(e){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}
   SYN.busy=false;
@@ -2556,7 +2662,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
+synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();acLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
