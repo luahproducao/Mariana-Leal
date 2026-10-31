@@ -964,7 +964,7 @@ function calEditor(it){
    +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +slidesHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
-   +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
+   +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':(S?'Roteiro com IA':'Montar roteiro'))+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost adv" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
    +'<button class="btn small ghost" data-calx="hoje|'+it.id+'">Criar tarefa para este dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
   return h;
@@ -1048,7 +1048,7 @@ document.addEventListener("click",function(e){
 });
 async function calIA(id){
   var it=calGet(id);if(!it)return;
-  if(!S){CAL.msg=NOAI;render();return}
+  if(!S){calLocal(it);return}
   CAL.busy=true;CAL.msg="";render();
   try{
     var marca=it.marca&&cfg().marcas[it.marca]?"\nPerfil da marca "+it.marca+": "+JSON.stringify(cfg().marcas[it.marca]):"";
@@ -1096,10 +1096,10 @@ function acNotasHtml(id){var a=acGet(id);if(!a)return"";
   return '<div class="card"><h3>Minhas atualizações da campanha</h3><p class="note">Anote o que você pensou ou mudou. Fica guardado aqui.</p>'+acNotasLista(a)+'<label class="lab"><textarea id="ac-n" placeholder="Ex.: troquei a ordem dos stories da semana 3"></textarea></label><div class="btns"><button class="btn small" data-acx="addnote|'+id+'">Guardar anotação</button></div></div>'}
 /* planejamento */
 var PL={txt:"",dest:"auto",d:"",canal:"Feed principal",acao:"tray",busy:false,prev:null,msg:""};
-function plDest(){return(!S&&PL.dest==="auto")?"cal":PL.dest}
+function plDest(){return PL.dest}
 function plBox(){
   if(!PL.open&&!PL.txt&&!PL.prev&&!PL.busy)return '<button class="card tap plmini" data-plx="open"><span class="plic" aria-hidden="true">✎</span><span>O que estou planejando…</span></button>'+(PL.msg?'<p class="note">'+esc(PL.msg)+'</p>':'');
-  var dests=(S?[["auto","Deixar a IA organizar"]]:[]).concat([["ideia","Caixa de ideias"],["cal","Calendário editorial"],["tarefa","Tarefa no Meu dia"],["camp","Anotação de uma campanha"],["cer","Minha base (decisão ou aprendizado)"]]);
+  var dests=[["auto",S?"Deixar a IA organizar":"Organizar pelo texto"]].concat([["ideia","Caixa de ideias"],["cal","Calendário editorial"],["tarefa","Tarefa no Meu dia"],["camp","Anotação de uma campanha"],["cer","Minha base (decisão ou aprendizado)"]]);
   var pd=plDest();
   var h='<div class="card"><h3>O que estou planejando</h3><p class="note">Escreva do seu jeito: a semana, uma ideia, uma mudança numa campanha. O texto vai para a aba certa.</p>'
    +'<textarea id="pl-t" data-pl="txt" style="min-height:96px" placeholder="Ex.: semana que vem quero um reels sobre preço mínimo na terça e mudar os stories da Tray da semana 3.">'+esc(PL.txt)+'</textarea>'
@@ -1126,11 +1126,11 @@ function plApply(list){var n={calendario:0,tarefa:0,campanha:0,cerebro:0};
   var p=[];if(n.calendario)p.push(n.calendario+" no calendário");if(n.tarefa)p.push(n.tarefa+" tarefa(s)");if(n.campanha)p.push(n.campanha+" anotação(ões) de campanha");if(n.ideia)p.push(n.ideia+" na caixa de ideias");if(n.cerebro)p.push(n.cerebro+" na minha base");
   return p.length?"Guardei: "+p.join(", ")+".":"Nada marcado para guardar."}
 async function plIA(){
-  var txt=PL.txt.trim();if(!txt)return;if(!S){PL.msg=NOAI;render();return}
+  var txt=PL.txt.trim();if(!txt)return;
   PL.busy=true;PL.msg="";render();
   try{
     var hoje=isoToday(),sem=["domingo","segunda","terça","quarta","quinta","sexta","sábado"][new Date(hoje+"T12:00:00").getDay()];
-    var r=await S.json(RULES+"\n\nA Mari escreveu o que está planejando. Separe em itens e diga onde cada um deve ficar. Não invente nada além do que ela escreveu; preserve as palavras dela.\nHoje é "+hoje+" ("+sem+"). Converta “terça”, “semana que vem” etc. em datas YYYY-MM-DD a partir de hoje; se não der para saber, deixe a data vazia.\nDestinos: calendario (conteúdo para postar), tarefa (coisa para ela fazer), campanha (mudança ou ideia para uma campanha ou desafio em andamento), ideia (ideia solta de conteúdo, ainda sem data), cerebro (decisão ou aprendizado sobre ela ou o negócio, vira a “minha base”).\nCampanhas ativas: "+JSON.stringify(AC.items.map(function(a){return{id:a.id,nome:a.nome}}))+"\nCanais: Feed principal, Stories, Assinatura, Melhores Amigos, Reels teste. Formatos: Reels, Carrossel, Story, Post estático, Live. Marcas: "+Object.keys(cfg().marcas).join(", ")+".\nTexto dela: "+txt+"\n\nResponda SOMENTE com JSON: {\"itens\":[{\"destino\":\"calendario|tarefa|campanha|ideia|cerebro\",\"titulo\":\"curto\",\"texto\":\"detalhe com as palavras dela\",\"data\":\"YYYY-MM-DD ou vazio\",\"canal\":\"\",\"formato\":\"\",\"marca\":\"\",\"acao\":\"id da campanha ou vazio\"}]}",{modelTier:"main"});
+    var r=!S?plLocalR(txt):await S.json(RULES+"\n\nA Mari escreveu o que está planejando. Separe em itens e diga onde cada um deve ficar. Não invente nada além do que ela escreveu; preserve as palavras dela.\nHoje é "+hoje+" ("+sem+"). Converta “terça”, “semana que vem” etc. em datas YYYY-MM-DD a partir de hoje; se não der para saber, deixe a data vazia.\nDestinos: calendario (conteúdo para postar), tarefa (coisa para ela fazer), campanha (mudança ou ideia para uma campanha ou desafio em andamento), ideia (ideia solta de conteúdo, ainda sem data), cerebro (decisão ou aprendizado sobre ela ou o negócio, vira a “minha base”).\nCampanhas ativas: "+JSON.stringify(AC.items.map(function(a){return{id:a.id,nome:a.nome}}))+"\nCanais: Feed principal, Stories, Assinatura, Melhores Amigos, Reels teste. Formatos: Reels, Carrossel, Story, Post estático, Live. Marcas: "+Object.keys(cfg().marcas).join(", ")+".\nTexto dela: "+txt+"\n\nResponda SOMENTE com JSON: {\"itens\":[{\"destino\":\"calendario|tarefa|campanha|ideia|cerebro\",\"titulo\":\"curto\",\"texto\":\"detalhe com as palavras dela\",\"data\":\"YYYY-MM-DD ou vazio\",\"canal\":\"\",\"formato\":\"\",\"marca\":\"\",\"acao\":\"id da campanha ou vazio\"}]}",{modelTier:"main"});
     var its=(r.itens||[]).filter(function(x){return x&&x.titulo}).map(function(x){return{destino:["calendario","tarefa","campanha","ideia","cerebro"].indexOf(x.destino)>=0?x.destino:"tarefa",titulo:String(x.titulo),texto:String(x.texto||""),data:/^\d{4}-\d{2}-\d{2}$/.test(x.data||"")?x.data:"",canal:x.canal||"",formato:x.formato||"",marca:x.marca||"",acao:x.acao||"",ok:true}});
     if(!its.length)PL.msg="Não consegui separar em itens. Escolha onde guardar e tente de novo.";else PL.prev=its;
   }catch(e){PL.msg=crErr(e)||"Não consegui agora. Escolha onde guardar."}
@@ -2740,6 +2740,88 @@ function brSepara(tx){
   });
   return {itens:out};
 }
+/* ============ v61: o resto sem IA ============ */
+function calLocal(it){
+  var fm=String(it.fmt||"Reels"),t=String(it.t||"o assunto").trim(),pub=!!it.marca,g=(pub&&cfg().marcas[it.marca])||{},ph=function(x){return "[PREENCHER: "+x+"]"},L;
+  if(/carross/i.test(fm))L=["Capa: "+ph("promessa concreta sobre "+t),"Slide 2: "+ph("o problema"),"Slide 3: "+ph("por que isso acontece"),"Slide 4: "+ph("primeiro passo"),"Slide 5: "+ph("segundo passo"),"Slide 6: "+ph("exemplo real"),"Slide final: "+ph("chamada para ação")];
+  else if(/stor/i.test(fm)||it.canal==="Stories"||it.canal==="Melhores Amigos")L=["Tela 1, situação: "+ph("o que está acontecendo sobre "+t),"Tela 2, problema: "+ph("o que a seguidora sente"),"Tela 3, solução: "+ph("mostre a tela, o produto ou o processo"),"Tela 4, interação: "+ph("pergunta para enquete ou caixinha"),"Tela 5, chamada: "+ph("o que ela faz agora e o link")];
+  else L=["Gancho (primeiros segundos): "+ph("frase que para o dedo sobre "+t),"História: "+ph("o que aconteceu com você ou com uma seguidora"),"Virada: "+ph("o que mudou e a solução prática"),"Mostrar: "+ph("cena ou tela real que prova"),"Chamada para ação: "+ph("uma ação só")];
+  if(pub){L.push("Marca: "+it.marca+" entra na virada, com tela real e sem dados de clientes."+(g.cta?" CTA da marca: "+g.cta:""));L.push("Obrigatório: parceria paga e #publi na legenda"+(g.leg?" ("+g.leg+")":"")+".")}
+  L.push("");L.push("Takes sugeridos:");["Você falando para a câmera","Detalhe das mãos ou do produto","Tela real, se mostrar uma ferramenta","Cobertura do ambiente, para cobrir cortes"].forEach(function(x){L.push("- "+x)});
+  var leg=ph("abertura da legenda, no seu jeito")+(pub?"\n\nPublicidade · parceria paga com "+it.marca+" #publi":"")+"\n\n"+ph("chamada para ação");
+  if(String(it.nota||"").trim()){if(!it.leg)it.leg=leg;CAL.msg="Este conteúdo já tem roteiro. Confira o texto e a legenda e preencha o que estiver em [PREENCHER].";it.at=Date.now();calSave();render();return}
+  it.nota=L.join("\n");if(!it.leg)it.leg=leg;
+  it.at=Date.now();calSave();CAL.msg="Estrutura montada no campo de roteiro. Preencha o que está em [PREENCHER].";render();
+}
+function plLocalR(txt){
+  var hoje=isoToday(),wd={domingo:0,segunda:1,"terça":2,terca:2,quarta:3,quinta:4,sexta:5,"sábado":6,sabado:6},marcas=Object.keys(cfg().marcas||{});
+  var parts=String(txt).replace(/([.!?])\s+(?=[A-ZÀ-Ú])/g,"$1\n").split(/\n+|;\s+/).map(function(p){return p.replace(/^[\s\-•*]+/,"").trim()}).filter(function(p){return p.length>3});
+  var itens=parts.map(function(p){
+    var low=p.toLowerCase(),data=bfDate(p)||"";
+    if(!data){
+      if(/amanh[ãa]/.test(low))data=addDays(hoje,1);
+      else if(/\bhoje\b/.test(low))data=hoje;
+      else{Object.keys(wd).some(function(k){if(new RegExp("(^|[^a-zà-ú])"+k+"(-feira)?([^a-zà-ú]|$)").test(low)){var cur=new Date(hoje+"T12:00:00").getDay(),df=(wd[k]-cur+7)%7;if(df===0)df=7;if(/semana que vem|pr[óo]xima semana/.test(low)&&wd[k]>cur)df+=7;data=addDays(hoje,df);return true}return false})}
+    }
+    var mc=marcas.filter(function(m){return low.indexOf(m.toLowerCase())>=0})[0]||"",destino="ideia",acao="",canal="Feed principal",formato="Reels";
+    if(/decidi|aprendi|a partir de agora|combinei|passei a|regra nova|n[ãa]o vou mais/.test(low))destino="cerebro";
+    else if(/\btray\b|black friday|esquenta|desafio|campanha/.test(low)){destino="campanha";var a0=(AC.items||[]).filter(function(a){return low.indexOf(String(a.nome).toLowerCase().split(" ")[0])>=0||(/tray/.test(low)&&a.id==="tray")||(/black/.test(low)&&a.id==="black")})[0]||(AC.items||[])[0];acao=a0?a0.id:"tray"}
+    else if(/reels?|stor(y|ies)|carross|\bpost\b|\bfeed\b|v[ií]deo|publi|roteiro|legenda|\blive\b/.test(low)){destino="calendario";if(/carross/.test(low))formato="Carrossel";else if(/stor/.test(low)){formato="Story";canal="Stories"}if(/melhores amigos/.test(low)){canal="Melhores Amigos";formato="Story"}}
+    else if(/lembrar|comprar|ligar|enviar|mandar|pagar|emitir|conferir|gravar|editar|responder|separar|pedir/.test(low))destino="tarefa";
+    var tit=p.length>90?p.slice(0,87)+"...":p;
+    return {destino:destino,titulo:tit,texto:p.length>90?p:"",data:data,canal:canal,formato:formato,marca:mc,acao:acao,ok:true};
+  });
+  return {itens:itens};
+}
+var _plIA61=plIA;
+plIA=async function(){await _plIA61();if(!S&&PL.prev){PL.msg="Separei pelo que você escreveu, usando palavras-chave. Confira onde cada item vai ficar e desmarque o que não quiser.";render()}};
+function sugLocal(c){
+  var m=c.material,out=[],ph=function(t){return (t.match(/\[PREENCHER/g)||[]).length},words=function(t){return String(t||"").trim().split(/\s+/).filter(Boolean).length};
+  var jarg=/\b(ERP|CMV|markup|DRE|margem de contribui[çc][ãa]o|ticket m[ée]dio|fluxo de caixa|capital de giro|CAC|LTV|ROI|SKU|giro de estoque)\b/i;
+  var add=function(o){out.push(o)};
+  m.secoes.forEach(function(s,i){
+    var tx=String(s.corpo||"")+" "+(s.itens||[]).join(" "),b=i+1;
+    if(ph(tx)>0)add({p:1,bloco:b,man:1,titulo:"Completar o bloco "+b,como:"Troque o que está em [PREENCHER] por algo que você viveu. Se não tiver o número, escreva sem número."});
+    else if(!String(s.corpo||"").trim()&&!(s.itens||[]).length)add({p:2,bloco:b,man:1,titulo:"Bloco "+b+" vazio",como:"Escreva duas ou três frases, ou apague o bloco."});
+    var j=jarg.exec(tx);if(j)add({p:3,bloco:b,man:1,titulo:"Termo técnico no bloco "+b+": "+j[0],como:"Explique “"+j[0]+"” em uma frase simples, como falaria com uma amiga que está começando."});
+    if(words(s.corpo)>140)add({p:4,bloco:b,man:1,titulo:"Bloco "+b+" longo",como:"Corte para até 100 palavras ou divida em dois blocos. Quem lê no celular desiste de texto grande."});
+    var longa=String(s.corpo||"").split(/[.!?]\s+/).filter(function(f){return words(f)>30})[0];
+    if(longa)add({p:5,bloco:b,man:1,titulo:"Frase longa no bloco "+b,como:"Quebre em duas frases a que começa com “"+longa.trim().split(/\s+/).slice(0,6).join(" ")+"…”."});
+  });
+  var todo=m.secoes.map(function(s){return (s.corpo||"")+" "+(s.itens||[]).join(" ")}).join(" ")+" "+(m.intro||"")+" "+(m.fechamento||"");
+  if(!String(m.intro||"").trim())add({p:6,bloco:0,man:1,titulo:"Falta a abertura",como:"Escreva duas frases dizendo para quem é e o que a pessoa vai levar."});
+  var ult=m.secoes[m.secoes.length-1],fim=String(m.fechamento||"")+" "+(ult?(ult.corpo||"")+" "+(ult.itens||[]).join(" "):"");
+  if(!/\b(clique|acesse|comece|baixe|compre|salve|responda|chame|fale|use|escolha|experimente|me conta|me mande)\b/i.test(fim))add({p:6,bloco:0,man:1,titulo:"Fechar com uma chamada para ação",como:"Termine dizendo o que a pessoa faz agora, uma ação só."});
+  if(!/exemplo|por exemplo|na minha loja|aconteceu/i.test(todo))add({p:7,bloco:0,man:1,titulo:"Falta um exemplo real",como:"Conte uma situação sua ou de uma seguidora. Exemplo concreto vale mais que explicação."});
+  if(m.secoes.length>12)add({p:8,bloco:0,man:1,titulo:"Muitos blocos",como:"Junte blocos parecidos. Menos blocos, mais fáceis de acompanhar."});
+  if(String(m.titulo||"").length>70)add({p:8,bloco:0,man:1,titulo:"Título longo",como:"Deixe o título com até 60 caracteres, falando do resultado que a pessoa vai ter."});
+  out.sort(function(a,b){return a.p-b.p});
+  return out.slice(0,5).map(function(x){return {bloco:x.bloco,man:1,titulo:x.titulo,como:x.como}});
+}
+var _crAction61=crAction;
+crAction=function(a,el){
+  var c=state.cr;
+  if(!S&&a==="sug"&&c&&c.material){c.sug=sugLocal(c);if(!c.sug.length)c.sug=[{bloco:0,man:1,titulo:"Nada para ajustar pelas regras do app",como:"Leia em voz alta. Onde você tropeçar, reescreva do seu jeito."}];saveCr();render();return}
+  return _crAction61(a,el);
+};
+var _renderCriar61=renderCriar;
+renderCriar=function(){_renderCriar61();if(S)return;var v=$("#view");if(!v)return;
+  [].slice.call(v.querySelectorAll('[data-crx^="voz"]')).forEach(function(b){b.remove()});
+  var ta=v.querySelector('textarea[data-cr="voz"]');if(ta){var cd=ta.closest(".card");if(cd)cd.remove()}};
+/* botão tocado com o formulário vazio: avisa em vez de ficar parado */
+(function(){var tm=null;
+  function toast(t){var z=document.getElementById("toast61");if(!z){z=document.createElement("div");z.id="toast61";z.setAttribute("role","status");z.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink,#2a1a22);color:var(--bg,#fff);padding:10px 16px;border-radius:12px;font-size:14px;z-index:99;max-width:min(92vw,420px);text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.25)";document.body.appendChild(z)}
+    z.textContent=t;z.style.display="block";clearTimeout(tm);tm=setTimeout(function(){z.style.display="none"},2600)}
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("button.btn");if(!b)return;var v=document.getElementById("view");if(!v)return;
+    var before=v.innerHTML,txt=b.textContent;
+    setTimeout(function(){
+      if(!document.body.contains(b)||!document.getElementById("view")||v.innerHTML!==before||b.textContent!==txt)return;
+      var sc=b,f=[];for(var k=0;k<4&&sc&&sc.id!=="view";k++){sc=sc.parentNode;if(!sc||!sc.querySelectorAll)break;f=[].slice.call(sc.querySelectorAll('input[type="text"],input:not([type]),textarea')).filter(function(x){return !x.disabled&&!!(b.compareDocumentPosition(x)&Node.DOCUMENT_POSITION_PRECEDING)});if(f.length)break}
+      var n=f[f.length-1];
+      if(n&&!String(n.value).trim()){toast("Escreva algo no campo antes de tocar aqui.");try{n.focus()}catch(_){}}
+    },350)},true);
+})();
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -2967,7 +3049,7 @@ function renderCriar(){
   var h='<div class="stack"><div class="btns">'+(state.tab==="criar"?'<button class="btn ghost small" data-hub="inicio">← Criar</button>':state.tab==="pub"?'<button class="btn ghost small" data-pub="camp">← Publis</button>':'<button class="btn ghost small" data-pback="1">← Produtos</button>')+'</div>'
    +(isDirect(c.tipo)&&!G?'<div><h2>'+esc(tipoLabel(c.tipo))+'</h2><p class="sub">Edite o texto, preencha o que está em [PREENCHER] e salve o PDF.</p></div>':G?'<div><h2>Guia de captação e edição</h2><p class="sub">Conte o que o vídeo precisa ser, mostre referências e o app monta o direcionamento para a editora, em PDF.</p></div>':'<div><h2>Criar material</h2><p class="sub">Escreva a ideia, responda algumas perguntas e o material sai montado com a sua identidade.</p></div>');
   if(!S&&!c.material&&!G&&isDirect(c.tipo)){
-    h+='<div class="draft">'+NOAI+'</div></div>';
+    h+='<div class="draft">Este documento nasce de uma parceria. Abra a parceria em Publis e use o botão do documento ou do relatório.</div></div>';
     $("#view").innerHTML=h;return;
   }
   if(!G)h+='<div class="note">Passo '+(c.step+1)+' de 4</div>';
@@ -2996,7 +3078,7 @@ function renderCriar(){
      +'<div class="btns"><button class="btn" data-crx="pdf">Salvar PDF</button><button class="btn ghost" data-crx="sug">Sugerir melhorias</button><button class="btn ghost" data-crx="save">Salvar página (HTML)</button><button class="btn ghost" data-crx="copy">Copiar texto</button><button class="btn ghost" data-crx="editar">Voltar a editar</button><button class="btn ghost" data-crx="reset">Começar outro</button></div>'+sugHtml(c);
   }else{
     var m=c.material;
-    h+='<div class="draft">Este texto é um rascunho. Mude o que quiser direto nos campos ou peça para reescrever no seu jeito.</div>'
+    h+='<div class="draft">Este texto é um rascunho. Mude o que quiser direto nos campos'+(S?' ou peça para reescrever no seu jeito':'')+'.</div>'
      +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (uma legenda, um roteiro, um áudio transcrito). O app usa isso para escrever como você. Fica salvo neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea><label class="lab">Ajuste extra (opcional)<input type="text" data-cr="instr" value="'+esc(c.instr||"")+'" placeholder="Ex.: mais curto, mais animado, mais direto"></label><div class="btns"><button class="btn" data-crx="voz-all">Reescrever tudo no meu jeito</button>'+(c.undo?'<button class="btn ghost small" data-crx="undo">Desfazer a última reescrita</button>':'')+'</div></div>'
      +'<div class="card"><label class="lab">Título<input type="text" data-cr="mt" value="'+esc(m.titulo)+'"></label><label class="lab">Subtítulo<input type="text" data-cr="ms" value="'+esc(m.subtitulo)+'"></label><label class="lab">Abertura<textarea data-cr="mi">'+esc(m.intro)+'</textarea></label></div>'
      +m.secoes.map(function(s,i){return '<div class="card"><label class="lab">Título do bloco '+(i+1)+'<input type="text" data-cr="mst'+i+'" value="'+esc(s.titulo)+'"></label><label class="lab">Texto<textarea data-cr="msc'+i+'">'+esc(s.corpo)+'</textarea></label><label class="lab">Itens (um por linha)<textarea data-cr="msi'+i+'">'+esc((s.itens||[]).join("\n"))+'</textarea></label><div class="btns"><button class="btn small" data-crx="voz'+i+'">Reescrever no meu jeito</button><button class="btn ghost small" data-crx="mdel'+i+'">Remover bloco</button></div></div>'}).join('')
@@ -3145,7 +3227,7 @@ function guiaForm(c){
 }
 function sugHtml(c){
   if(!c.sug||!c.sug.length)return '';
-  return '<div class="card"><h3>Sugestões de melhoria</h3>'+c.sug.map(function(s,i){return '<p><b>'+esc(s.titulo)+'</b>'+(s.bloco>0?' <span class="note">(bloco '+s.bloco+')</span>':'')+'<br><span class="note">'+esc(s.como)+'</span>'+(s.bloco>0?'<br><button class="btn small ghost" data-crx="apl'+i+'">Aplicar no bloco '+s.bloco+'</button>':'')+'</p>'}).join('')+'<div class="btns"><button class="btn ghost small" data-crx="sugclear">Fechar sugestões</button></div></div>';
+  return '<div class="card"><h3>Sugestões de melhoria</h3>'+c.sug.map(function(s,i){return '<p><b>'+esc(s.titulo)+'</b>'+(s.bloco>0?' <span class="note">(bloco '+s.bloco+')</span>':'')+'<br><span class="note">'+esc(s.como)+'</span>'+(s.bloco>0&&S?'<br><button class="btn small ghost" data-crx="apl'+i+'">Aplicar no bloco '+s.bloco+'</button>':'')+'</p>'}).join('')+'<div class="btns"><button class="btn ghost small" data-crx="sugclear">Fechar sugestões</button></div></div>';
 }
 /* ---- imagens e quadros ---- */
 function imgBlob(file){return new Promise(function(res,rej){var im=new Image();im.onload=function(){var sc=Math.min(1,1024/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);c.toBlob(function(b){b?res(b):rej({code:"img"})},"image/jpeg",0.8)};im.onerror=function(){rej({code:"img"})};im.src=URL.createObjectURL(file)})}
