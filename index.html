@@ -1990,6 +1990,7 @@ function addHero(){
   var t=state.tab,H=null;
   if(t==="criar"&&(state.hub||"inicio")==="inicio")H=["@mariana.leaal","Seu espaço de criação","Ideias, roteiros, ações e materiais. Tudo no seu jeito."];
   else if(t==="pub"&&state.pub!=="mat")H=["Publicidade","Publis","Do briefing ao pagamento, cada parceria no seu painel."];
+  else if(t==="mais"&&state.more==="perfil")H=["Mais","Meu perfil","Quem você é, para o app escrever no seu jeito."];
   else if(t==="mais")H=["Mais","Seu painel","Prazos, equipe, canais, ideias e ajustes."];
   else if(t==="hoje"&&(state.hmode||"meu")==="meu"){var hr=new Date().getHours();H=["Hoje · "+acFmt(isoToday()),(hr<12?"Bom dia":hr<18?"Boa tarde":"Boa noite")+", Mari",hojeResumo(),"compact"]}
   else if(t==="cal")H=["Editorial","Calendário","Tudo o que vai ao ar, em um só lugar.","compact"];
