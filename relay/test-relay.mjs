@@ -1,0 +1,16 @@
+import w from "./worker.js";
+let n=0,f=0;const ok=(c,m)=>{n++;if(!c){f++;console.log("FALHOU",m)}};
+const env={NOTION_CLIENT_ID:"cid",NOTION_CLIENT_SECRET:"sec",RETURN_URLS:"https://app.example/Mari/"};
+const calls=[];globalThis.fetch=async(u,o)=>{calls.push([String(u),o]);if(String(u).includes("oauth/token"))return new Response(JSON.stringify({access_token:"secret_tok",workspace_name:"Loja"}),{status:200});return new Response('{"results":[]}',{status:200})};
+const R=(p,o)=>w.fetch(new Request("https://relay.x"+p,o),env);
+let r=await R("/oauth/start?ret="+encodeURIComponent("https://evil.com/"));ok(r.status===400,"ret ruim");
+r=await R("/oauth/start?ret="+encodeURIComponent("https://app.example/Mari/"));ok(r.status===302&&r.headers.get("location").includes("client_id=cid"),"start");
+const st=new URL(r.headers.get("location")).searchParams.get("state");
+r=await R("/oauth/cb?code=abc&state="+st);ok(r.status===302&&r.headers.get("location")==="https://app.example/Mari/#nt=secret_tok&ntw=Loja","cb "+r.headers.get("location"));
+r=await R("/oauth/cb?code=abc&state="+btoa("https://evil.com"));ok(r.status===400,"cb ret ruim");
+r=await R("/v1/search",{method:"POST",body:"{}"});ok(r.status===401,"sem token");
+r=await R("/v1/search",{method:"POST",body:"{}",headers:{"x-nt":"t"}});ok(r.status===200&&calls.at(-1)[1].headers.authorization==="Bearer t","proxy");
+r=await R("/v1/blocks/abc",{method:"POST",body:"{}",headers:{"x-nt":"t"}});ok(r.status===403,"bloqueia");
+r=await R("/v1/pages/"+"a".repeat(32),{method:"PATCH",body:"{}",headers:{"x-nt":"t"}});ok(r.status===200,"patch");
+r=await R("/v1/databases/"+"a".repeat(32)+"/query",{method:"POST",body:"{}",headers:{"x-nt":"t"}});ok(r.status===200,"query");
+console.log(n-f+"/"+n+" ok");process.exit(f?1:0);

@@ -426,6 +426,8 @@ h3{font-size:21px}
 .tkc{display:flex;flex-direction:column;gap:6px}
 
 .nfile .kinds{display:flex;gap:8px;flex-wrap:wrap}
+
+.ntc .btns{margin-top:10px}
 </style>
 
 <div class="wrap">
@@ -2037,10 +2039,10 @@ var NSF={
 var NSK=["cal","base","parc"];
 function nsRd(){if(!typing())render()}
 async function nsSync(){
-  if(NS.busy||!AUTH.token||inClaude())return;NS.busy=true;NS.msg="Sincronizando com o Notion...";nsRd();
+  if(NS.busy||!nsReady()||inClaude())return;NS.busy=true;NS.msg="Sincronizando com o Notion...";nsRd();
   try{
-    if(!AUTH.notion){await api("/notion/setup",{method:"POST"});AUTH.notion=true;authSave()}
-    var rem=await api("/notion/pull",{method:"POST"}),jobs=[],dels={cal:[],base:[],parc:[]},nIn=0,nOut=0;
+    if(!nsHas()){await napi("/notion/setup",{method:"POST"});nsMark()}
+    var rem=await napi("/notion/pull",{method:"POST"}),jobs=[],dels={cal:[],base:[],parc:[]},nIn=0,nOut=0;
     NS.applying=true;
     NSK.forEach(function(k){var A=NSF[k],loc={},rm={},changed=false;
       A.list().slice().forEach(function(i){loc[A.id(i)]=i});(rem[k]||[]).forEach(function(r){rm[r.id]=r});
@@ -2060,16 +2062,16 @@ async function nsSync(){
     NS.applying=false;
     var chunks=[];for(var q=0;q<jobs.length;q+=30)chunks.push(jobs.slice(q,q+30));
     var dl=[];NSK.forEach(function(k){dels[k].forEach(function(id){dl.push([k,id])})});
-    for(var c=0;c<dl.length;c+=30){var bd={del:{cal:[],base:[],parc:[]}};dl.slice(c,c+30).forEach(function(x){bd.del[x[0]].push(x[1])});await api("/notion/push",{method:"POST",body:bd});nOut+=0}
+    for(var c=0;c<dl.length;c+=30){var bd={del:{cal:[],base:[],parc:[]}};dl.slice(c,c+30).forEach(function(x){bd.del[x[0]].push(x[1])});await napi("/notion/push",{method:"POST",body:bd});nOut+=0}
     for(var ci=0;ci<chunks.length;ci++){var body={cal:[],base:[],parc:[]};chunks[ci].forEach(function(x){body[x[0]].push(NSF[x[0]].rem(x[1]))});
-      await api("/notion/push",{method:"POST",body:body});chunks[ci].forEach(function(x){NS.sig[x[0]+":"+NSF[x[0]].id(x[1])]=NSF[x[0]].sig(NSF[x[0]].rem(x[1]));nOut++})}
+      await napi("/notion/push",{method:"POST",body:body});chunks[ci].forEach(function(x){NS.sig[x[0]+":"+NSF[x[0]].id(x[1])]=NSF[x[0]].sig(NSF[x[0]].rem(x[1]));nOut++})}
     NS.on=true;NS.last=Date.now();nsSave();
     NS.msg="Notion sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+(nIn||nOut?" ("+nIn+" vindos, "+nOut+" enviados)":" (tudo igual)")+".";
   }catch(e){NS.applying=false;if(!(e&&e.code==="auth"))NS.msg=aerr(e)}
   NS.busy=false;nsSave();nsRd()}
-function nsSoon(ms){if(!AUTH.token||!AUTH.notion||!NS.on)return;clearTimeout(NS.t);NS.t=setTimeout(nsSync,ms||20000)}
+function nsSoon(ms){if(!nsReady()||!nsHas()||!NS.on)return;clearTimeout(NS.t);NS.t=setTimeout(nsSync,ms||20000)}
 (function(){try{var o=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){o.call(this,k,v);if(this===window.localStorage&&(k==="hoje-cal"||k==="hoje-brain"||k==="hoje-parc")&&!NS.applying)nsSoon()}}catch(e){}})();
-document.addEventListener("visibilitychange",function(){if(!document.hidden&&AUTH.token&&AUTH.notion&&NS.on&&Date.now()-NS.last>120000)nsSoon(1500)});
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&nsReady()&&nsHas()&&NS.on&&Date.now()-NS.last>120000)nsSoon(1500)});
 
 /* conta na tela de Ajustes */
 function contaHtml(){
@@ -2212,6 +2214,93 @@ function iaCardOwn(){var cf=aiGet(),dentro=inClaude()||(S&&!S.own),tem=!!cf.key;
 var _htmlAI51=htmlAI;
 htmlAI=function(){var h=_htmlAI51();if(AUTH.token&&!inClaude())return h;var i=h.indexOf('<div class="card"><h3>Backup dos seus dados');
   return nfCard()+iaCardOwn()+(i>=0?h.slice(i):'')};
+
+/* ============ v52: Notion direto pelo modelo (relé sem banco) ============ */
+var RELAY_URL="";           /* endereço do relé (Worker), preenchido ao publicar */
+var NT_TEMPLATE_URL="";     /* link público do modelo de Notion, para duplicar */
+var NT={tok:"",ws:"",dbs:null,vt:"text",map:{}};
+function relayBase(){var v="";try{v=localStorage.getItem("relay-hoje")||""}catch(e){}return String(v||RELAY_URL).replace(/\/+$/,"")}
+function ntLoad(){try{var j=JSON.parse(localStorage.getItem("ntok-hoje")||"null");if(j&&j.tok){NT.tok=j.tok;NT.ws=j.ws||"";NT.dbs=j.dbs||null;NT.vt=j.vt||"text"}}catch(e){}}
+function ntSave(){try{if(NT.tok)localStorage.setItem("ntok-hoje",JSON.stringify({tok:NT.tok,ws:NT.ws,dbs:NT.dbs,vt:NT.vt}));else localStorage.removeItem("ntok-hoje")}catch(e){}}
+function nsReady(){return !!(NT.tok||AUTH.token)}
+function nsHas(){return NT.tok?!!NT.dbs:!!AUTH.notion}
+function nsMark(){if(!NT.tok){AUTH.notion=true;authSave()}}
+AERR.ntauth="A conexão com o Notion expirou ou foi removida. Conecte de novo.";
+AERR.ntnone="Não achei o modelo no seu Notion. Duplique o modelo, e na tela de autorização marque a página duplicada. Depois tente de novo.";
+AERR.ntnet="Sem conexão com o Notion agora. Os dados continuam neste aparelho.";
+async function nreq(path,method,body,tries){
+  var r;try{r=await fetch(relayBase()+"/v1/"+path,{method:method,headers:{"content-type":"application/json","x-nt":NT.tok},body:body?JSON.stringify(body):undefined})}catch(e){throw {code:"ntnet"}}
+  if(r.status===429&&(tries||0)<2){await new Promise(function(z){setTimeout(z,(+r.headers.get("retry-after")||1)*1000)});return nreq(path,method,body,(tries||0)+1)}
+  var j={};try{j=await r.json()}catch(e){}
+  if(r.status===401||(r.status===400&&j&&j.code==="unauthorized")){NT.tok="";NT.dbs=null;ntSave();throw {code:"ntauth"}}
+  if(!r.ok)throw {code:"notion_"+r.status,detail:(j&&j.message)||""};
+  return j}
+function ntRt(v){v=sv(v);var o=[];for(var i=0;i<v.length&&o.length<90;i+=1900)o.push({type:"text",text:{content:v.slice(i,i+1900)}});return o}
+function ntTx(p){var a=p&&(p.rich_text||p.title);return a?a.map(function(x){return x.plain_text||""}).join(""):""}
+function ntSel(p){return p&&p.select?p.select.name:""}
+function ntDt(p){return p&&p.date?String(p.date.start||"").slice(0,10):""}
+function ntSelW(v){v=sv(v).replace(/,/g," ").slice(0,100);return {select:v?{name:v}:null}}
+function ntDtW(v){return {date:/^\d{4}-\d{2}-\d{2}$/.test(v||"")?{start:v}:null}}
+function ntNum(v){var n=parseFloat(sv(v).replace(/[^\d,.-]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."));return isFinite(n)?n:null}
+var NTST=["Ideia","Roteiro","Gravado","Editado","Publicado"];
+var NTTO={
+ cal:function(i){return {"Título":{title:ntRt(i.t)},Data:ntDtW(i.d),Canal:ntSelW(i.canal),Formato:ntSelW(i.fmt),Etapa:ntSelW(NTST.indexOf(i.st)>=0?i.st:"Ideia"),Marca:{rich_text:ntRt(i.marca)},Roteiro:{rich_text:ntRt(i.nota)},CTA:{rich_text:ntRt(i.cta)},Legenda:{rich_text:ntRt(i.leg)},Hashtags:{rich_text:ntRt(i.tags)},Slides:{rich_text:ntRt(i.slides)},ID:{rich_text:ntRt(i.id)}}},
+ base:function(i){return {Texto:{title:ntRt(i.text)},Categoria:ntSelW(i.cat),ID:{rich_text:ntRt(i.id)}}},
+ parc:function(i){return {Marca:{title:ntRt(i.marca)},Nome:{rich_text:ntRt(i.nome)},Status:ntSelW(i.status),Valor:NT.vt==="number"?{number:ntNum(i.valor)}:{rich_text:ntRt(i.valor)},"Nota fiscal":{rich_text:ntRt(i.nf)},"Nota emitida em":ntDtW(i.nfData),"Pago em":ntDtW(i.pagoEm),"Entregáveis":{rich_text:ntRt(i.entregaveis)},Regras:{rich_text:ntRt(i.regras)},ID:{rich_text:ntRt(i.id)}}}};
+var NTFROM={
+ cal:function(p){var q=p.properties;return {id:ntTx(q.ID),t:ntTx(q["Título"]),d:ntDt(q.Data),canal:ntSel(q.Canal),fmt:ntSel(q.Formato),st:ntSel(q.Etapa)||"Ideia",marca:ntTx(q.Marca),nota:ntTx(q.Roteiro),cta:ntTx(q.CTA),leg:ntTx(q.Legenda),tags:ntTx(q.Hashtags),slides:ntTx(q.Slides)}},
+ base:function(p){var q=p.properties;return {id:ntTx(q.ID),text:ntTx(q.Texto),cat:ntSel(q.Categoria)}},
+ parc:function(p){var q=p.properties,v=q.Valor;return {id:ntTx(q.ID),marca:ntTx(q.Marca),nome:ntTx(q.Nome),status:ntSel(q.Status),valor:v&&v.type==="number"?(v.number==null?"":String(v.number)):ntTx(v),nf:ntTx(q["Nota fiscal"]),nfData:ntDt(q["Nota emitida em"]),pagoEm:ntDt(q["Pago em"]),entregaveis:ntTx(q["Entregáveis"]),regras:ntTx(q.Regras)}}};
+var NTTITLE={cal:"calendario",base:"perfil e base",parc:"parcerias e prazos"};
+async function ntSetup(){
+  var r=await nreq("search","POST",{filter:{value:"database",property:"object"},page_size:100}),dbs={},best={};
+  (r.results||[]).forEach(function(d){if(d.archived||d.in_trash)return;var t=nfNorm((d.title||[]).map(function(x){return x.plain_text||""}).join(""));
+    Object.keys(NTTITLE).forEach(function(k){if(t===NTTITLE[k]){var e=Date.parse(d.last_edited_time)||0;if(!best[k]||e>best[k]){best[k]=e;dbs[k]=d.id;if(k==="parc"){var v=d.properties&&d.properties.Valor;NT.vt=v&&v.type==="number"?"number":"text"}}}})});
+  if(!dbs.cal||!dbs.base||!dbs.parc)throw {code:"ntnone"};
+  NT.dbs=dbs;ntSave()}
+async function napi(path,opt){
+  if(!NT.tok)return api(path,opt);
+  var b=(opt&&opt.body)||{};
+  if(path==="/notion/setup"){await ntSetup();return {ok:true}}
+  if(!NT.dbs)await ntSetup();
+  if(path==="/notion/pull"){var out={};
+    for(var ki=0;ki<NSK.length;ki++){var k=NSK[ki],cur;out[k]=[];
+      for(var g=0;g<20;g++){var r=await nreq("databases/"+NT.dbs[k]+"/query","POST",cur?{page_size:100,start_cursor:cur}:{page_size:100});
+        (r.results||[]).forEach(function(p){if(p.archived||p.in_trash)return;var it=NTFROM[k](p);if(!it.id)it.id="nt"+p.id.replace(/-/g,"").slice(0,12);NT.map[k+":"+it.id]=p.id;it.edited=Date.parse(p.last_edited_time)||0;out[k].push(it)});
+        if(!r.has_more)break;cur=r.next_cursor}
+      cur=undefined}
+    return out}
+  if(path==="/notion/push"){
+    for(var kj=0;kj<NSK.length;kj++){var kk=NSK[kj];
+      for(var n=0;n<(b[kk]||[]).length;n++){var i=b[kk][n];if(!i||!i.id)continue;var key=kk+":"+i.id;
+        try{if(NT.map[key])await nreq("pages/"+NT.map[key],"PATCH",{properties:NTTO[kk](i)});
+          else{var pg=await nreq("pages","POST",{parent:{database_id:NT.dbs[kk]},properties:NTTO[kk](i)});NT.map[key]=pg.id}}
+        catch(e){if(e&&e.detail&&/archived/i.test(e.detail)){delete NT.map[key]}else throw e}}
+      var dl=(b.del&&b.del[kk])||[];
+      for(var m=0;m<dl.length;m++){var k2=kk+":"+dl[m];if(!NT.map[k2])continue;await nreq("pages/"+NT.map[k2],"PATCH",{archived:true});delete NT.map[k2]}}
+    return {ok:true}}
+  return {}}
+function ntCard(){
+  var rb=relayBase(),h='<div class="card ntc"><h3>Notion</h3>';
+  if(NT.tok){h+='<p class="note">Conectado'+(NT.ws?' a <b>'+esc(NT.ws)+'</b>':'')+'. O calendário, o perfil e as parcerias vão e voltam entre o app e as páginas do seu Notion.</p>'
+    +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
+    +'<div class="btns"><button class="btn small" data-nt="sync"'+(NS.busy?' disabled':'')+'>Sincronizar agora</button><button class="btn ghost small" data-nt="off">Desconectar</button></div>'}
+  else if(!rb){h+='<p class="note">A conexão automática com o Notion ainda não está ativa nesta versão. Use a troca por arquivo logo abaixo.</p>'}
+  else{h+='<p class="note">1. Duplique o modelo para o seu Notion.<br>2. Toque em Conectar e, na tela do Notion, marque a página duplicada.<br>3. Pronto: o app lê e grava nela.</p>'
+    +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
+    +'<div class="btns">'+(NT_TEMPLATE_URL?'<a class="btn ghost small" href="'+esc(NT_TEMPLATE_URL)+'" target="_blank" rel="noopener">Abrir o modelo</a>':'')+'<button class="btn small" data-nt="on">Conectar com Notion</button></div>'}
+  return h+'</div>'}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-nt]");if(!b)return;var a=b.dataset.nt;
+  if(a==="on"){location.href=relayBase()+"/oauth/start?ret="+encodeURIComponent(location.href.split("#")[0]);return}
+  if(a==="sync"){nsSync();return}
+  if(a==="off"){NT.tok="";NT.dbs=null;NT.map={};NS.on=false;NS.sig={};NS.msg="";ntSave();nsSave();render()}});
+var _htmlAI52=htmlAI;
+htmlAI=function(){var h=_htmlAI52();if(inClaude()||AUTH.token)return h;var m='<div class="card nfile">',i=h.indexOf(m);return i<0?ntCard()+h:h.slice(0,i)+ntCard()+h.slice(i)};
+ntLoad();
+(function(){var m=/[#&]nt=([^&]+)(?:&ntw=([^&]*))?/.exec(location.hash||"");
+  if(m){NT.tok=decodeURIComponent(m[1]);NT.ws=decodeURIComponent(m[2]||"");NT.dbs=null;ntSave();NS.msg="Conectado. Toque em Sincronizar agora.";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+  else if(/[#&]nterr=/.test(location.hash||"")){NS.msg="Não foi possível conectar ao Notion. Tente de novo.";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+  if(m||/nterr=/.test(location.hash||""))setTimeout(function(){try{state.tab="mais";state.more="ajustes";render()}catch(e){}},0)})();
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
