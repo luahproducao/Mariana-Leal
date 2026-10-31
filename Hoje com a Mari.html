@@ -377,6 +377,9 @@ h3{font-size:21px}
 .cr .crh{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
 .cr .crt{white-space:pre-wrap}
 .cr .crp{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+#flash{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:60;background:#2b1d22;color:#fff;padding:10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px);font-size:14px;text-align:center}
+#flash[hidden]{display:none}
 </style>
 
 <div class="wrap">
@@ -391,6 +394,7 @@ h3{font-size:21px}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+var ERRLOG=[];
 /* ============ CONTEÚDO (vem dos cartões do Trello "Operação Marketing", lidos em 30/10) ============ */
 var TRELLO="https://trello.com/b/JgmSPYBZ";
 var HOW_REC="Leia o story em voz alta uma vez. Grave de uma vez só, olhando para a câmera, do seu jeito. Se errar, continue a frase e corte depois.";
@@ -1011,7 +1015,7 @@ function acStrip(){
   if(!at.length)h+='<p class="note">Nenhum desafio, campanha ou ação ativa agora.</p>';
   at.forEach(function(a){h+='<div class="card tap acc" role="button" tabindex="0" data-acgo="'+a.id+'"><div><span class="tag t">'+esc(a.tipo)+'</span></div><h3>'+esc(a.nome)+'</h3><p class="note">'+esc(acInfo(a))+'</p>'
     +'<div class="btns"><button class="btn small ghost" data-acx="note|'+a.id+'">Anotar</button>'+((a.notas||[]).length?'<button class="btn small ghost" data-acx="notes|'+a.id+'">'+(AC.open===a.id?'Fechar anotações':'Anotações ('+a.notas.length+')')+'</button>':'')+'<button class="btn small ghost" data-acx="del|'+a.id+'">'+(AC.delc===a.id?'Toque de novo para encerrar':'Encerrar')+'</button></div>'
-    +(AC.open===a.id?acNotasLista(a):'')+'</div>'});
+    +(AC.open===a.id?acNotasLista(a)+'<label class="lab">Nova anotação<textarea data-acn="'+a.id+'" placeholder="O que você pensou ou mudou"></textarea></label><div class="btns"><button class="btn small" data-acx="addnote|'+a.id+'">Guardar anotação</button></div>':'')+'</div>'});
   if(AC.add){var f=AC.f;h+='<div class="card"><h3>Nova ação</h3><label class="lab">Nome<input type="text" data-acf="nome" value="'+esc(f.nome)+'" placeholder="Ex.: Lançamento do app"></label>'
     +'<div class="fields"><label>Tipo<select data-acf="tipo">'+["Desafio","Campanha","Ação","Lançamento"].map(function(x){return'<option'+(x===f.tipo?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label><label>Abre ao tocar<select data-acf="go">'+ACGO.map(function(g){return'<option value="'+g[0]+'"'+(g[0]===f.go?' selected':'')+'>'+g[1]+'</option>'}).join('')+'</select></label></div>'
     +'<div class="fields"><label>Início<input type="date" data-acf="ini" value="'+esc(f.ini)+'"></label><label>Fim<input type="date" data-acf="fim" value="'+esc(f.fim)+'"></label></div>'
@@ -1086,14 +1090,14 @@ document.addEventListener("click",function(e){
     if(b==="new"){AC.add=true;render();return}
     if(b==="cancel"){AC.add=false;render();return}
     if(b==="create"){var f=AC.f;if(!f.nome.trim()||!f.ini||!f.fim)return;AC.items.push({id:"a"+Date.now(),nome:f.nome.trim(),tipo:f.tipo,ini:f.ini,fim:f.fim,go:f.go,notas:[]});acSave();AC.add=false;AC.f={nome:"",tipo:"Campanha",ini:"",fim:"",go:"tab=cal"};render();return}
-    if(b==="note"){PL.dest="camp";PL.acao=q[1];render();var el=document.getElementById("pl-t");if(el){el.scrollIntoView({block:"center"});el.focus()}return}
+    if(b==="note"){AC.open=q[1];render();var el=document.querySelector('[data-acn="'+q[1]+'"]');if(el){el.scrollIntoView({block:"center"});el.focus()}return}
     if(b==="notes"){AC.open=AC.open===q[1]?null:q[1];render();return}
     if(b==="del"){if(AC.delc!==q[1]){AC.delc=q[1];render();return}AC.items=AC.items.filter(function(z){return z.id!==q[1]});acSave();AC.delc=null;render();return}
     if(b==="rmn"){var a2=acGet(q[1]);if(a2){a2.notas.splice(+q[2],1);acSave();render()}return}
-    if(b==="addnote"){var v=(document.getElementById("ac-n")||{}).value;v=String(v||"").trim();var a3=acGet(q[1]);if(a3&&v){a3.notas=a3.notas||[];a3.notas.push({t:v,at:Date.now()});acSave();render()}return}
+    if(b==="addnote"){var ne=document.querySelector('[data-acn="'+q[1]+'"]')||document.getElementById("ac-n"),v=ne?ne.value:"";v=String(v||"").trim();var a3=acGet(q[1]);if(!v){flash("Escreva a anotação antes de guardar.");return}if(a3&&v){a3.notas=a3.notas||[];a3.notas.push({t:v,at:Date.now()});acSave();render()}return}
   }
   var ag=t.closest("[data-acgo]");
-  if(ag&&!t.closest("button")){var a4=acGet(ag.dataset.acgo);if(a4){String(a4.go||"tab=cal").split(";").forEach(function(kv){var qq=kv.split("=");state[qq[0]]=qq[1]});render();window.scrollTo(0,0)}}
+  if(ag&&!t.closest("button")){var a4=acGet(ag.dataset.acgo);if(a4&&state.tab==="cal"&&(!a4.go||a4.go==="tab=cal")){var gg=calOpenGo("acgo|"+a4.id).split("|");state.tab="hoje";state.hmode="plano";state.sel=gg[1];render();window.scrollTo(0,0);return}if(a4){String(a4.go||"tab=cal").split(";").forEach(function(kv){var qq=kv.split("=");state[qq[0]]=qq[1]});render();window.scrollTo(0,0)}}
 });
 
 
@@ -1270,7 +1274,7 @@ function ovPath(d,k){
   if(k==="ma"||k==="ass"||k==="start"||k==="finish")return [d,k];
   var m=k.match(/^s(\d+)$/);if(m&&d.stories[+m[1]-1])return [d.stories[+m[1]-1],1];
   return null}
-function ovLoad(){try{OVR=JSON.parse(localStorage.getItem("hoje-ovr")||"{}")}catch(e){OVR={}}
+function ovLoad(){try{OVR=JSON.parse(localStorage.getItem("hoje-ovr")||"{}")}catch(e){OVR={}}if(!OVR||typeof OVR!=="object")OVR={};
   Object.keys(OVR).forEach(function(key){var i=key.indexOf("|"),d=dayById(key.slice(0,i)),k=key.slice(i+1);if(!d||k.indexOf("n.")===0)return;var p=ovPath(d,k);if(!p)return;if(!(key in ORIGV))ORIGV[key]=p[0][p[1]];p[0][p[1]]=OVR[key]})}
 function ovSave(){try{localStorage.setItem("hoje-ovr",JSON.stringify(OVR))}catch(e){}}
 function ovSet(d,k,v){var key=d.id+"|"+k;
@@ -1702,6 +1706,24 @@ document.addEventListener("change",function(e){var el=e.target;if(!el.dataset||!
   if(it.autoSl||!(it.slides&&it.slides.length)){if(b.slides){it.slides=b.slides;it.autoSl=1}else if(it.autoSl){it.slides=[];it.autoSl=0}}
   calSave();render()});
 
+
+/* ============ v42: avisos curtos ============ */
+function flash(msg){var b=document.getElementById("flash");if(!b){b=document.createElement("div");b.id="flash";b.setAttribute("role","status");b.hidden=true;document.body.appendChild(b)}
+  b.textContent=msg;b.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(function(){b.hidden=true},2600)}
+document.addEventListener("click",function(e){var bt=e.target&&e.target.closest&&e.target.closest("button");if(!bt||bt.closest("#undo,#flash"))return;
+  var tx=(bt.textContent||"").trim();if(!/^(Adicionar|Guardar|Salvar)/.test(tx)||bt.id==="savenote"||bt.id==="saveres")return;
+  var v0=document.getElementById("view")?document.getElementById("view").innerHTML.length:0;
+  setTimeout(function(){var vw=document.getElementById("view");if(vw&&vw.innerHTML.length===v0)flash("Preencha o campo antes de guardar.")},220)});
+
+
+/* ============ v42: erros visíveis e copiáveis ============ */
+function errShow(m){ERRLOG.push(new Date().toLocaleTimeString("pt-BR")+" "+m);var b=document.getElementById("flash");if(!b){b=document.createElement("div");b.id="flash";b.setAttribute("role","status");document.body.appendChild(b)}
+  b.hidden=false;b.textContent="Deu um erro. Toque aqui para copiar e me mandar.";b.setAttribute("data-err","1");clearTimeout(flash.t);flash.t=setTimeout(function(){b.hidden=true;b.removeAttribute("data-err")},9000)}
+window.addEventListener("error",function(e){if(e&&e.message)errShow(e.message+(e.lineno?" (linha "+e.lineno+")":""))});
+window.addEventListener("unhandledrejection",function(e){errShow(String(e.reason&&e.reason.message||e.reason))});
+document.addEventListener("click",function(e){var b=e.target&&e.target.closest&&e.target.closest("#flash[data-err]");if(!b)return;var tx="Hoje com a Mari, erro:\n"+ERRLOG.slice(-5).join("\n")+"\n"+navigator.userAgent;
+  try{navigator.clipboard.writeText(tx).then(function(){b.textContent="Copiado. Cole no WhatsApp para a Laila."},function(){b.textContent="Não consegui copiar. Tire um print."})}catch(er){b.textContent="Não consegui copiar. Tire um print."}},true);
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -1977,7 +1999,7 @@ function saveDrafts(){try{localStorage.setItem("hoje-drafts",JSON.stringify(stat
 function savePlano(){try{localStorage.setItem("hoje-plano",JSON.stringify(state.plano))}catch(e){}}
 function loadHub(){
   try{state.rot=JSON.parse(localStorage.getItem("hoje-rot")||"null")}catch(e){}if(!state.rot)state.rot=rotNew();
-  try{state.drafts=JSON.parse(localStorage.getItem("hoje-drafts")||"[]")}catch(e){state.drafts=[]}
+  try{state.drafts=JSON.parse(localStorage.getItem("hoje-drafts")||"[]")}catch(e){state.drafts=[]}if(!Array.isArray(state.drafts))state.drafts=[];
   try{state.plano=JSON.parse(localStorage.getItem("hoje-plano")||"{}")}catch(e){state.plano={}}
 }
 function pushDraft(d){d.id="d"+Date.now();d.at=Date.now();state.drafts.unshift(d);state.drafts=state.drafts.slice(0,50);saveDrafts();draftSync(d)}
@@ -3443,7 +3465,7 @@ document.addEventListener("change",function(e){
 });
 
 /* ============ INÍCIO ============ */
-synLoadMeta();loadLocal();brLoad();brSeed();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();mdSeed();mdMigratePlano();state.sel=pickDay();render();
+["synLoadMeta","loadLocal","brLoad","brSeed","parcLoad","mdLoad","calLoad","acLoad","ckLoad","ovLoad","mdSeed","mdMigratePlano"].forEach(function(n){try{window[n]()}catch(e){ERRLOG.push(n+": "+e.message)}});try{state.sel=pickDay()}catch(e){state.sel=DAYS[0].id}render();
 function typing(){var a=document.activeElement;return a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))}
 function listen(name,apply){
   C[name].onSnapshot(function(s){apply(s);saveLocal();if(!typing())render();setSync("Sincronizado com a equipe")},function(){});
