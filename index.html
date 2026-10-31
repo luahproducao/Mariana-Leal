@@ -1528,10 +1528,15 @@ function calRowSecs(x){var q=String(x.go||"").split("|"),k=q[0],o=[];
   if(k==="acgo"){var a=acGet(q[1]);if(a){crSec(o,a.tipo,a.nome);crSec(o,"Período",acFmt(a.ini)+" a "+acFmt(a.fim));if(a.notas&&a.notas.length)crSec(o,"Notas",a.notas.map(function(n){return "• "+(n.t||n)}).join("\n"))}return o}
   if(k==="md"){var l=(MD.items||[]).filter(function(z){return z.d===q[1]&&z.st!=="cancelado"});crSec(o,"Tarefas do dia",l.map(function(z){return (z.st==="feito"?"✓ ":"• ")+z.t+(z.quem?" ("+z.quem+")":"")}).join("\n"));return o}
   crSec(o,x.tag,x.t);return o}
+function calOpenGo(go){var q=String(go).split("|");
+  if(q[0]==="acgo"){var a=acGet(q[1]);if(a&&(!a.go||a.go==="tab=cal")){var sel=CAL.sel||isoToday(),d=DAYS.filter(function(z){return z.date===sel})[0]||DAYS.filter(function(z){return z.date>=sel})[0]||DAYS[DAYS.length-1];return "plano|"+d.id}}
+  return go}
+function calOpenLbl(go){var q=String(go).split("|");if(q[0]==="acgo"){var a=acGet(q[1]);if(a&&(!a.go||a.go==="tab=cal"))return "Abrir o plano do dia"}
+  return {plano:"Abrir o plano no Hoje",md:"Abrir minhas tarefas",canais:"Abrir os canais",prz:"Abrir em Publis",camp:"Abrir em Publis",acgo:"Abrir em Publis"}[q[0]]||"Abrir no app"}
 function calRowRead(x,ix){var secs=calRowSecs(x);
   var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span><h3 style="margin:6px 0 2px">'+esc(x.t)+'</h3></div>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
-  h+='<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">Abrir no app</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>';
+  h+='<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">'+esc(calOpenLbl(x.go))+'</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>';
   return h}
 document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||state.tab!=="cal")return;
   var r=t.closest("[data-calrd]");
@@ -1542,7 +1547,7 @@ document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||
     if(q[0]==="close"){CAL.rd=null;render();return}
     if(q[0]==="copy"){var its=calItems(CAL.sel).filter(calFilter),xx=its[+q[1]];if(xx)copyText(xx.tag+": "+xx.t+"\n\n"+calRowSecs(xx).map(function(z){return z.h+":\n"+z.t}).join("\n\n"),c);return}}
   var o=t.closest("[data-calopen]");
-  if(o){e.stopPropagation();var go=o.dataset.calopen;CAL.rd=null;var f=document.createElement("div");f.dataset.calgo=go;document.body.appendChild(f);f.click();f.remove()}},true);
+  if(o){e.stopPropagation();var go=calOpenGo(o.dataset.calopen);CAL.rd=null;var f=document.createElement("div");f.dataset.calgo=go;document.body.appendChild(f);f.click();f.remove()}},true);
 
 
 /* ============ v39: roteiro, legenda, hashtags e CTA em todos os conteúdos ============ */
