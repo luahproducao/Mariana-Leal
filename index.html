@@ -2153,7 +2153,7 @@ var NFHEAD={ // nomes aceitos nos cabeçalhos do Notion (sem acento, minúsculo)
  parc:{marca:["marca","brand","titulo","title","name"],nome:["nome"],status:["status","etapa"],valor:["valor","value"],nf:["nota fiscal","nf"],nfData:["nota emitida em"],pagoEm:["pago em"],entregaveis:["entregaveis"],regras:["regras"],id:["id"]}};
 function nfNorm(t){return String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim()}
 function csvEsc(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'}
-function csvParse(t){t=String(t||"").replace(/^﻿/,"");var first=t.split(/\r?\n/)[0]||"",sep=(first.split(";").length>first.split(",").length)?";":",";
+function csvParse(t){t=String(t||"").replace(/^﻿/,"");var first=t.split(/\r?\n/)[0]||"",sep=(first.split("\t").length>1)?"\t":(first.split(";").length>first.split(",").length)?";":",";
   var rows=[],row=[],f="",q=false;
   for(var i=0;i<t.length;i++){var ch=t[i];
     if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
@@ -2193,9 +2193,10 @@ function nfImport(k,text){var rows=csvParse(text);if(rows.length<2)return {err:"
   });A.save()}finally{NS.applying=false}
   return {novos:novos,atual:atual}}
 function nfCard(){var k=NF.kind;
-  return '<div class="card nfile"><h3>Notion, por arquivo</h3><p class="note">Sem conectar nada: o app exporta e importa arquivos CSV, que o Notion lê e gera. Para levar ao Notion: exporte aqui e, no Notion, use Importar e depois CSV. Para trazer do Notion: abra o banco, menu ••• e Exportar como CSV, e importe aqui. Novas linhas entram e as existentes são atualizadas.</p>'
+  return '<div class="card nfile"><h3>Levar e trazer do Notion</h3><p class="note">Seu Notion tem o modelo "Hoje" com três bancos (Calendário, Perfil e base, Parcerias). É só escolher o que levar e tocar:</p>'
    +'<div class="kinds" role="group" aria-label="O que levar">'+["cal","base","parc"].map(function(x){return '<button class="pill" data-nf="kind|'+x+'" aria-pressed="'+(k===x)+'">'+NFNAME[x]+'</button>'}).join('')+'</div>'
-   +'<div class="btns"><button class="btn small" data-nf="export">Exportar '+NFNAME[k]+' (CSV)</button><label class="btn ghost small" style="cursor:pointer">Importar CSV do Notion<input type="file" accept=".csv,text/csv" data-nf="import" style="display:none"></label></div>'
+   +'<div class="btns"><button class="btn small" data-nf="export">1. Levar para o Notion</button><label class="btn ghost small" style="cursor:pointer">2. Trazer do Notion<input type="file" accept=".csv,.tsv,.txt,text/csv" data-nf="import" style="display:none"></label></div>'
+   +'<details class="note"><summary>Como funciona</summary><p><b>Levar:</b> o app baixa um arquivo. No Notion, abra o banco do modelo, toque em ••• e Importar (ou Mesclar com CSV), e escolha o arquivo.<br><b>Trazer:</b> no banco do Notion, ••• e Exportar como CSV. Depois toque em "Trazer do Notion" e escolha o arquivo. O que já existe é atualizado e o novo entra.</p></details>'
    +(NF.msg?'<p class="note" role="status">'+esc(NF.msg)+'</p>':'')+'</div>'}
 document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-nf]");if(!b||b.tagName==="INPUT")return;var a=b.dataset.nf.split("|");
   if(a[0]==="kind"){NF.kind=a[1];NF.msg="";render();return}
@@ -2285,7 +2286,7 @@ function ntCard(){
   if(NT.tok){h+='<p class="note">Conectado'+(NT.ws?' a <b>'+esc(NT.ws)+'</b>':'')+'. O calendário, o perfil e as parcerias vão e voltam entre o app e as páginas do seu Notion.</p>'
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
     +'<div class="btns"><button class="btn small" data-nt="sync"'+(NS.busy?' disabled':'')+'>Sincronizar agora</button><button class="btn ghost small" data-nt="off">Desconectar</button></div>'}
-  else if(!rb){h+='<p class="note">A conexão automática com o Notion ainda não está ativa nesta versão. Use a troca por arquivo logo abaixo.</p>'}
+  else if(!rb){return ''}
   else{h+='<p class="note">1. Duplique o modelo para o seu Notion.<br>2. Toque em Conectar e, na tela do Notion, marque a página duplicada.<br>3. Pronto: o app lê e grava nela.</p>'
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
     +'<div class="btns">'+(NT_TEMPLATE_URL?'<a class="btn ghost small" href="'+esc(NT_TEMPLATE_URL)+'" target="_blank" rel="noopener">Abrir o modelo</a>':'')+'<button class="btn small" data-nt="on">Conectar com Notion</button></div>'}
