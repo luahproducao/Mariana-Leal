@@ -1537,7 +1537,13 @@ function calOpenGo(go){var q=String(go).split("|");
   return go}
 function calOpenLbl(go){var q=String(go).split("|");if(q[0]==="acgo"){var a=acGet(q[1]);if(a&&(!a.go||a.go==="tab=cal"))return "Abrir o plano do dia"}
   return {plano:"Abrir o plano no Hoje",md:"Abrir minhas tarefas",canais:"Abrir os canais",prz:"Abrir em Publis",camp:"Abrir em Publis",acgo:"Abrir em Publis"}[q[0]]||"Abrir no app"}
-function calRowRead(x,ix){var secs=calRowSecs(x);
+function calRowRead(x,ix){var q0=String(x.go||"").split("|");
+  if(q0[0]==="md"){var l=(MD.items||[]).filter(function(z){return z.d===q0[1]&&z.st!=="cancelado"});
+    var hh='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag">Tarefas</span><h3 style="margin:6px 0 2px">Tarefas do dia '+esc(acFmt(q0[1]))+'</h3><span class="note">Toque para marcar como feita. Toque de novo para desmarcar.</span></div>';
+    l.forEach(function(z){hh+='<div class="row'+(z.st==="feito"?' chkd':'')+'"><input type="checkbox" id="mt-'+z.id+'" data-mdtog="'+z.id+'"'+(z.st==="feito"?' checked':'')+'><label for="mt-'+z.id+'">'+esc(z.t)+(z.quem?' <span class="note">('+esc(z.quem)+')</span>':'')+'</label></div>'});
+    if(!l.length)hh+='<p class="note">Nenhuma tarefa neste dia.</p>';
+    return hh+'<div class="btns"><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>'}
+  var secs=calRowSecs(x);
   var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span><h3 style="margin:6px 0 2px">'+esc(x.t)+'</h3></div>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
   h+='<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">'+esc(calOpenLbl(x.go))+'</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>';
@@ -1723,6 +1729,10 @@ window.addEventListener("error",function(e){if(e&&e.message)errShow(e.message+(e
 window.addEventListener("unhandledrejection",function(e){errShow(String(e.reason&&e.reason.message||e.reason))});
 document.addEventListener("click",function(e){var b=e.target&&e.target.closest&&e.target.closest("#flash[data-err]");if(!b)return;var tx="Hoje com a Mari, erro:\n"+ERRLOG.slice(-5).join("\n")+"\n"+navigator.userAgent;
   try{navigator.clipboard.writeText(tx).then(function(){b.textContent="Copiado. Cole no WhatsApp para a Laila."},function(){b.textContent="Não consegui copiar. Tire um print."})}catch(er){b.textContent="Não consegui copiar. Tire um print."}},true);
+
+
+document.addEventListener("change",function(e){var t=e.target;if(!t||!t.dataset||!t.dataset.mdtog)return;var it=(MD.items||[]).filter(function(z){return z.id===t.dataset.mdtog})[0];if(!it)return;
+  it.st=t.checked?"feito":"pendente";it.at=Date.now();mdLocal();render()});
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
