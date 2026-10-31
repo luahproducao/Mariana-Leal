@@ -2213,8 +2213,9 @@ function nfImport(k,text){var rows=csvParse(text);if(rows.length<2)return {err:"
     else{var m3=Object.assign({id:"i"+Date.now()+(seq++)},r);if(k==="cal"&&!m3.st)m3.st="Ideia";A.add(A.make(m3));novos++}
   });A.save()}finally{NS.applying=false}
   return {novos:novos,atual:atual}}
+var NOTION_MODELO="https://dune-freighter-a96.notion.site/Hoje-com-a-Mari-Modelo-de-Notion-40ab9909984e81e997f8dd1a8eb9d5c2?pvs=73";
 function nfCard(){var k=NF.kind;
-  return '<div class="card nfile"><h3>Notion, por arquivo</h3><p class="note">Sem conectar nada: o app exporta e importa arquivos CSV, que o Notion lê e gera. Para levar ao Notion: exporte aqui e, no Notion, use Importar e depois CSV. Para trazer do Notion: abra o banco, menu ••• e Exportar como CSV, e importe aqui. Novas linhas entram e as existentes são atualizadas.</p>'
+  return '<div class="card nfile"><h3>Notion, por arquivo</h3><p class="note"><b>1.</b> Toque em “Abrir o modelo no Notion” e, no Notion, em Duplicar. Você ganha a sua cópia, vazia.<br><b>2.</b> Para levar do app ao Notion: escolha o que levar abaixo, exporte o CSV e, no Notion, use Importar e depois CSV.<br><b>3.</b> Para trazer do Notion: abra o banco, menu ••• e Exportar como CSV, e importe aqui. Linhas novas entram e as existentes são atualizadas.</p><div class="btns"><a class="btn small" href="'+NOTION_MODELO+'" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Abrir o modelo no Notion</a></div>'
    +'<div class="kinds" role="group" aria-label="O que levar">'+["cal","base","parc"].map(function(x){return '<button class="pill" data-nf="kind|'+x+'" aria-pressed="'+(k===x)+'">'+NFNAME[x]+'</button>'}).join('')+'</div>'
    +'<div class="btns"><button class="btn small" data-nf="export">Exportar '+NFNAME[k]+' (CSV)</button><label class="btn ghost small" style="cursor:pointer">Importar CSV do Notion<input type="file" accept=".csv,text/csv" data-nf="import" style="display:none"></label></div>'
    +(NF.msg?'<p class="note" role="status">'+esc(NF.msg)+'</p>':'')+'</div>'}
