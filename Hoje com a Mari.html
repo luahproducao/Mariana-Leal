@@ -383,6 +383,14 @@ h3{font-size:21px}
 
 .crtop{position:sticky;top:6px;z-index:6;display:flex;justify-content:flex-end;margin:-4px 0 0;pointer-events:none}
 .crtop .btn{pointer-events:auto;background:var(--card,#fffaf3);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+
+.pf .bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.pf .bar i{display:block;height:100%;background:var(--accent)}
+.pf .prow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin:8px 0}
+.pf .prow .bar{grid-column:1 / -1}
+.pf textarea{min-height:110px}
+.pf .chips{display:flex;flex-wrap:wrap;gap:8px}
+.pf .chips label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 12px}
 </style>
 
 <div class="wrap">
@@ -551,7 +559,7 @@ var NAV=[
  ["criar","Criar",'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>'],
  ["mais","Mais",'<circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/>']
 ];
-var MORE=[["atalhos","Início"],["prazos","Prazos"],["canais","Melhores Amigos"],["produtos","Mini produtos"],["equipe","Equipe"],["ajustes","Ajustes"]];
+var MORE=[["atalhos","Início"],["perfil","Meu perfil"],["prazos","Prazos"],["canais","Melhores Amigos"],["produtos","Mini produtos"],["equipe","Equipe"],["ajustes","Ajustes"]];
 
 /* ============ PRODUTOS ============ */
 var PST=[["ideia","Ideia"],["roteiro","Rascunho"],["feito","Produzido"],["venda","À venda"]];
@@ -1260,7 +1268,7 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
 function hubS(html){if(!SIMPLE||HK.all)return html;var p=html.split('<button class="card click tile"'),keep=[p[0]];p.slice(1).forEach(function(z){if(z.indexOf('data-hub="ideias"')>=0||z.indexOf('data-hub="roteiro"')>=0)keep.push(z)});return keep.join('<button class="card click tile"')+'</div><div class="btns"><button class="btn ghost small" data-hkall="1">Mais ferramentas</button></div>'}
 function backBtn(){if(SIMPLE&&state.tab==="pub")$("#view").insertAdjacentHTML("afterbegin",'<div class="btns"><button class="btn ghost small" data-tab="mais">← Mais</button></div>')}
 function atalhosHtml(){
-  var L=[["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Avisar a Laila, recados e andamento","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
+  var L=[["Meu perfil","Conte sobre você e o app alinha roteiros, ganchos e calendário","tab=mais;more=perfil"],["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Avisar a Laila, recados e andamento","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
   var h='<div><h2>Mais</h2><p class="sub">Tudo o que não é do dia a dia fica aqui.</p></div>'+L.map(function(x){return'<div class="card tap" role="button" tabindex="0" data-go="'+x[2]+'"><h3>'+x[0]+'</h3><p class="note">'+x[1]+'</p></div>'}).join('');
   h+='<div class="card"><h3>Modo do app</h3><p class="note">'+(SIMPLE?'Agora você vê só o essencial: Hoje, Calendário e Criar. O modo completo mostra tudo de uma vez.':'Agora você vê tudo. O modo simples deixa só Hoje, Calendário e Criar.')+'</p><div class="btns"><button class="btn small" data-simple="'+(SIMPLE?'off':'on')+'">'+(SIMPLE?'Mostrar tudo (modo completo)':'Voltar ao modo simples')+'</button></div></div>';
   return h}
@@ -1744,6 +1752,74 @@ document.addEventListener("click",function(e){var b=e.target&&e.target.closest&&
 document.addEventListener("change",function(e){var t=e.target;if(!t||!t.dataset||!t.dataset.mdtog)return;var it=(MD.items||[]).filter(function(z){return z.id===t.dataset.mdtog})[0];if(!it)return;
   it.st=t.checked?"feito":"pendente";it.at=Date.now();mdLocal();render()});
 
+
+/* ============ v46: Meu perfil (boas-vindas e alinhamento) ============ */
+var PERF={done:false,skip:false,i:null,ans:{},ids:{},pil:[]};
+var PILARES=[["historia","Minha história"],["gestao","Gestão e preço"],["viagem","Curadoria e compras"],["loja","Bastidor da loja"],["black","Black Friday"],["trend","Humor e trend"],["assin","Assinatura"],["publi","Publis"],["app","Estoque Crescente"]];
+var PIL_OF={historia:"historia",gestao:"gestao",viagem:"viagem",loja:"loja",arrume:"loja",teste:"loja",black:"black",live:"black",trend:"trend",assin:"assin",publi:"publi",tray:"publi",melhorenvio:"publi",app:"app"};
+function perfLoad(){try{var j=JSON.parse(localStorage.getItem("hoje-perfil")||"null");if(j&&typeof j==="object"&&!Array.isArray(j)){PERF.done=!!j.done;PERF.skip=!!j.skip;PERF.ans=j.ans||{};PERF.ids=j.ids||{};PERF.pil=Array.isArray(j.pil)?j.pil:[]}}catch(e){}}
+function perfSave(){try{localStorage.setItem("hoje-perfil",JSON.stringify({done:PERF.done,skip:PERF.skip,ans:PERF.ans,ids:PERF.ids,pil:PERF.pil}))}catch(e){}}
+function perfSteps(){var st=[];[["voz",0],["voz",1],["historia",0],["historia",1],["publico",0],["publico",1],["negocio",0],["negocio",1],["marcas",0],["marcas",1]].forEach(function(p){var q=(BRQ[p[0]]||[])[p[1]];if(q)st.push({k:p[0]+p[1],cat:p[0],q:q})});
+  st.push({k:"texto",cat:"voz",q:"Cole 2 ou 3 textos seus (legenda, roteiro ou áudio transcrito). O app aprende o seu tom por eles.",raw:1});
+  st.push({k:"pilares",q:"Sobre o que você quer falar mais nos próximos meses? Marque os assuntos.",pil:1});
+  st.push({k:"meta",q:"Qual é a sua meta para os próximos 30 dias? Pode ser seguidores, vendas, lançamento ou rotina."});
+  st.push({k:"limites",q:"O que você NÃO quer mostrar nem falar? Por exemplo: preços, endereço, família, nomes de fornecedores."});
+  st.push({k:"rotina",q:"Em quais dias e horários você grava e posta? Quanto tempo você tem por dia?"});return st}
+function perfClean(t){var m=String(t||"").match(/R: ([\s\S]*)$/);return (m?m[1]:String(t||"")).trim()}
+function perfBR(cat){return BR.items.filter(function(x){return x.cat===cat})}
+function perfCommit(stp){var a=String(PERF.ans[stp.k]||"").trim();if(!a||!stp.cat)return;var text=stp.raw?a:"P: "+stp.q+"\nR: "+a;var id=PERF.ids[stp.k],it=id?BR.items.filter(function(x){return x.id===id})[0]:null;
+  if(it){it.text=text;it.at=Date.now();brPut(it)}else{var n=brAdd(stp.cat,text);if(n)PERF.ids[stp.k]=n.id}}
+function profText(){var o=[];if(PERF.pil.length)o.push("Assuntos que a Mari quer priorizar: "+PERF.pil.map(function(k){return (PILARES.filter(function(p){return p[0]===k})[0]||[0,k])[1]}).join(", "));
+  if(PERF.ans.meta)o.push("Meta dos próximos 30 dias: "+PERF.ans.meta);if(PERF.ans.limites)o.push("LIMITES (nunca ultrapasse): "+PERF.ans.limites);if(PERF.ans.rotina)o.push("Rotina: "+PERF.ans.rotina);return o.join("\n")}
+function perfBanner(){if(PERF.done||PERF.skip)return '';return '<div class="card"><h3>Vamos nos conhecer</h3><p class="note">Responda umas perguntas rápidas sobre você, a loja e o seu público. O app usa isso para escrever no seu jeito e organizar o calendário. Leva uns 5 minutos e dá para parar e continuar depois.</p><div class="btns"><button class="btn" data-gob="tab=mais;more=perfil">Começar</button><button class="btn small ghost" data-perfx="skip">Agora não</button></div></div>'}
+var _greetP=greetHtml;greetHtml=function(){return _greetP()+perfBanner()};
+function perfBalance(){var t=isoToday(),end=addDays(t,14),cnt={},tot=0;CALD.items.forEach(function(x){if(x.skip||!x.d||x.d<t||x.d>end)return;var k=PIL_OF[calTag(x)]||"loja";cnt[k]=(cnt[k]||0)+1;tot++});
+  var h='<div class="card pf"><h3>Equilíbrio dos próximos 14 dias</h3><p class="note">'+tot+' conteúdos no calendário. As barras mostram o peso de cada assunto.</p>';
+  PILARES.forEach(function(p){var n=cnt[p[0]]||0,pr=PERF.pil.indexOf(p[0])>=0;h+='<div class="prow"><span>'+esc(p[1])+(pr?' <span class="tag t">prioridade</span>':'')+'</span><b>'+n+'</b><div class="bar"><i style="width:'+(tot?Math.round(n*100/tot):0)+'%"></i></div></div>'});
+  var falta=PERF.pil.filter(function(k){return !cnt[k]}).map(function(k){return PILARES.filter(function(p){return p[0]===k})[0][1]});
+  if(falta.length)h+='<p class="note"><b>Atenção:</b> nenhum conteúdo de '+esc(falta.join(", "))+' nos próximos 14 dias.</p>';
+  else if(PERF.pil.length)h+='<p class="note">Todos os assuntos que você priorizou aparecem nos próximos 14 dias.</p>';
+  return h+'</div>'}
+function perfSummary(){var h='<div class="card pf"><h3>O que o app entendeu sobre você</h3>';var any=false;
+  [["voz","Seu jeito de falar"],["historia","Sua história"],["publico","Seu público"],["negocio","Sua loja"],["marcas","Parcerias"]].forEach(function(c){var l=perfBR(c[0]).slice(0,2);if(!l.length)return;any=true;h+='<p><b>'+c[1]+':</b> '+l.map(function(x){var t=perfClean(x.text);return esc(t.length>140?t.slice(0,140)+"…":t)}).join(" · ")+'</p>'});
+  if(PERF.pil.length){any=true;h+='<p><b>Quer falar mais sobre:</b> '+esc(PERF.pil.map(function(k){return PILARES.filter(function(p){return p[0]===k})[0][1]}).join(", "))+'</p>'}
+  [["meta","Meta de 30 dias"],["limites","Limites"],["rotina","Rotina"]].forEach(function(c){if(PERF.ans[c[0]]){any=true;h+='<p><b>'+c[1]+':</b> '+esc(PERF.ans[c[0]])+'</p>'}});
+  if(!any)h+='<p class="note">Ainda sem respostas.</p>';
+  h+='<p class="note">O app usa isso em cada roteiro (bloco "Do seu perfil"), no equilíbrio do calendário e na IA, quando o Worker estiver ligado.</p></div>';return h}
+function perfPage(){var st=perfSteps(),N=st.length;
+  if(PERF.i==null){
+    var h='<div><h2>Meu perfil</h2><p class="sub">Quanto mais você conta, melhor o app escreve no seu jeito.</p></div>';
+    if(!PERF.done){h+='<div class="card pf"><h3>Conte sobre você</h3><p class="note">'+N+' perguntas curtas. Pode responder do seu jeito, por texto ou pelo microfone do teclado. Dá para pular e voltar depois.</p><div class="btns"><button class="btn" data-perfx="start">'+(Object.keys(PERF.ans).length?'Continuar':'Começar')+'</button></div></div>'}
+    else h+=perfSummary()+perfBalance()+'<div class="card pf"><div class="btns"><button class="btn ghost" data-perfx="redo">Revisar minhas respostas</button></div></div>';
+    return h}
+  var s0=st[PERF.i];if(!s0){PERF.i=null;return perfPage()}
+  var h2='<div><span class="kicker">Passo '+(PERF.i+1)+' de '+N+'</span><div class="bar" style="margin-top:6px"><i style="width:'+Math.round((PERF.i)*100/N)+'%"></i></div></div><div class="card pf"><h3>'+esc(s0.q)+'</h3>';
+  if(s0.pil)h2+='<div class="chips">'+PILARES.map(function(p){return '<label><input type="checkbox" data-perfpil="'+p[0]+'"'+(PERF.pil.indexOf(p[0])>=0?' checked':'')+'>'+esc(p[1])+'</label>'}).join('')+'</div>';
+  else h2+='<textarea data-perf="'+s0.k+'" placeholder="Escreva do seu jeito">'+esc(PERF.ans[s0.k]||"")+'</textarea>';
+  h2+='<div class="btns">'+(PERF.i>0?'<button class="btn ghost" data-perfx="back">Voltar</button>':'')+'<button class="btn" data-perfx="next">'+(PERF.i===N-1?'Concluir':'Salvar e continuar')+'</button><button class="btn small ghost" data-perfx="pause">Continuar depois</button></div></div>';
+  return h2}
+function perfPageSteps(){return perfSteps()}
+document.addEventListener("input",function(e){var t=e.target;if(!t||!t.dataset||!t.dataset.perf)return;PERF.ans[t.dataset.perf]=t.value;perfSave()});
+document.addEventListener("change",function(e){var t=e.target;if(!t||!t.dataset||!t.dataset.perfpil)return;var k=t.dataset.perfpil,i=PERF.pil.indexOf(k);if(t.checked&&i<0)PERF.pil.push(k);if(!t.checked&&i>=0)PERF.pil.splice(i,1);perfSave()});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-perfx]");if(!b)return;var a=b.dataset.perfx,st=perfSteps(),N=st.length;
+  if(a==="skip"){PERF.skip=true;perfSave();render();return}
+  if(a==="start"){PERF.i=0;PERF.skip=false;render();window.scrollTo(0,0);return}
+  if(a==="redo"){PERF.i=0;PERF.done=false;render();window.scrollTo(0,0);return}
+  if(a==="pause"){if(PERF.i!=null&&st[PERF.i])perfCommit(st[PERF.i]);perfSave();PERF.i=null;applyRegras();render();return}
+  if(a==="back"){if(PERF.i>0)PERF.i--;render();window.scrollTo(0,0);return}
+  if(a==="next"){var s0=st[PERF.i];if(s0)perfCommit(s0);if(PERF.i>=N-1){PERF.i=null;PERF.done=true;perfSave();applyRegras();flash("Pronto. O app já usa o seu perfil.")}else{PERF.i++;perfSave()}render();window.scrollTo(0,0)}});
+// uso do perfil: texto das regras da IA e bloco nos roteiros
+var _applyReg=applyRegras;applyRegras=function(){_applyReg();var p=profText();if(p)RULES=RULES+"\n"+p};
+var _calFull2=calFull;
+calFull=function(it){var o=_calFull2(it);if(!(PERF.done||Object.keys(PERF.ans).length||BR.items.length))return o;
+  var tg=calTag(it),lines=[],v=perfBR("voz");
+  if(v.length)lines.push("Seu jeito de falar: "+perfClean(v[0].text).slice(0,200));
+  var cat=tg==="historia"?"historia":(tg==="publi"||tg==="tray"||tg==="melhorenvio")?"marcas":(tg==="app"||tg==="loja"||tg==="viagem"||tg==="gestao")?"negocio":"publico";
+  var c=perfBR(cat);if(c.length)lines.push((cat==="historia"?"Da sua história: ":cat==="marcas"?"Sobre parcerias: ":cat==="negocio"?"Sobre a sua loja: ":"Sobre o seu público: ")+perfClean(c[0].text).slice(0,200));
+  if(PERF.ans.limites)lines.push("Seus limites: "+PERF.ans.limites);
+  if(lines.length)o.splice(Math.min(1,o.length),0,{h:"Do seu perfil",t:lines.join("\n")});return o};
+perfLoad();
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -1751,6 +1827,7 @@ function renderMais(){
   if(state.more==="atalhos"){$("#view").innerHTML='<div class="stack">'+(SIMPLE?'':pillsMais())+atalhosHtml()+'</div>';return}
   if(state.more==="produtos"){renderProdutos();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="cerebro"||state.more==="ideias"){state.tab="criar";state.hub=state.more==="cerebro"?"cerebro":"ideias";state.more="atalhos";render();return}
+  if(state.more==="perfil"){$("#view").innerHTML='<div class="stack">'+(SIMPLE?'<div class="btns"><button class="btn ghost small" data-go="tab=mais;more=atalhos">← Mais</button></div>':pillsMais())+perfPage()+'</div>';return}
   if(state.more==="ajustes"){$("#view").innerHTML='<div class="stack">'+pillsMais()+htmlAjustes()+calAjustes()+instHtml()+'</div>';return}
   if(state.more==="canais"){renderCanais();$("#view").insertAdjacentHTML("afterbegin",'<div class="stack">'+pillsMais()+'</div>');return}
   if(state.more==="prazos")inner=htmlPrazos();else if(state.more==="equipe")inner=htmlEquipe();else inner=htmlPrazos();
@@ -3336,7 +3413,7 @@ document.addEventListener("change",function(e){
 document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest('[data-pub="parc"]');if(t&&t.classList.contains("pill")&&PCUI.open){PCUI.open=null;render()}});
 
 /* ============ SINCRONIZAÇÃO (fora do Claude) ============ */
-var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal","hoje-acoes","hoje-check","hoje-ovr"];
+var SYNKEYS=["hoje-mari-2","hoje-brain","hoje-parc","hoje-tasks","hoje-camp","hoje-cfg","hoje-drafts","hoje-plano","hoje-voz","hoje-tools","hoje-cal","hoje-acoes","hoje-check","hoje-ovr","hoje-perfil"];
 var SYN={meta:{},busy:false,timer:null,msg:"",applying:false};
 function synOn(){var c=aiGet();return !!(c.proxy&&c.code)&&!(window.claude&&window.claude.use)}
 function synLoadMeta(){try{SYN.meta=JSON.parse(localStorage.getItem("hoje-sync-meta")||"{}")}catch(e){SYN.meta={}}}
@@ -3356,7 +3433,7 @@ async function synNow(){
     localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
     if(Object.keys(push.meta).length){var r2=await fetch(base,{method:"PUT",headers:{"content-type":"application/json","x-app-code":c.code},body:JSON.stringify(push)});if(!r2.ok)throw 0}
     localStorage.setItem("hoje-sync-init","1");
-    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();perfLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
     SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
   }catch(e){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}
   SYN.busy=false;
