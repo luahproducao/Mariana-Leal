@@ -411,6 +411,19 @@ h3{font-size:21px}
 .mini i.on{background:var(--ok)}
 .momc{border-left:4px solid var(--gold,var(--accent));background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px;white-space:pre-line}
 .momc b{display:block;margin-bottom:2px}
+
+#authgate{position:fixed;inset:0;z-index:9999;background:var(--bg);color:var(--ink);overflow:auto;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#authgate .ag{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px}
+#authgate .ag h1{font-family:var(--display,Georgia,serif);font-weight:500;font-size:40px;line-height:1;margin:0;color:var(--accent)}
+#authgate .ag .tabs{display:flex;gap:8px}
+#authgate .ag .tabs button{flex:1;padding:10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
+#authgate .ag .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#authgate .ag label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+#authgate .ag input{font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+#authgate .gmsg{min-height:20px;font-size:14px;color:var(--bad,#B3261E);margin:0}
+.acc .code{font-size:22px;font-weight:700;letter-spacing:.08em;background:var(--accent-soft);border-radius:10px;padding:8px 12px;display:inline-block}
+
+.tkc{display:flex;flex-direction:column;gap:6px}
 </style>
 
 <div class="wrap">
@@ -928,7 +941,7 @@ function calEditor(it){
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost adv" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
-   +'<button class="btn small ghost adv" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
+   +'<button class="btn small ghost" data-calx="hoje|'+it.id+'">Criar tarefa para este dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
   return h;
 }
 function calHtml(){
@@ -989,7 +1002,7 @@ document.addEventListener("click",function(e){
       else{var it=calNew({t:tx,canal:kk,d:CAL.sel,fmt:kk==="Stories"||kk==="Melhores Amigos"?"Story":"Reels"});CALD.items.push(it);calSave();CAL.edit=it.id;CAL.mode="edit"}
       render();return}
     if(a==="copy"){var c0=calGet(q[1]);if(c0)copyText(calFullText(c0),x);return}
-    if(a==="hoje"){var c1=calGet(q[1]);if(c1){MD.items.push(mdNew({t:c1.canal+": "+c1.t,tipo:"gravar",d:c1.d||isoToday(),parc:(PARC.items.filter(function(p){return p.marca===c1.marca})[0]||{}).id||""}));mdLocal();x.textContent="Adicionado ao Meu dia"}return}
+    if(a==="hoje"){var c1=calGet(q[1]);if(c1){var tt=c1.canal+": "+c1.t,dd=c1.d||isoToday();var ex=(MD.items||[]).filter(function(m){return m.t===tt&&m.d===dd&&m.st!=="cancelado"})[0];if(!ex){MD.items.push(mdNew({t:tt,tipo:"gravar",d:dd,parc:(PARC.items.filter(function(p){return p.marca===c1.marca})[0]||{}).id||""}));mdLocal()}CAL.tk={id:c1.id,d:dd,dup:!!ex};render()}return}
     if(a==="parc"){var c2=calGet(q[1]),pp=PARC.items.filter(function(p){return c2&&p.marca===c2.marca})[0];if(pp){PCUI.open=pp.id;state.tab="pub";state.pub="parc";render();window.scrollTo(0,0)}return}
     if(a==="del"){if(CAL.delc!==q[1]){CAL.delc=q[1];render();return}CALD.items=CALD.items.filter(function(z){return z.id!==q[1]});calSave();CAL.edit=null;CAL.delc=null;render();return}
     if(a==="csv"){copyText(calCsv(),x);return}
@@ -1284,7 +1297,7 @@ document.addEventListener("click",function(e){var x=e.target.closest&&e.target.c
 document.addEventListener("click",function(e){var g=e.target.closest&&e.target.closest("[data-gob]");if(g){g.dataset.gob.split(";").forEach(function(kv){var q=kv.split("=");state[q[0]]=q[1]});render();window.scrollTo(0,0)}});
 document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-simple]");if(x){setSimple(x.dataset.simple==="on");return}
   var k=e.target.closest&&e.target.closest("[data-hkall]");if(k){HK.all=!HK.all;render()}});
-function hubS(html){if(!SIMPLE||HK.all)return html;var p=html.split('<button class="card click tile"'),keep=[p[0]];p.slice(1).forEach(function(z){if(z.indexOf('data-hub="ideias"')>=0||z.indexOf('data-hub="roteiro"')>=0)keep.push(z)});return keep.join('<button class="card click tile"')+'</div><div class="btns"><button class="btn ghost small" data-hkall="1">Mais ferramentas</button></div>'}
+function hubS(html){if(!SIMPLE||HK.all)return html;var p=html.split('<button class="card click tile"'),keep=[p[0]];p.slice(1).forEach(function(z){if(z.indexOf('data-hub="ideias"')>=0||z.indexOf('data-hub="roteiro"')>=0||z.indexOf('data-hub="material"')>=0||z.indexOf('data-hub="guia"')>=0)keep.push(z)});return keep.join('<button class="card click tile"')+'</div><div class="btns"><button class="btn ghost small" data-hkall="1">Mais ferramentas</button></div>'}
 function backBtn(){if(SIMPLE&&state.tab==="pub")$("#view").insertAdjacentHTML("afterbegin",'<div class="btns"><button class="btn ghost small" data-tab="mais">← Mais</button></div>')}
 function atalhosHtml(){
   var L=[["Meu perfil","Conte sobre você e o app alinha roteiros, ganchos e calendário","tab=mais;more=perfil"],["Publis e parcerias","Cada marca, briefing, prazos e pagamento","tab=pub;pub=parc"],["Roteiro do dia (gravar)","O passo a passo de gravação do dia","tab=gravar"],["Minha base","O que o app sabe sobre o seu jeito","tab=criar;hub=cerebro"],["Guia de captação e edição","Direcionamento para a editora, em PDF","tab=criar;hub=guia"],["Material digital","eBook, checklist, ficha ou exercício","tab=criar;hub=material"],["Rascunhos","Seus trabalhos salvos","tab=criar;hub=rascunhos"],["Prazos","O que não pode passar","tab=mais;more=prazos"],["Melhores Amigos e assinatura","Papel de cada canal","tab=mais;more=canais"],["Mini produtos","Materiais prontos","tab=mais;more=produtos"],["Equipe","Avisar a Laila, recados e andamento","tab=mais;more=equipe"],["Ajustes","IA, sincronização, backup","tab=mais;more=ajustes"]];
@@ -1926,6 +1939,203 @@ var _calEditor3=calEditor;
 calEditor=function(it){var h=_calEditor3(it);if(!it||CAL.mode==="ler"||!it.d)return h;
   return h.replace('<h3>Conteúdo</h3>','<h3>Conteúdo</h3><div class="momc"><b>Momento do ano</b>'+esc(seasonText(it.d,it))+'</div>')};
 
+/* ============ v49: conta, login e Notion ============ */
+var WORKER_URL="https://marileal.luahproducao.workers.dev";
+var AUTH={token:"",email:"",name:"",notion:false,avail:false};
+function inClaude(){return !!(window.claude&&window.claude.use)}
+function noLogin(){try{return localStorage.getItem("nologin-hoje")==="1"}catch(e){return false}}
+function authLoad(){try{var j=JSON.parse(localStorage.getItem("auth-hoje")||"null");if(j&&typeof j==="object"&&typeof j.token==="string"&&j.token)AUTH=Object.assign(AUTH,j)}catch(e){}}
+function authSave(){try{localStorage.setItem("auth-hoje",JSON.stringify({token:AUTH.token,email:AUTH.email,name:AUTH.name,notion:AUTH.notion}))}catch(e){}}
+function authBase(){var c=aiGet();return String(c.workerUrl||WORKER_URL).replace(/\/+$/,"")}
+async function api(path,opt){opt=opt||{};var h={"content-type":"application/json"};if(AUTH.token&&!opt.anon)h.authorization="Bearer "+AUTH.token;if(opt.admin)h["x-admin-code"]=opt.admin;
+  var r;try{r=await fetch(authBase()+path,{method:opt.method||"GET",headers:h,body:opt.body?JSON.stringify(opt.body):undefined})}catch(e){throw {code:"network"}}
+  var j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401&&AUTH.token&&!opt.anon&&!opt.admin){authOut(true);throw {code:"auth"}}
+  if(!r.ok)throw {code:(j&&j.error)||"http",status:r.status,detail:j&&j.detail};return j}
+var AERR={bad_login:"E-mail ou senha incorretos.",too_many:"Muitas tentativas. Espere 15 minutos e tente de novo.",bad_invite:"Convite inválido, vencido ou já usado.",exists:"Esse e-mail já tem conta. Toque em Entrar.",weak_password:"A senha precisa ter 8 caracteres ou mais.",bad_email:"Confira o e-mail.",network:"Sem conexão com o serviço. Confira a internet e tente de novo.",unauthorized:"Código de administradora incorreto.",notion_not_configured:"O Notion ainda não foi ligado no serviço pela assessoria.",ai_off:"A IA está desligada."};
+function aerr(e){return (e&&AERR[e.code])||(e&&e.code&&/^notion_/.test(e.code)?"O Notion recusou o pedido"+(e.detail?": "+e.detail:"")+".":"Algo deu errado. Tente de novo.")}
+var GATE={mode:"in",msg:""};
+function gateNeeded(){return !inClaude()&&!AUTH.token&&!noLogin()}
+function gateHtml(){var up=GATE.mode==="up";
+  return '<div class="ag"><div><h1>Hoje com a Mari</h1><p class="note" style="margin:6px 0 0">'+(up?'Primeiro acesso: use o convite que a assessoria enviou.':'Entre para abrir o seu painel.')+'</p></div>'
+   +'<div class="tabs"><button type="button" data-gate="in" aria-pressed="'+!up+'">Entrar</button><button type="button" data-gate="up" aria-pressed="'+up+'">Primeiro acesso</button></div>'
+   +(up?'<label>Seu nome<input id="g-name" type="text" autocomplete="name"></label>':'')
+   +'<label>E-mail<input id="g-email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false"></label>'
+   +'<label>Senha'+(up?' (8 caracteres ou mais)':'')+'<input id="g-pw" type="password" autocomplete="'+(up?'new-password':'current-password')+'"></label>'
+   +(up?'<label>Convite<input id="g-inv" type="text" autocapitalize="off" autocomplete="off" spellcheck="false"></label>':'')
+   +'<p class="gmsg" id="g-msg" role="alert">'+esc(GATE.msg)+'</p>'
+   +'<button class="btn" type="button" data-gate="go">'+(up?'Criar minha conta':'Entrar')+'</button></div>'}
+function gateShow(){var el=document.getElementById("authgate");
+  if(!gateNeeded()){if(el)el.remove();return}
+  if(!el){el=document.createElement("div");el.id="authgate";el.setAttribute("role","dialog");el.setAttribute("aria-label","Entrar");document.body.appendChild(el)}
+  el.innerHTML=gateHtml()}
+function authOut(expired){AUTH.token="";AUTH.email="";AUTH.name="";AUTH.notion=false;authSave();GATE.mode="in";GATE.msg=expired?"Sua sessão terminou. Entre de novo.":"";gateShow()}
+async function authDone(r){AUTH.token=r.token;AUTH.email=r.email;AUTH.name=r.name||"";AUTH.notion=!!r.notion;authSave();GATE.msg="";gateShow();
+  try{localStorage.removeItem("hoje-sync-init")}catch(e){}
+  authMe();synNow().then(function(){render()});render()}
+async function authMe(){try{var m=await api("/auth/me");AUTH.name=m.name||AUTH.name;AUTH.notion=!!m.notion;AUTH.avail=!!m.notion_available;authSave();if(AUTH.notion&&NS.on)nsSoon(2500)}catch(e){}}
+document.addEventListener("click",async function(e){var b=e.target.closest&&e.target.closest("[data-gate]");if(!b)return;var a=b.dataset.gate;
+  if(a==="in"||a==="up"){GATE.mode=a;GATE.msg="";gateShow();return}
+  var g=function(id){var x=document.getElementById(id);return x?x.value.trim():""};
+  var up=GATE.mode==="up",em=g("g-email"),pw=document.getElementById("g-pw")?document.getElementById("g-pw").value:"",m=document.getElementById("g-msg");
+  if(!em||!pw){if(m)m.textContent="Preencha e-mail e senha.";return}
+  if(up&&!g("g-inv")){if(m)m.textContent="Cole o convite que a assessoria enviou.";return}
+  b.disabled=true;if(m)m.textContent="Entrando...";
+  try{var r=await api(up?"/auth/signup":"/auth/login",{method:"POST",anon:true,body:up?{email:em,password:pw,name:g("g-name"),invite:g("g-inv")}:{email:em,password:pw}});await authDone(r)}
+  catch(err){GATE.msg=aerr(err);var m2=document.getElementById("g-msg");if(m2)m2.textContent=GATE.msg;b.disabled=false}});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.closest&&e.target.closest("#authgate")){var b=document.querySelector('#authgate [data-gate="go"]');if(b)b.click()}});
+
+/* sincronização geral usa a conta */
+synOn=function(){return !!AUTH.token&&!inClaude()};
+synNow=async function(){
+  if(!synOn()||SYN.busy)return;SYN.busy=true;
+  try{
+    var rem=await api("/sync");rem.meta=rem.meta||{};rem.data=rem.data||{};
+    var first=!localStorage.getItem("hoje-sync-init"),applied=0,push={meta:{},data:{}},now=Date.now();
+    SYNKEYS.forEach(function(k){
+      var lt=SYN.meta[k]||0,rt=rem.meta[k]||0,lv=localStorage.getItem(k);
+      if(rt>0&&(rt>lt||first)){SYN.applying=true;try{localStorage.setItem(k,rem.data[k]);SYN.meta[k]=rt;applied++}finally{SYN.applying=false}}
+      else if(lv!==null&&(lt>rt||(first&&rt===0))){var t2=lt||now;SYN.meta[k]=t2;push.meta[k]=t2;push.data[k]=lv}
+    });
+    localStorage.setItem("hoje-sync-meta",JSON.stringify(SYN.meta));
+    if(Object.keys(push.meta).length)await api("/sync",{method:"PUT",body:push});
+    localStorage.setItem("hoje-sync-init","1");
+    if(applied){var keep={tab:state.tab,pub:state.pub,hub:state.hub,hmode:state.hmode,more:state.more,sel:state.sel,campOpen:state.campOpen};loadLocal();brLoad();parcLoad();mdLoad();calLoad();acLoad();ckLoad();ovLoad();perfLoad();for(var kk in keep)state[kk]=keep[kk];if(!typing())render()}
+    SYN.msg="Sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});setSync("Sincronizado");
+  }catch(e){if(!(e&&e.code==="auth")){SYN.msg="Não consegui sincronizar agora. Os dados continuam neste aparelho.";setSync("Só neste aparelho")}}
+  SYN.busy=false};
+
+/* Notion: calendário, perfil e parcerias nos dois sentidos */
+var NS={busy:false,msg:"",last:0,sig:{},on:false,applying:false,t:null};
+function nsLoad(){try{var j=JSON.parse(localStorage.getItem("notion-hoje")||"{}");NS.sig=j.sig||{};NS.last=j.last||0;NS.on=!!j.on}catch(e){}}
+function nsSave(){try{localStorage.setItem("notion-hoje",JSON.stringify({sig:NS.sig,last:NS.last,on:NS.on}))}catch(e){}}
+function sv(x){return String(x==null?"":x)}
+function slTxt(i){return (i.slides||[]).map(function(z){return sv(z.t)+": "+sv(z.txt)}).join("\n\n")}
+function slParse(t){return sv(t).split("\n\n").filter(Boolean).map(function(b){var k=b.indexOf(": ");return k<0?{t:"Slide",txt:b}:{t:b.slice(0,k),txt:b.slice(k+2)}})}
+var NSF={
+ cal:{list:function(){return CALD.items.filter(function(x){return !x.skip})},id:function(i){return i.id},
+  rem:function(i){return {id:i.id,t:sv(i.t),d:sv(i.d),canal:sv(i.canal),fmt:sv(i.fmt),st:sv(i.st),marca:sv(i.marca),nota:sv(i.nota),cta:sv(i.cta),leg:sv(i.leg),tags:sv(i.tags),slides:slTxt(i)}},
+  sig:function(r){return [r.t,r.d,r.canal,r.fmt,r.st,r.marca,r.nota,r.cta,r.leg,r.tags,r.slides].map(sv).join("\u0001")},
+  apply:function(i,r){i.t=sv(r.t);i.d=sv(r.d);if(CALKIND[r.canal])i.canal=r.canal;if(r.fmt)i.fmt=r.fmt;if(CALST.indexOf(r.st)>=0)i.st=r.st;i.marca=sv(r.marca);i.nota=sv(r.nota);i.cta=sv(r.cta);i.leg=sv(r.leg);i.tags=sv(r.tags);if(sv(r.slides)!==slTxt(i))i.slides=slParse(r.slides);i.cp=1;i.autoNota=null;i.autoLeg=null;i.at=r.edited||Date.now()},
+  make:function(r){var it=calNew({t:r.t,canal:CALKIND[r.canal]?r.canal:"Feed principal",fmt:r.fmt||"Reels",d:r.d,marca:r.marca});it.id=r.id;it.src="notion";NSF.cal.apply(it,r);return it},
+  add:function(it){CALD.items.push(it)},del:function(i){i.skip=true},save:function(){calSave()}},
+ base:{list:function(){return BR.items},id:function(i){return i.id},
+  rem:function(i){return {id:i.id,text:sv(i.text),cat:brLabel(i.cat).replace(/,/g," ")}},
+  sig:function(r){return [r.text,r.cat].map(sv).join("\u0001")},
+  apply:function(i,r){i.text=sv(r.text);var c=BRCATS.filter(function(x){return x[1].replace(/,/g," ")===r.cat||x[0]===r.cat})[0];if(c)i.cat=c[0];i.at=r.edited||Date.now()},
+  make:function(r){var it={id:r.id,cat:"decisao",text:"",pin:false,at:Date.now()};NSF.base.apply(it,r);return it},
+  add:function(it){BR.items.push(it)},del:function(i){BR.items=BR.items.filter(function(x){return x!==i})},save:function(){brLocal()}},
+ parc:{list:function(){return PARC.items},id:function(i){return i.id},
+  rem:function(i){return {id:i.id,marca:sv(i.marca),nome:sv(i.nome),status:sv(i.status),valor:sv(i.valor),nf:sv(i.nf),nfData:sv(i.nfData),pagoEm:sv(i.pagoEm),entregaveis:sv(i.entregaveis),regras:sv(i.regras)}},
+  sig:function(r){return [r.marca,r.nome,r.status,r.valor,r.nf,r.nfData,r.pagoEm,r.entregaveis,r.regras].map(sv).join("\u0001")},
+  apply:function(i,r){["marca","nome","status","valor","nf","nfData","pagoEm","entregaveis","regras"].forEach(function(k){i[k]=sv(r[k])});i.at=r.edited||Date.now()},
+  make:function(r){var p=parcNew(r.marca||"Nova parceria",r.nome,r.status||"Prospecção");p.id=r.id;NSF.parc.apply(p,r);return p},
+  add:function(p){PARC.items.push(p)},del:function(i){PARC.items=PARC.items.filter(function(x){return x!==i})},save:function(){parcLocal()}}
+};
+var NSK=["cal","base","parc"];
+function nsRd(){if(!typing())render()}
+async function nsSync(){
+  if(NS.busy||!AUTH.token||inClaude())return;NS.busy=true;NS.msg="Sincronizando com o Notion...";nsRd();
+  try{
+    if(!AUTH.notion){await api("/notion/setup",{method:"POST"});AUTH.notion=true;authSave()}
+    var rem=await api("/notion/pull",{method:"POST"}),jobs=[],dels={cal:[],base:[],parc:[]},nIn=0,nOut=0;
+    NS.applying=true;
+    NSK.forEach(function(k){var A=NSF[k],loc={},rm={},changed=false;
+      A.list().slice().forEach(function(i){loc[A.id(i)]=i});(rem[k]||[]).forEach(function(r){rm[r.id]=r});
+      Object.keys(rm).forEach(function(id){var r=rm[id],i=loc[id],key=k+":"+id,rs=A.sig(r),last=NS.sig[key];
+        if(!i){ if(last!==undefined&&last===rs){dels[k].push(id);delete NS.sig[key]} else {A.add(A.make(r));NS.sig[key]=rs;nIn++;changed=true} return}
+        var ls=A.sig(A.rem(i));
+        if(ls===rs){NS.sig[key]=rs;return}
+        var remoteWins;
+        if(last===undefined)remoteWins=(r.edited||0)>(i.at||0);
+        else if(rs!==last&&ls===last)remoteWins=true;
+        else if(ls!==last&&rs===last)remoteWins=false;
+        else remoteWins=(r.edited||0)>(i.at||0);
+        if(remoteWins){A.apply(i,r);NS.sig[key]=rs;nIn++;changed=true}else jobs.push([k,i])});
+      Object.keys(loc).forEach(function(id){if(rm[id])return;var key=k+":"+id;
+        if(NS.sig[key]!==undefined){A.del(loc[id]);delete NS.sig[key];nIn++;changed=true}else jobs.push([k,loc[id]])});
+      if(changed)A.save()});
+    NS.applying=false;
+    var chunks=[];for(var q=0;q<jobs.length;q+=30)chunks.push(jobs.slice(q,q+30));
+    var dl=[];NSK.forEach(function(k){dels[k].forEach(function(id){dl.push([k,id])})});
+    for(var c=0;c<dl.length;c+=30){var bd={del:{cal:[],base:[],parc:[]}};dl.slice(c,c+30).forEach(function(x){bd.del[x[0]].push(x[1])});await api("/notion/push",{method:"POST",body:bd});nOut+=0}
+    for(var ci=0;ci<chunks.length;ci++){var body={cal:[],base:[],parc:[]};chunks[ci].forEach(function(x){body[x[0]].push(NSF[x[0]].rem(x[1]))});
+      await api("/notion/push",{method:"POST",body:body});chunks[ci].forEach(function(x){NS.sig[x[0]+":"+NSF[x[0]].id(x[1])]=NSF[x[0]].sig(NSF[x[0]].rem(x[1]));nOut++})}
+    NS.on=true;NS.last=Date.now();nsSave();
+    NS.msg="Notion sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+(nIn||nOut?" ("+nIn+" vindos, "+nOut+" enviados)":" (tudo igual)")+".";
+  }catch(e){NS.applying=false;if(!(e&&e.code==="auth"))NS.msg=aerr(e)}
+  NS.busy=false;nsSave();nsRd()}
+function nsSoon(ms){if(!AUTH.token||!AUTH.notion||!NS.on)return;clearTimeout(NS.t);NS.t=setTimeout(nsSync,ms||20000)}
+(function(){try{var o=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){o.call(this,k,v);if(this===window.localStorage&&(k==="hoje-cal"||k==="hoje-brain"||k==="hoje-parc")&&!NS.applying)nsSoon()}}catch(e){}})();
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&AUTH.token&&AUTH.notion&&NS.on&&Date.now()-NS.last>120000)nsSoon(1500)});
+
+/* conta na tela de Ajustes */
+function contaHtml(){
+  var hh=function(t){return '<div class="card acc"><h3>'+t[0]+'</h3>'+t[1]+'</div>'};
+  var c1=hh(["Minha conta",'<p><b>'+esc(AUTH.name||"Sem nome")+'</b><br><span class="note">'+esc(AUTH.email)+'</span></p>'+(SYN.msg?'<p class="note">'+esc(SYN.msg)+'</p>':'')+'<div class="btns"><button class="btn small" data-synb="1">Sincronizar agora</button><button class="btn ghost small" data-acc="out">Sair</button></div>']);
+  var nt;
+  if(!AUTH.avail&&!AUTH.notion)nt='<p class="note">O Notion ainda não foi ligado pela assessoria. Quando for, o botão de conectar aparece aqui.</p>';
+  else nt='<p class="note">'+(AUTH.notion?'Conectado. O calendário, o perfil e as parcerias vão e voltam do Notion, e a assessoria vê e edita os mesmos conteúdos por lá.':'Um toque cria as suas páginas no Notion e traz o que já estiver lá.')+'</p>'
+    +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')+'<div class="btns"><button class="btn small" data-ns="sync"'+(NS.busy?' disabled':'')+'>'+(AUTH.notion?'Sincronizar com o Notion':'Conectar ao Notion')+'</button></div>';
+  var ad='<details class="acc"><summary class="note">Para quem vende o app (assessoria)</summary><label class="lab">Código de administradora<input type="password" id="adm-code" autocomplete="off" autocapitalize="off" spellcheck="false"></label><label class="lab">Nome da cliente (opcional)<input type="text" id="adm-name" autocomplete="off"></label><div class="btns"><button class="btn small" data-acc="inv">Gerar convite</button><button class="btn ghost small" data-acc="users">Ver clientes</button></div>'+(ACC.msg?'<p class="note" style="white-space:pre-line">'+esc(ACC.msg)+'</p>':'')+(ACC.code?'<p><span class="code">'+esc(ACC.code)+'</span></p>':'')+'</details>';
+  return c1+hh(["Notion",nt])+'<div class="card">'+ad+'</div>'}
+var ACC={msg:"",code:""};
+document.addEventListener("click",async function(e){var b=e.target.closest&&e.target.closest("[data-acc],[data-ns]");if(!b)return;
+  if(b.dataset.ns){nsSync();return}
+  var a=b.dataset.acc;
+  if(a==="out"){authOut(false);render();return}
+  var ad=(document.getElementById("adm-code")||{}).value||"";
+  if(!ad){ACC.msg="Digite o código de administradora.";ACC.code="";render();return}
+  try{
+    if(a==="inv"){var r=await api("/admin/invite",{method:"POST",admin:ad,body:{name:(document.getElementById("adm-name")||{}).value||""}});ACC.code=r.code;ACC.msg="Convite válido por "+r.expires_days+" dias. Envie à cliente o link do app ("+PAGES_URL+") e este código, para ela tocar em Primeiro acesso."}
+    if(a==="users"){var u=await api("/admin/users",{admin:ad});ACC.code="";ACC.msg=u.users.length?u.users.map(function(x){return x.name+" · "+x.email+(x.active?"":" (desativada)")+(x.notion?" · Notion ligado":"")}).join("\n"):"Nenhuma cliente ainda."}
+  }catch(err){ACC.code="";ACC.msg=aerr(err)}
+  render()});
+var _htmlAI49=htmlAI;
+htmlAI=function(){var h=_htmlAI49();if(inClaude()||!AUTH.token)return h;var i=h.indexOf('<div class="card"><h3>Backup dos seus dados');return contaHtml()+(i>=0?h.slice(i):'')};
+authLoad();nsLoad();
+(function(){function go(){gateShow();if(AUTH.token&&!inClaude())authMe()}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",go);else go()})();
+
+/* ============ v50: tarefa a partir do calendário e criação sem IA ============ */
+function tkCard(it){if(!CAL.tk||CAL.tk.id!==it.id)return '';var dd=CAL.tk.d,lb=dd.slice(8,10)+"/"+dd.slice(5,7);
+  var l=(MD.items||[]).filter(function(z){return z.d===dd&&z.st!=="cancelado"}),ck=l.map(function(z){return '<div class="row'+(z.st==="feito"?' chkd':'')+'"><input type="checkbox" id="tk-'+z.id+'" data-mdtog="'+z.id+'"'+(z.st==="feito"?' checked':'')+'><label for="tk-'+z.id+'">'+esc(z.t)+'</label></div>'}).join('');
+  return '<div class="momc tkc"><b>'+(CAL.tk.dup?'Essa tarefa já existe':'Tarefa criada')+' para o dia '+lb+'</b>Ela aparece em Hoje nesse dia. Aqui estão as tarefas do dia. Toque para marcar como feita.'+ck+'<div class="btns"><button class="btn small ghost" data-calgo="md|'+dd+'">Abrir em Hoje</button></div></div>'}
+var _calRead50=calRead;
+calRead=function(it){var h=_calRead50(it);var k=h.lastIndexOf('</div>');
+  var add=tkCard(it)+(CAL.tk&&CAL.tk.id===it.id?'':'<div class="btns"><button class="btn small ghost" data-calx="hoje|'+it.id+'">Criar tarefa para este dia</button></div>');
+  return h.slice(0,k)+add+h.slice(k)};
+var _calEditor50=calEditor;
+calEditor=function(it){var h=_calEditor50(it);if(CAL.mode==="ler"||!CAL.tk||CAL.tk.id!==it.id)return h;return h.replace('<div class="fields">',tkCard(it)+'<div class="fields">')};
+
+/* Criar produto digital sem IA: modo guiado */
+var CRQ0=["Para quem é e em que momento essa pessoa está?","Qual problema isso resolve na loja dela?","O que ela vai conseguir fazer depois de ler ou usar?","Qual exemplo real da Loyall ou da sua rotina entra aqui?"];
+var CRT={
+ ebook:["Por que isso importa","O problema na prática","O passo a passo","Um exemplo real","Erros comuns","Seu plano para começar"],
+ checklist:["Antes de começar","Passo a passo","Conferir","Depois de fazer"],
+ ficha:["Dados básicos","Como preencher","Exemplo preenchido (fictício)","Como interpretar"],
+ exercicio:["Objetivo","O que você precisa","Passo a passo (5 minutos)","Como saber se deu certo"],
+ outro:["Contexto","Passo a passo","Exemplo","Fechamento"]};
+function crSecs(t){return CRT[t]||CRT.outro}
+function crPH(t,i,a){var r=function(n){return String(a[n]||"").trim()};
+  if(t==="ebook"){var m=[r(2),r(1),"","",""];
+    var guia=["[PREENCHER: desenvolva com a sua história, em 60 a 120 palavras.]","[PREENCHER: descreva o problema do jeito que a lojista sente no dia a dia.]","[PREENCHER: o passo a passo, um ponto de cada vez.]",(r(3)?r(3)+"\n":"")+"[PREENCHER: conte o exemplo. Se usar números, avise que são fictícios.]","[PREENCHER: 3 erros que você já viu ou cometeu.]","[PREENCHER: o que a leitora faz hoje, amanhã e em 7 dias.]"];
+    var pre=[r(2),r(1),"","","",""][i]||"";return (pre?pre+"\n":"")+guia[i]}
+  return "[PREENCHER: escreva esta parte com as suas palavras.]"}
+function crGuided(a,c){
+  if(a==="ask"){if(!c.ideia.trim()){c.err="Escreva a ideia primeiro, do jeito que você falaria.";render();return}
+    c.perguntas=CRQ0.slice();c.respostas=c.perguntas.map(function(){return ""});c.step=1;c.err="";c.guided=true;saveCr();render();return}
+  if(a==="outline"){var ti=String(c.ideia).trim().split(/[.!?\n]/)[0].slice(0,80);
+    c.outline={titulo:ti,subtitulo:c.publico?"Para "+c.publico:"",secoes:crSecs(c.tipo).map(function(n){return {titulo:n,itens:[]}})};c.step=2;c.guided=true;c.err="";saveCr();render();return}
+  if(a==="write"){var o=c.outline,ans=c.respostas||[];
+    c.material={titulo:o.titulo,subtitulo:o.subtitulo,intro:(String(ans[0]||"").trim()?"Este material é para "+String(ans[0]).trim().replace(/^[A-ZÀ-Ú]/,function(x){return x.toLowerCase()})+(/[.!?]$/.test(String(ans[0]).trim())?"":"."):"[PREENCHER: 2 a 3 frases dizendo para quem é e o que a pessoa vai levar.]"),
+      fechamento:"[PREENCHER: 1 a 2 frases de fechamento e a chamada para a próxima ação.]",
+      secoes:o.secoes.map(function(s,i){return {titulo:s.titulo,corpo:crPH(c.tipo,i,ans),itens:(s.itens||[]).slice()}})};
+    c.step=3;c.view="edit";c.undo=null;c.err="";c.guided=true;saveCr();render();return}}
+var _crAction50=crAction;
+crAction=function(a,el){if(!S&&(a==="ask"||a==="outline"||a==="write")&&!isDirect(state.cr.tipo)){return crGuided(a,state.cr)}return _crAction50(a,el)};
+var _renderCriar50=renderCriar;
+renderCriar=function(){_renderCriar50();var c=state.cr;if(!S&&c&&c.guided&&c.step>=1&&!c.busy){var v=$("#view");if(v)v.insertAdjacentHTML("afterbegin",'<div class="draft">Modo guiado, sem IA: o app monta o esqueleto com as suas respostas e deixa marcado onde falta o seu texto. Você escreve direto nos campos e salva em PDF. Para a IA escrever por você, é preciso ligar a IA.</div>')}};
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -2152,7 +2362,7 @@ function renderCriar(){
   var G=c.tipo==="guia";
   var h='<div class="stack"><div class="btns">'+(state.tab==="criar"?'<button class="btn ghost small" data-hub="inicio">← Criar</button>':state.tab==="pub"?'<button class="btn ghost small" data-pub="camp">← Publis</button>':'<button class="btn ghost small" data-pback="1">← Produtos</button>')+'</div>'
    +(isDirect(c.tipo)&&!G?'<div><h2>'+esc(tipoLabel(c.tipo))+'</h2><p class="sub">Edite o texto, preencha o que está em [PREENCHER] e salve o PDF.</p></div>':G?'<div><h2>Guia de captação e edição</h2><p class="sub">Conte o que o vídeo precisa ser, mostre referências e o app monta o direcionamento para a editora, em PDF.</p></div>':'<div><h2>Criar material</h2><p class="sub">Escreva a ideia, responda algumas perguntas e o material sai montado com a sua identidade.</p></div>');
-  if(!S&&!c.material){
+  if(!S&&!c.material&&(G||isDirect(c.tipo))){
     h+='<div class="draft">'+NOAI+'</div></div>';
     $("#view").innerHTML=h;return;
   }
@@ -2227,7 +2437,7 @@ function renderHub(){
      +hubCard("ideias","Ideias",state.ideas.length?state.ideas.length+" guardada(s). Toque para ver ou anotar uma nova.":"Anote uma ideia na hora, antes de esquecer.")
      +hubCard("roteiro","Roteiro de conteúdo","Para o seu conteúdo, sem marca: Reels, Story ou Carrossel na sua voz.")
      +hubCard("guia","Guia de captação e edição","Monte o direcionamento para a editora com suas referências e envie em PDF junto com os arquivos.","Novo")
-     +hubCard("material","Material digital","eBook, checklist, ficha ou exercício, com a identidade da Mari e PDF.")
+     +hubCard("material","Produto digital (eBook)","Crie um eBook, checklist, ficha ou exercício com a identidade da Mari e salve em PDF. Funciona mesmo sem IA.")
      +hubCard("rascunhos","Rascunhos",state.drafts.length?state.drafts.length+" salvo(s).":"Seus trabalhos salvos aparecem aqui.")+'</div>');
     return;
   }
