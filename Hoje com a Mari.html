@@ -1665,6 +1665,38 @@ calFull=function(it){var o=_calFull(it),own=o.filter(function(z){return !z.p}),p
   plan.forEach(function(z){out.push(z);if(d&&d.feed&&/legenda/.test(z.h)){if(d.feed.cta)out.push({h:z.h.replace("legenda","CTA"),t:d.feed.cta,p:1});if(d.feed.tags)out.push({h:z.h.replace("legenda","hashtags"),t:d.feed.tags,p:1})}});
   return out};
 
+
+/* ============ v40: texto automático nos conteúdos novos ============ */
+var PBEATS={gestao:["Explique o problema em uma frase.","Mostre o passo a passo, um ponto de cada vez.","Dê um exemplo simples (use números fictícios e avise)."],historia:["Conte o começo: [PREENCHER: o que só a Mari sabe].","Conte o momento difícil e o que você fez.","Diga o que aprendeu e o que ainda está aprendendo."],viagem:["Mostre onde você está e o que procura.","Mostre o critério de escolha, sem expor contatos.","Conte o que decidiu e por quê."],black:["Diga em que ponto da Black você está.","Mostre o passo prático de hoje.","Conte o que vem a seguir."],arrume:["Comece se arrumando e falando com a câmera.","Responda uma dúvida real: [PREENCHER: dúvida, sem nome].","Termine mostrando o look pronto."],trend:["Mostre a cena como ela é na loja.","Responda no seu jeito, com humor.","Faça a virada no final."],assin:["Diga o que a assinante vai levar.","Mostre o passo a passo.","Indique o material extra."],teste:["Grave com o gancho A.","Grave com o gancho B, mantendo o resto igual.","Compare retenção até 3s e salvamentos."],app:["Mostre a parte da tela, sem dados de ninguém.","Explique o problema que ela resolve.","Não prometa data nem preço."],tray:["Mostre o uso real: [PREENCHER: o que é verdade hoje].","Explique o benefício só com o material oficial.","Mostre o link exclusivo."],melhorenvio:["Mostre o envio de uma peça real.","Explique só o que está no material oficial.","Mostre o link exclusivo."],publi:["Apresente a marca como você usa no dia a dia.","Conte o que é verdade na sua experiência.","Mostre o link exclusivo."],live:["Boas-vindas e o que vai rolar.","Conteúdo principal em 3 blocos.","Perguntas e fechamento."],loja:["Mostre o que está acontecendo na loja.","Explique em uma frase o motivo.","Convide para participar."]};
+var CTAK={gestao:"Salva esse conteúdo e manda para uma lojista.",historia:"Me conta a sua história nos comentários.",viagem:"Salva para planejar a sua viagem de compras.",black:"Me segue para acompanhar a Black passo a passo.",arrume:"Deixa nos comentários a sua dúvida.",trend:"Marca uma amiga lojista.",assin:"Faz o exercício e me conta o resultado.",teste:"O que performar melhor vira Reels de feed.",app:"Quer ser avisada? Entra na lista.",tray:"Acesse meu link exclusivo. Parceria paga.",melhorenvio:"Acesse meu link exclusivo. Parceria paga.",publi:"Veja o link exclusivo. Parceria paga.",live:"Entra na lista para receber o material.",loja:"Me conta o que você achou."};
+function calTag(it){var t=(it.t||"").toLowerCase(),m=it.marca||"";
+  if(m==="Tray")return "tray";if(m==="Melhor Envio")return "melhorenvio";if(m)return "publi";
+  if(it.fmt==="Live")return "live";
+  if(it.canal==="Reels teste")return "teste";
+  if(/app|estoque crescente/.test(t))return "app";
+  if(/black/.test(t))return "black";
+  if(/arrume/.test(t))return "arrume";
+  if(/hist[óo]ria|comecei|minha jornada/.test(t))return "historia";
+  if(/fornecedor|viagem|s[ãa]o paulo|curadoria/.test(t))return "viagem";
+  if(/pre[çc]o|desconto|estoque|custo|frete|margem|caixa|financ|taxa/.test(t))return "gestao";
+  if(/trend|cliente x|expectativa/.test(t))return "trend";
+  if(it.canal==="Assinatura")return "assin";
+  return "loja"}
+function calAuto(it){if(!it||!it.t||it.cp)return;var tg=calTag(it),g=it.t.replace(/\s+$/,"");if(!/[.?!]$/.test(g))g+=".";
+  var b=rotBuild(it,[g,PBEATS[tg],CTAK[tg],tg]);
+  if(!it.nota){it.nota=b.nota;it.autoNota=b.nota}
+  if(!it.leg){it.leg=b.leg;it.autoLeg=b.leg}
+  if(!it.tags)it.tags=b.tags;if(!it.cta)it.cta=b.cta;
+  if(b.slides&&!(it.slides&&it.slides.length)){it.slides=b.slides;it.autoSl=1}
+  it.cp=1}
+var _calNew=calNew;calNew=function(o){var it=_calNew(o);calAuto(it);return it};
+document.addEventListener("change",function(e){var el=e.target;if(!el.dataset||!el.dataset.cif||!CAL.edit)return;var f=el.dataset.cif;if(!(f==="t"||f==="canal"||f==="fmt"||f==="marca"))return;
+  var it=calGet(CAL.edit);if(!it||it.src!=="app"||!it.autoNota||it.nota!==it.autoNota)return;
+  var b=rotBuild(it,[(it.t||"").replace(/\s+$/,"")+(/[.?!]$/.test(it.t||"")?"":"."),PBEATS[calTag(it)],CTAK[calTag(it)],calTag(it)]);
+  it.nota=b.nota;it.autoNota=b.nota;if(it.leg===it.autoLeg){it.leg=b.leg;it.autoLeg=b.leg}it.tags=b.tags;it.cta=b.cta;
+  if(it.autoSl||!(it.slides&&it.slides.length)){if(b.slides){it.slides=b.slides;it.autoSl=1}else if(it.autoSl){it.slides=[];it.autoSl=0}}
+  calSave();render()});
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
