@@ -391,6 +391,26 @@ h3{font-size:21px}
 .pf textarea{min-height:110px}
 .pf .chips{display:flex;flex-wrap:wrap;gap:8px}
 .pf .chips label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+
+.stp{display:flex;gap:0;margin:12px 0 4px}
+.stp .s{flex:1;min-width:0;background:none;border:0;padding:0 2px;font:inherit;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.stp .s::before{content:"";position:absolute;top:15px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.stp .s:first-child::before{display:none}
+.stp .s.done::before,.stp .s.next::before{background:var(--ok)}
+.stp .s i{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700;font-size:14px;border:2px solid var(--line);background:var(--surface);color:var(--muted)}
+.stp .s.done i{background:var(--ok);border-color:var(--ok);color:#fff}
+.stp .s.next i{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.stp .s span{font-size:12px;line-height:1.1}
+.stp .s.done span{color:var(--ok);font-weight:700}
+.stp .s.next span{color:var(--accent);font-weight:700}
+.stp.c{margin:8px 0 2px}.stp.c .s i{width:26px;height:26px;font-size:12px}.stp.c .s::before{top:12px}.stp.c .s span{font-size:11px}
+.stn{margin:8px 0 4px;font-size:15px}
+.stb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.mini{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}
+.mini i{display:inline-block;width:10px;height:5px;border-radius:2px;background:var(--line)}
+.mini i.on{background:var(--ok)}
+.momc{border-left:4px solid var(--gold,var(--accent));background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px;white-space:pre-line}
+.momc b{display:block;margin-bottom:2px}
 </style>
 
 <div class="wrap">
@@ -862,7 +882,7 @@ var CALSEED=[["10-08","F","Tr","R","Trend adaptada: tradução baiana de dona de
 var CALC={F:"Feed principal",S:"Stories",A:"Assinatura",M:"Melhores Amigos",T:"Reels teste"};
 var CALT={Tr:"Trend",Po:"Ponte (solução)",Es:"Estrutura",In:"Interação",Ar:"Arrume-se comigo",Te:"Teste",St:"Storytelling",Ba:"Bastidor",Pu:"Publi",Ca:"Carrossel",Au:"Aula",Pr:"Produto e app",Li:"Live"};
 var CALF={R:"Reels",C:"Carrossel",E:"Post estático",S:"Story",L:"Live"};
-var CALST=["Ideia","Roteiro","Gravado","Editado","Publicado"],CALLBL={"Publicado":"Postado"};function calLbl(s){return CALLBL[s]||s}function calDots(s){var i=CALST.indexOf(s);if(i<0)i=0;return CALST.map(function(_,k){return k<=i?"●":"○"}).join("")}function calNext(s){var i=CALST.indexOf(s);return i>=0&&i<CALST.length-1?CALST[i+1]:null}function calMig(){var m={"Em andamento":"Roteiro","Revisão":"Editado"};CALD.items.forEach(function(x){if(m[x.st])x.st=m[x.st]})}
+var CALST=["Ideia","Roteiro","Gravado","Editado","Publicado"],CALLBL={"Roteiro":"Roteiro pronto","Publicado":"Postado"};function calLbl(s){return CALLBL[s]||s}function calDots(s){var i=CALST.indexOf(s);if(i<0)i=0;return '<span class="mini" aria-hidden="true">'+CALST.map(function(_,k){return '<i'+(k<=i?' class="on"':'')+'></i>'}).join("")+'</span>'}function calNext(s){var i=CALST.indexOf(s);return i>=0&&i<CALST.length-1?CALST[i+1]:null}function calMig(){var m={"Em andamento":"Roteiro","Revisão":"Editado"};CALD.items.forEach(function(x){if(m[x.st])x.st=m[x.st]})}
 var CALKIND={"Feed principal":"f","Stories":"s","Assinatura":"a","Melhores Amigos":"m","Reels teste":"r"};
 var CALD={items:[]};
 var CAL={m:null,sel:null,f:"todos",edit:null,delc:null,busy:false,msg:""};
@@ -894,7 +914,7 @@ function calEditor(it){
   if(CAL.mode==="ler")return calRead(it);
   var h='<div class="card cal-open" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calx="close">▲ Minimizar</button></div><h3>Conteúdo</h3><div class="btns"><button class="btn small ghost" data-calx="ler">‹ Ver conteúdo completo</button></div>'
    +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
-   +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+calLbl(s)+'</button>'}).join('')+'</div>'
+   +calStepper(it)
    +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
    +'<div class="fields adv"><label>Formato<select data-cif="fmt">'+Object.keys(CALF).map(function(k){return'<option'+(CALF[k]===it.fmt?' selected':'')+'>'+CALF[k]+'</option>'}).join('')+'</select></label><label>Tipo<select data-cif="tipo"><option value="">—</option>'+Object.keys(CALT).map(function(k){return'<option'+(CALT[k]===it.tipo?' selected':'')+'>'+CALT[k]+'</option>'}).join('')+'</select></label></div>'
    +'<label class="lab adv">Marca (se for publi)<select data-cif="marca"><option value="">Nenhuma</option>'+marcaList().map(function(m){return'<option'+(m===it.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
@@ -906,7 +926,6 @@ function calEditor(it){
    +'<label class="lab adv">Link (quando publicar)<input type="text" data-cif="link" value="'+esc(it.link)+'"></label>'+metHtml(it)
    +slidesHtml(it)
    +(CAL.msg?'<p class="note">'+esc(CAL.msg)+'</p>':'')
-   +((calNext(it.st)||calPrev(it.st))?'<div class="btns">'+(calPrev(it.st)?'<button class="btn ghost" data-cst="'+it.id+'|'+calPrev(it.st)+'">‹ Voltar para '+calLbl(calPrev(it.st))+'</button>':'')+(calNext(it.st)?'<button class="btn" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button>':'')+'</div>':'')
    +'<div class="btns"><button class="btn" data-calx="ia|'+it.id+'"'+(CAL.busy?' disabled':'')+'>'+(CAL.busy?'Escrevendo…':'Roteiro com IA')+'</button><button class="btn small ghost adv" data-calx="copy|'+it.id+'">Copiar</button>'
    +(PARC.items.some(function(p){return p.marca===it.marca})&&it.marca?'<button class="btn small ghost adv" data-calx="parc|'+it.id+'">Abrir parceria</button>':'')
    +'<button class="btn small ghost adv" data-calx="hoje|'+it.id+'">Pôr no Meu dia</button><button class="btn small ghost" data-calx="close">Fechar</button><button class="btn small ghost" data-calx="del|'+it.id+'">'+(CAL.delc===it.id?'Toque de novo para apagar':'Apagar')+'</button></div></div>';
@@ -938,7 +957,7 @@ function calHoje(D){
   var its=CALD.items.filter(function(x){return x.d===D&&!x.skip});
   var h='<div class="block"><h3>No calendário editorial'+(its.length?' ('+its.length+')':'')+'</h3>';
   if(!its.length)h+='<p class="note">Nada planejado para este dia no calendário.</p>';
-  its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div><div class="meta"><button class="btn small'+(x.st==="Publicado"?' ghost':'')+'" data-cstc="'+x.id+'">'+esc(calLbl(x.st))+' '+calDots(x.st)+' ›</button></div></div>'});
+  its.forEach(function(x){h+='<div class="item"><div class="row"><div class="txt tap" role="button" tabindex="0" data-calgo="ci|'+x.id+'"><span class="tag '+CALTAGC[CALKIND[x.canal]||"f"]+'">'+esc(x.canal)+(x.marca?' · '+esc(x.marca):'')+'</span><br><b>'+esc(x.t)+'</b> <b aria-hidden="true">›</b></div></div>'+calStepper(x,1)+'</div>'});
   h+='<div class="btns"><button class="btn ghost small" data-calgo="open">Abrir o calendário</button></div></div>';
   return h;
 }
@@ -1513,11 +1532,10 @@ function calFull(it){var out=[],d=DAYS.filter(function(x){return x.date===it.d})
   return out}
 function calFullText(it){return it.t+"\n"+it.canal+(it.fmt?" · "+it.fmt:"")+(it.marca?" · "+it.marca:"")+" · "+(it.d||"sem data")+"\n\n"+calFull(it).map(function(z){return z.h+":\n"+z.t}).join("\n\n")}
 function calRead(it){var secs=calFull(it);
-  var h='<div class="card cal-open cr" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calx="close">▲ Minimizar</button></div><div><span class="tag '+CALTAGC[CALKIND[it.canal]||"f"]+'">'+esc(it.canal+(it.marca?" · "+it.marca:""))+'</span>'+(it.fmt?' <span class="tag">'+esc(it.fmt)+'</span>':'')+(it.tipo?' <span class="tag">'+esc(it.tipo)+'</span>':'')+'<h3 style="margin:6px 0 2px">'+esc(it.t)+'</h3><span class="note">'+esc(calLbl(it.st))+' '+calDots(it.st)+(it.d?' · '+it.d.slice(8,10)+'/'+it.d.slice(5,7):'')+'</span></div>';
+  var h='<div class="card cal-open cr" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calx="close">▲ Minimizar</button></div><div><span class="tag '+CALTAGC[CALKIND[it.canal]||"f"]+'">'+esc(it.canal+(it.marca?" · "+it.marca:""))+'</span>'+(it.fmt?' <span class="tag">'+esc(it.fmt)+'</span>':'')+(it.tipo?' <span class="tag">'+esc(it.tipo)+'</span>':'')+'<h3 style="margin:6px 0 2px">'+esc(it.t)+'</h3>'+(it.d?'<span class="note">Dia '+it.d.slice(8,10)+'/'+it.d.slice(5,7)+'</span>':'')+'</div>'+calStepper(it);
   if(!secs.length)h+='<p class="note">Este conteúdo ainda não tem roteiro. Toque em Editar para escrever, ou use Roteiro com IA.</p>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
   h+='<div class="btns"><button class="btn" data-calx="editar">Editar</button><button class="btn ghost" data-calx="copyall|'+it.id+'">Copiar tudo</button><button class="btn small ghost" data-calx="close">Fechar</button></div>';
-  if(calNext(it.st)||calPrev(it.st))h+='<div class="btns">'+(calPrev(it.st)?'<button class="btn small ghost" data-cst="'+it.id+'|'+calPrev(it.st)+'">‹ Voltar para '+calLbl(calPrev(it.st))+'</button>':'')+(calNext(it.st)?'<button class="btn small" data-cst="'+it.id+'|'+calNext(it.st)+'">Avançar para '+calLbl(calNext(it.st))+' ›</button>':'')+'</div>';
   return h+'</div>'}
 document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)return;
   var sel=t.closest("[data-cald]")?".cal-dayc":(t.closest("[data-calgo^='ci|']")||t.closest("[data-calx='ler']")||t.closest("[data-calx='editar']")||t.closest("[data-cst]")?".cal-open":null);
@@ -1819,6 +1837,94 @@ calFull=function(it){var o=_calFull2(it);if(!(PERF.done||Object.keys(PERF.ans).l
   if(PERF.ans.limites)lines.push("Seus limites: "+PERF.ans.limites);
   if(lines.length)o.splice(Math.min(1,o.length),0,{h:"Do seu perfil",t:lines.join("\n")});return o};
 perfLoad();
+
+/* ============ v47: etapas claras e leitura do momento ============ */
+var STGN={"Ideia":["escrever o roteiro","Roteiro pronto"],"Roteiro":["gravar o vídeo","Já gravei"],"Gravado":["editar","Já editei"],"Editado":["postar","Já postei"]};
+var STGS={"Publicado":"Postado"};
+function calStepper(it,compact){var i=CALST.indexOf(it.st);if(i<0)i=0;var last=i>=CALST.length-1;
+  var h='<div class="stp'+(compact?' c':'')+'" role="group" aria-label="Etapas do conteúdo">';
+  CALST.forEach(function(st,k){var cls=k<=i?"done":(k===i+1?"next":"todo");
+    h+='<button type="button" class="s '+cls+'" data-cst="'+it.id+'|'+st+'" aria-label="'+(STGS[st]||st)+(k<=i?", feito":k===i+1?", próxima etapa":"")+'"><i>'+(k<=i?"✓":(k+1))+'</i><span>'+(STGS[st]||st)+'</span></button>'});
+  h+='</div>';
+  if(last)return h+'<p class="stn"><b>Tudo pronto.</b> Esse conteúdo já foi postado.</p>'+(compact?'':'<div class="stb"><button class="btn small ghost" data-cst="'+it.id+'|'+CALST[i-1]+'">Desfazer: ainda não postei</button></div>');
+  var nx=STGN[it.st]||["avançar","Avançar"];
+  h+='<p class="stn"><b>Próxima etapa:</b> '+nx[0]+'.</p><div class="stb"><button class="btn'+(compact?' small':'')+'" data-cst="'+it.id+'|'+CALST[i+1]+'">✓ '+nx[1]+'</button>'+(i>0&&!compact?'<button class="btn small ghost" data-cst="'+it.id+'|'+CALST[i-1]+'">‹ Voltar uma etapa</button>':'')+'</div>';
+  return h}
+
+/* calendário de datas do comércio (Brasil) */
+function sP2(n){return String(n).padStart(2,"0")}
+function sIso(y,m,d){return y+"-"+sP2(m)+"-"+sP2(d)}
+function sNth(y,m,dow,n){var d=new Date(Date.UTC(y,m-1,1)),c=0;for(var k=0;k<40;k++){if(d.getUTCDay()===dow){c++;if(c===n)return sIso(y,m,d.getUTCDate())}d.setUTCDate(d.getUTCDate()+1)}return sIso(y,m,1)}
+function sEaster(y){var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(Date.UTC(y,mo-1,da))}
+function sAdd(dt,n){var d=new Date(dt.getTime());d.setUTCDate(d.getUTCDate()+n);return sIso(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate())}
+function sDiff(a,b){return Math.round((Date.parse(b+"T12:00:00Z")-Date.parse(a+"T12:00:00Z"))/86400000)}
+var SANG={
+ "Black Friday":{tag:"#blackfriday",big:1,a:["Mostrar o preparo: estoque, embalagem e atendimento","Explicar preço mínimo e margem antes de dar desconto","Contagem regressiva e bastidor do dia"]},
+ "Cyber Monday":{tag:"#cybermonday",a:["Última chance para quem não comprou","Mostrar o que sobrou e o que mudou"]},
+ "Natal":{big:1,tag:"#natal",a:["Prazo de postagem e frete para chegar a tempo","Ideias de presente para quem compra na loja","Bastidor da correria de fim de ano"]},
+ "Réveillon":{tag:"#anonovo",a:["Balanço do ano da loja","Metas para o próximo ano"]},
+ "Ano Novo":{tag:"#planejamento",a:["Planejar o ano da loja","O que funcionou e o que vai mudar"]},
+ "Carnaval":{tag:"#carnaval",a:["Look e peças para a folia","Organizar a loja em semana de feriado"]},
+ "Dia da Mulher":{tag:"#diadamulher",a:["Mulheres que empreendem: sua história","Mensagem para a cliente"]},
+ "Dia do Consumidor":{tag:"#diadoconsumidor",a:["Promoção planejada, sem desconto no escuro","Testar a Black antes da Black"]},
+ "Páscoa":{tag:"#pascoa",a:["Feriado prolongado: organizar vendas e entregas","Presente e conteúdo leve"]},
+ "Dia das Mães":{big:1,tag:"#diadasmaes",a:["Presente: curadoria e kits","Prazo de envio e frete","Mãe empreendedora: sua história"]},
+ "Dia dos Namorados":{tag:"#diadosnamorados",a:["Curadoria de presentes","Look para a data"]},
+ "Dia dos Pais":{tag:"#diadospais",a:["Presente e curadoria","Pai e filha empreendendo"]},
+ "Dia do Cliente":{tag:"#diadocliente",a:["Agradecer e mostrar clientes (com autorização)","Ação de relacionamento"]},
+ "Dia das Crianças":{tag:"#diadascriancas",a:["Presente e curadoria","Mãe empreendedora e a rotina com filhos"]},
+ "13º salário (1ª parcela)":{tag:"",a:["Cliente com dinheiro extra: organizar a oferta","Lojista: separar o 13º para o caixa da loja"]},
+ "13º salário (2ª parcela)":{tag:"",a:["Última parcela: reta final de vendas","Lojista: reservar para o estoque do próximo ano"]}
+};
+function sEvents(y){var e=sEaster(y),bf=sAdd(new Date(Date.parse(sNth(y,11,4,4)+"T12:00:00Z")),1),L=[];
+  L.push([sIso(y,1,1),"Ano Novo"],[sAdd(e,-47),"Carnaval"],[sIso(y,3,8),"Dia da Mulher"],[sIso(y,3,15),"Dia do Consumidor"],[sAdd(e,0),"Páscoa"],[sNth(y,5,0,2),"Dia das Mães"],[sIso(y,6,12),"Dia dos Namorados"],[sNth(y,8,0,2),"Dia dos Pais"],[sIso(y,9,15),"Dia do Cliente"],[sIso(y,10,12),"Dia das Crianças"],[sIso(y,11,30),"13º salário (1ª parcela)"],[bf,"Black Friday"],[sAdd(new Date(Date.parse(bf+"T12:00:00Z")),3),"Cyber Monday"],[sIso(y,12,20),"13º salário (2ª parcela)"],[sIso(y,12,25),"Natal"],[sIso(y,12,31),"Réveillon"]);
+  return L}
+function sFase(n,big){if(n<0)return "já passou: hora de agradecer e mostrar o resultado";if(n===0)return "é hoje";if(n<=7)return "reta final";if(n<=14)return "contagem regressiva";if(n<=30)return big?"fase de esquenta":"hora de começar a falar";return "ainda cedo: bom para planejar e organizar"}
+function seasonCtx(iso){iso=iso||isoToday();var y=+iso.slice(0,4),ev=sEvents(y).concat(sEvents(y+1)),out=[];
+  ev.forEach(function(x){var n=sDiff(iso,x[0]),a=SANG[x[1]]||{a:[]},lim=a.big?60:21;if(n>=-5&&n<=lim)out.push({n:x[1],d:x[0],dias:n,a:a.a,tag:a.tag||"",big:!!a.big})});
+  out.sort(function(p,q){return (q.big-p.big)||(Math.abs(p.dias)-Math.abs(q.dias))});
+  var m=+iso.slice(5,7),est=m>=9&&m<=11?"Primavera, caminhando para o verão: roupa leve, calor e compras de fim de ano.":(m===12||m<=2)?"Verão: calor, férias, viagens e festas.":m<=5?"Outono: troca de coleção e primeiras peças de meia-estação.":"Inverno: peças de frio e liquidação de estação.";
+  var main=out.filter(function(x){return x.dias>=0&&x.dias<=(x.big?60:21)})[0]||out[0]||null;
+  return {iso:iso,main:main,list:out,est:est}}
+function seasonText(iso,it){var c=seasonCtx(iso),L=[],dd=iso.slice(8,10)+"/"+iso.slice(5,7);
+  if(c.main){var x=c.main,dt=x.d.slice(8,10)+"/"+x.d.slice(5,7);
+    L.push(x.dias>0?"Para "+dd+": faltam "+x.dias+" dia"+(x.dias===1?"":"s")+" para "+x.n+" ("+dt+"), "+sFase(x.dias,x.big)+".":x.dias===0?x.n+" é hoje ("+dt+").":x.n+" foi há "+(-x.dias)+" dia"+(x.dias===-1?"":"s")+" ("+dt+"): "+sFase(x.dias,x.big)+".");
+    var oth=c.list.filter(function(z){return z!==x&&z.dias>=0}).slice(0,2);if(oth.length)L.push("Também no radar: "+oth.map(function(z){return z.n+" ("+z.d.slice(8,10)+"/"+z.d.slice(5,7)+")"}).join(", ")+".");
+    if(x.a.length)L.push("Ideias que combinam com o momento: "+x.a.join("; ")+".");
+    if(it&&x.a.length&&x.dias>=0&&!it.marca&&calTag(it)!==(x.n==="Black Friday"?"black":"__"))L.push("Dica: se couber, conecte este assunto com "+x.n+" ("+x.a[0].toLowerCase()+").")}
+  else L.push("Para "+dd+": sem data comercial grande por perto. Bom momento para conteúdo de base (gestão, história, bastidor).");
+  L.push(c.est);return L.join("\n")}
+function seasonTag(iso){var c=seasonCtx(iso);return c.main&&c.main.dias>=0&&c.main.dias<=30?c.main.tag:""}
+
+/* roteiro novo mais desenvolvido: ganchos, momento e perfil */
+function sTema(it){var t=String(it.t||"").replace(/[.!?\s]+$/,"");return t?t.charAt(0).toLowerCase()+t.slice(1):""}
+function sProf(it){var L=[];if(typeof PERF==="undefined")return L;
+  var pb=perfBR("publico");if(pb.length)L.push("Seu público: "+perfClean(pb[0].text).slice(0,160));
+  if(PERF.ans.meta)L.push("Meta dos próximos 30 dias: "+PERF.ans.meta);
+  var tg=calTag(it),pk=PIL_OF[tg];
+  if(PERF.pil.length&&pk){var nm=(PILARES.filter(function(p){return p[0]===pk})[0]||[0,pk])[1];L.push(PERF.pil.indexOf(pk)>=0?"Este conteúdo reforça um assunto que você quer priorizar: "+nm+".":"Este assunto ("+nm+") não está entre as suas prioridades. Se não for publi, vale conferir o equilíbrio em Mais > Meu perfil.")}
+  if(PERF.ans.rotina)L.push("Sua rotina: "+PERF.ans.rotina);
+  if(!L.length&&!(PERF.done||Object.keys(PERF.ans).length))L.push("Preencha Mais > Meu perfil para este roteiro usar seu jeito, seu público e seus limites.");
+  return L}
+var _rotBuild=rotBuild;
+rotBuild=function(it,r){var b=_rotBuild(it,r);if(!it||it.src!=="app"||b.slides)return b;
+  try{var T=sTema(it);if(!T)return b;var Tc=T.charAt(0).toUpperCase()+T.slice(1),c=seasonCtx(it.d||isoToday()),H=[];
+    var isQ=/^(como|por que|porque|o que|quando|qual|quais|quanto|vale)\b/.test(T);
+    H.push(isQ?"A) Pergunta: “"+Tc+"? Fica até o final que eu mostro.”":"A) Pergunta: “Você também passa por isso na loja? "+Tc+".”","B) Direto: “Vou te mostrar "+T+", sem complicar.”","C) Bastidor: “Hoje na loja: "+T+".”");
+    if(c.main&&c.main.dias>0&&c.main.dias<=30)H.push("D) Momento: “Faltam "+c.main.dias+" dias para "+c.main.n+". "+Tc+".”");
+    var ex="\n\nOUTRAS OPÇÕES DE GANCHO (adapte para o seu jeito de falar):\n"+H.join("\n"),pl=sProf(it);
+    if(pl.length)ex+="\n\nAJUSTE AO SEU PERFIL:\n- "+pl.join("\n- ");
+    var tg=seasonTag(it.d||isoToday());if(tg&&b.tags.indexOf(tg)<0)b.tags+=" "+tg;
+    b.nota=b.nota+ex}catch(e){}
+  return b};
+var _calFull3=calFull;
+calFull=function(it){var o=_calFull3(it);if(!it||!it.d)return o;
+  var k=-1;o.forEach(function(z,i){if(z.h==="Do seu perfil")k=i});
+  var sec={h:"Momento do ano",t:seasonText(it.d,it)};
+  if(k>=0)o.splice(k+1,0,sec);else o.splice(Math.min(1,o.length),0,sec);return o};
+var _calEditor3=calEditor;
+calEditor=function(it){var h=_calEditor3(it);if(!it||CAL.mode==="ler"||!it.d)return h;
+  return h.replace('<h3>Conteúdo</h3>','<h3>Conteúdo</h3><div class="momc"><b>Momento do ano</b>'+esc(seasonText(it.d,it))+'</div>')};
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
