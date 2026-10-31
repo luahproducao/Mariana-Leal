@@ -448,6 +448,7 @@ h3{font-size:21px}
 .estl{display:flex;gap:8px;flex-wrap:wrap}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap}
 .thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+@media (min-width:700px){.bottom{left:50%;right:auto;width:min(680px,calc(100% - 24px));transform:translateX(-50%)}}
 </style>
 
 <div class="wrap">
@@ -2305,7 +2306,7 @@ function ntCard(){
   if(NT.tok){h+='<p class="note">Conectado'+(NT.ws?' a <b>'+esc(NT.ws)+'</b>':'')+'. O calendário, o perfil e as parcerias vão e voltam entre o app e as páginas do seu Notion.</p>'
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
     +'<div class="btns"><button class="btn small" data-nt="sync"'+(NS.busy?' disabled':'')+'>Sincronizar agora</button><button class="btn ghost small" data-nt="off">Desconectar</button></div>'}
-  else if(!rb){h+='<p class="note">A conexão automática com o Notion ainda não está ativa nesta versão. Use a troca por arquivo logo abaixo.</p>'}
+  else if(!rb){return ''}
   else{h+='<p class="note">Toque em Conectar. Na tela do Notion, escolha usar o modelo do app e permita. O Notion cria a sua cópia e o app já passa a ler e gravar nela.</p>'
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
     +'<div class="btns"><button class="btn small" data-nt="on">Conectar com Notion</button></div>'}
@@ -2345,7 +2346,6 @@ function prodExtraHtml(c){var h='',mx=crMax(c),names=["1 Ideia","2 Perguntas","3
   if(c.fb&&c.step>=1)h+='<div class="draft">A IA não respondeu agora, então o app seguiu no modo guiado, sem IA. Tudo o que você escreveu está salvo.</div>';
   if(c.step===0&&!c.material)h+=prodListHtml();
   h+='<div class="stnav" role="group" aria-label="Etapas">'+names.map(function(n,i){return '<button class="pill" data-prs="go|'+i+'" aria-pressed="'+(cs===i)+'"'+(i>mx?' disabled':'')+'>'+n+'</button>'}).join('')+'</div>';
-  if(c.step===0&&!c.material)h+='<div class="card"><h3>Tudo o que eu já tenho (opcional)</h3><p class="note">Cole aqui ideias soltas, partes de áudio, tópicos, números, exemplos. Pode ser pouco ou muito, e você pode voltar e acrescentar depois.</p><textarea data-cr="bruto" placeholder="Qualquer coisa que você já pensou sobre esse produto...">'+esc(c.bruto||"")+'</textarea></div>';
   if(c.material&&c.bruto&&c.bruto.trim())h+='<details class="card"><summary><b>Minhas anotações de apoio</b></summary><textarea data-cr="bruto">'+esc(c.bruto)+'</textarea></details>';
   return h}
 function prodBottomHtml(c){var h='<div class="card"><div class="btns">';
@@ -2353,7 +2353,7 @@ function prodBottomHtml(c){var h='<div class="card"><div class="btns">';
   h+='<button class="btn ghost small" data-prs="later">Salvar e continuar depois</button></div>'+(c.material&&(JSON.stringify(c.material).match(/\[PREENCHER/g)||[]).length?'<p class="note" style="color:var(--bad,#B3261E)">Atenção: ainda há '+JSON.stringify(c.material).match(/\[PREENCHER/g).length+' trecho(s) em [PREENCHER]. Eles saem assim no PDF e nas imagens.</p>':'')+(c.done?'<p class="note"><span class="stg ok">Pronto</span> Você ainda pode editar e baixar de novo.</p>':'')+'<p class="note" id="prs-msg"></p></div>';return h}
 var _renderCriar56=renderCriar;
 renderCriar=function(){_renderCriar56();var c=state.cr;if(!isProd(c)||c.busy)return;var st=document.querySelector("#view .stack");if(!st)return;
-  var a=document.createElement("div");a.className="stack";a.innerHTML=prodExtraHtml(c);var ref=st.children[1]||null;
+  var a=document.createElement("div");a.className="stack";a.innerHTML=prodExtraHtml(c);var ref=st.children[2]||null;
   /* depois do cabeçalho: entra antes do primeiro cartão/aviso */
   st.insertBefore(a,ref);
   var b=document.createElement("div");b.innerHTML=prodBottomHtml(c);st.appendChild(b.firstChild)};
@@ -2451,7 +2451,7 @@ function capaCanvas(m,tipo,c,capaImg){var st=estOf(c),cv=document.createElement(
     if(sl.length){x.font="400 34px "+SANS;x.fillStyle="#EBDDD2";sl.forEach(function(l){x.fillText(l,M,y);y+=46});y+=14}
     x.font="700 22px "+CAPS;var tw=x.measureText(tag).width+44;x.strokeStyle="#E9CF9B";x.lineWidth=2.5;rrect(x,M,y,tw,52,26);x.stroke();x.fillStyle="#E9CF9B";x.fillText(tag,M+22,y+34);
   }else{x.fillStyle=st.cv;x.fillRect(0,0,IMW,IMH);x.strokeStyle=st.gold;x.lineWidth=3;x.strokeRect(48,48,IMW-96,IMH-96);x.lineWidth=1;x.strokeRect(62,62,IMW-124,IMH-124);
-    x.textAlign="center";var cx=IMW/2;x.fillStyle=st.gold;x.font="700 22px "+CAPS;x.fillText("ESTOQUE CRESCENTE",cx,170);
+    x.textAlign="center";var cx=IMW/2;x.fillStyle=st.gold;x.font="700 22px "+CAPS;x.fillText(tipo==="guia"?"DIRECIONAMENTO DE EDIÇÃO":"ESTOQUE CRESCENTE",cx,170);
     x.font="600 112px "+SERIF;var tl2=imWrap2(x,m.titulo||"",W-40),fs2=112;if(tl2.length>4){fs2=86;x.font="600 86px "+SERIF;tl2=imWrap2(x,m.titulo||"",W-40)}
     var lh2=fs2*1.0,blk=tl2.length*lh2,y2=IMH/2-blk/2+fs2*0.35-40;x.fillStyle=st.cvInk;x.font="600 "+fs2+"px "+SERIF;tl2.forEach(function(l){x.fillText(l,cx,y2);y2+=lh2});
     x.fillStyle=st.gold;x.fillRect(cx-55,y2-lh2+fs2*0.55,110,3);y2+=fs2*0.5;
@@ -2479,13 +2479,13 @@ function pagesCanvas(m,tipo,c,fi){var st=estOf(c),M=96,W=IMW-2*M,pages=[],cv,x,y
   pages.forEach(function(p,i){var q=p.getContext("2d");q.fillStyle=st.gold;q.fillRect(M,IMH-104,W,1.5);q.fillStyle=st.mut;q.font="400 40px "+SCRIPT;q.fillText("Mariana Leal",M,IMH-48);q.font="700 20px "+CAPS;var t=String(i+2),tw=q.measureText(t).width;q.fillText(t,IMW-M-tw,IMH-52)});
   return pages}
 function contraCanvas(m,c){var st=estOf(c),cv=document.createElement("canvas");cv.width=IMW;cv.height=IMH;var x=cv.getContext("2d"),cx=IMW/2,v=(c&&c.venda)||{};x.textBaseline="alphabetic";
-  var dark=(c&&c.estilo)==="creme"?false:true;x.fillStyle=(c&&c.estilo)==="creme"?st.ac:st.bg2;x.fillRect(0,0,IMW,IMH);x.strokeStyle=(c&&c.estilo)==="creme"?"#E9CF9B":st.gold;x.lineWidth=2;x.strokeRect(48,48,IMW-96,IMH-96);
+  var guia=!!(c&&c.tipo==="guia");if(guia)v={};var dark=(c&&c.estilo)==="creme"?false:true;x.fillStyle=(c&&c.estilo)==="creme"?st.ac:st.bg2;x.fillRect(0,0,IMW,IMH);x.strokeStyle=(c&&c.estilo)==="creme"?"#E9CF9B":st.gold;x.lineWidth=2;x.strokeRect(48,48,IMW-96,IMH-96);
   var ink=(c&&c.estilo)==="creme"?"#FBF3EA":st.ink,gold=(c&&c.estilo)==="creme"?"#E9CF9B":st.gold;x.textAlign="center";
   x.fillStyle=gold;x.font="400 120px "+SCRIPT;x.fillText("Obrigada",cx,360);
   var y=470;x.fillStyle=ink;x.font="italic 600 46px "+SERIF;var fe=String(m.fechamento||"").trim();if(fe){imWrap2(x,fe,IMW-260).slice(0,7).forEach(function(l){x.fillText(l,cx,y);y+=62});y+=30}
   if(v.preco){x.font="700 30px "+CAPS;var pr=String(v.preco).trim(),pw=x.measureText(pr).width+64;x.strokeStyle=gold;x.lineWidth=2.5;rrect(x,cx-pw/2,y,pw,66,33);x.stroke();x.fillStyle=gold;x.fillText(pr,cx,y+44);y+=110}
   if(v.link){x.fillStyle=ink;x.font="500 32px "+SANS;imWrap2(x,String(v.link),IMW-300).slice(0,2).forEach(function(l){x.fillText(l,cx,y);y+=44});y+=24}
-  if(v.ec!==false){x.fillStyle=gold;x.font="700 20px "+CAPS;x.fillText("ORGANIZE CUSTOS E ESTOQUE COM O",cx,IMH-250);x.font="600 50px "+SERIF;x.fillStyle=ink;x.fillText("Estoque Crescente",cx,IMH-190)}
+  if(!guia&&v.ec!==false){x.fillStyle=gold;x.font="700 20px "+CAPS;x.fillText("ORGANIZE CUSTOS E ESTOQUE COM O",cx,IMH-250);x.font="600 50px "+SERIF;x.fillStyle=ink;x.fillText("Estoque Crescente",cx,IMH-190)}
   x.fillStyle=gold;x.font="400 54px "+SCRIPT;x.fillText("@mariana.leaal",cx,IMH-110);x.textAlign="left";return cv}
 async function imMake2(m,tipo,c){await fontsReady();var fi={},ids=[];(m.secoes||[]).forEach(function(z){if(z.foto&&FOTOS[z.foto])ids.push(z.foto)});
   for(var k=0;k<ids.length;k++)fi[ids[k]]=await loadImg(FOTOS[ids[k]]);
@@ -2524,7 +2524,7 @@ var _crPH58=crPH;crPH=function(t,i,a){if(t==="catalogo")return "[PREENCHER: por 
 var _crAction58=crAction;
 crAction=function(a,el){var c=state.cr;
   if(isProd(c)&&a==="ask")CRQ0=(c.tipo==="catalogo"?CRQ_CAT:CRQ_DEF).slice();
-  if(isProd(c)&&a==="pdf"){if(!c.material)return;var b0=el,t0=el&&el.textContent;if(el)el.textContent="Montando o PDF...";
+  if((isProd(c)||c.tipo==="guia")&&a==="pdf"){if(!c.material)return;var b0=el,t0=el&&el.textContent;if(el)el.textContent="Montando o PDF...";
     pdfFromPages(c.material,c.tipo,c).then(function(doc){if(!doc){if(el)el.textContent="PDF indisponível agora";return}return D.save({filename:crName(c.material)+".pdf",data:doc.output("arraybuffer")}).then(function(){if(el)el.textContent="PDF salvo"})}).catch(function(e){if(el)el.textContent=(e&&e.code==="declined")?"Salvar cancelado":"Não consegui salvar o PDF"});return}
   var r=_crAction58(a,el);
   if(isProd(c)&&c.tipo==="catalogo"&&a==="write"&&!S&&c.material&&(c.fotos||[]).length){c.material.secoes=c.fotos.map(function(id,i){return {titulo:"Produto "+(i+1),corpo:"[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]",itens:[],foto:id,preco:""}});saveCr();render()}
@@ -2544,11 +2544,13 @@ function secExtras(c){var m=c.material;if(!m)return;var cat=c.tipo==="catalogo";
       +(cat?'<label class="lab" style="flex:1;min-width:140px">Preço<input type="text" data-prp="'+i+'" value="'+esc(sc.preco||"")+'" placeholder="Ex.: R$ 89,90"></label>':'');
     card.insertBefore(d,card.firstChild.nextSibling||null)})}
 var _renderCriar58=renderCriar;
-renderCriar=function(){var c0=state.cr;if(isProd(c0))pfPerfil(c0);_renderCriar58();var c=state.cr;if(!isProd(c)||c.busy)return;var st=document.querySelector("#view .stack");if(!st)return;
-  if(c.step===0&&!c.material){var h='<div class="card"><h3>'+(c.tipo==="catalogo"?"Fotos dos produtos":"Fotos (opcional)")+'</h3><p class="note">'+(c.tipo==="catalogo"?"Escolha as fotos de uma vez. Cada foto vira um produto no catálogo.":"Se tiver fotos, escolha aqui. Elas viram páginas do material.")+'</p>'+((c.fotos||[]).length?'<div class="thumbs">'+c.fotos.map(function(id){return FOTOS[id]?'<img alt="" src="'+FOTOS[id]+'">':''}).join('')+'</div>':'')+'<div class="btns"><label class="btn small" style="cursor:pointer">Escolher fotos<input type="file" accept="image/*" multiple data-prfm="1" style="display:none"></label>'+((c.fotos||[]).length?'<button class="btn ghost small" data-prs="fclear">Limpar fotos</button>':'')+'</div><p class="note" id="prs-fmsg"></p></div>';var a=document.createElement("div");a.innerHTML=h;var ref=st.querySelectorAll(".card");var last=ref[ref.length-1];st.insertBefore(a.firstChild,last?last.nextSibling:null)}
-  if(c.step===1){var a2=document.createElement("div");a2.innerHTML=baseChips(c);if(a2.firstChild){var cs=st.querySelectorAll(".card"),l2=cs[cs.length-1];st.insertBefore(a2.firstChild,l2?l2.nextSibling:null)}}
-  if(c.material){var e=document.createElement("div");e.innerHTML=estPicker(c)+vendaCard(c);var bt=st.lastElementChild;while(e.firstChild)st.insertBefore(e.firstChild,bt);secExtras(c);
-    if(c.view==="edit"&&c.tipo==="catalogo"){var mb=st.querySelector('[data-crx="maddsec"]');if(mb){var lb=document.createElement("label");lb.className="btn ghost small";lb.style.cursor="pointer";lb.innerHTML='Adicionar produtos com fotos<input type="file" accept="image/*" multiple data-prfm="2" style="display:none">';mb.parentNode.insertBefore(lb,mb.nextSibling)}}
+renderCriar=function(){var c0=state.cr;if(isProd(c0))pfPerfil(c0);_renderCriar58();var c=state.cr,P=isProd(c);if((!P&&!(c.tipo==="guia"&&c.material))||c.busy)return;var st=document.querySelector("#view .stack");if(!st)return;
+  if(P&&c.step===0&&!c.material){var h='<div class="card"><h3>Tudo o que eu já tenho (opcional)</h3><p class="note">Cole aqui ideias soltas, partes de áudio, tópicos, números, exemplos. Pode ser pouco ou muito, e você pode voltar e acrescentar depois.</p><textarea data-cr="bruto" placeholder="Qualquer coisa que você já pensou sobre esse produto...">'+esc(c.bruto||"")+'</textarea></div><div class="card"><h3>'+(c.tipo==="catalogo"?"Fotos dos produtos":"Fotos (opcional)")+'</h3><p class="note">'+(c.tipo==="catalogo"?"Escolha as fotos de uma vez. Cada foto vira um produto no catálogo.":"Se tiver fotos, escolha aqui. Elas viram páginas do material.")+'</p>'+((c.fotos||[]).length?'<div class="thumbs">'+c.fotos.map(function(id){return FOTOS[id]?'<img alt="" src="'+FOTOS[id]+'">':''}).join('')+'</div>':'')+'<div class="btns"><label class="btn small" style="cursor:pointer">Escolher fotos<input type="file" accept="image/*" multiple data-prfm="1" style="display:none"></label>'+((c.fotos||[]).length?'<button class="btn ghost small" data-prs="fclear">Limpar fotos</button>':'')+'</div><p class="note" id="prs-fmsg"></p></div>';var a=document.createElement("div");a.innerHTML=h;var ref=st.querySelectorAll(".card");var last=ref[ref.length-1],nx=last?last.nextSibling:null;while(a.firstChild)st.insertBefore(a.firstChild,nx)}
+  var lt=st.querySelector('[data-prs="later"]');var lbc=lt&&lt.closest(".card");
+  if(P&&c.step===1){var a2=document.createElement("div");a2.innerHTML=baseChips(c);if(a2.firstChild){var cs=st.querySelectorAll(".card"),l2=cs[cs.length-1];st.insertBefore(a2.firstChild,l2?l2.nextSibling:null)}}
+  if(lbc&&c.step<3&&!c.material){st.appendChild(lbc)}
+  if(c.material){var e=document.createElement("div");e.innerHTML=estPicker(c)+(P?vendaCard(c):'<div class="card"><div class="btns"><button class="btn small" data-prs="img">Salvar como imagens</button></div><p class="note" id="prs-msg"></p></div>');var bt=st.lastElementChild;while(e.firstChild)st.insertBefore(e.firstChild,bt);secExtras(c);
+    if(P&&c.view==="edit"&&c.tipo==="catalogo"){var mb=st.querySelector('[data-crx="maddsec"]');if(mb){var lb=document.createElement("label");lb.className="btn ghost small";lb.style.cursor="pointer";lb.innerHTML='Adicionar produtos com fotos<input type="file" accept="image/*" multiple data-prfm="2" style="display:none">';mb.parentNode.insertBefore(lb,mb.nextSibling)}}
     if(c.view==="ver"){var mt=st.querySelector(".mt");if(mt){var box=document.createElement("div");box.className="prvp";box.id="prvpages";box.innerHTML='<p class="note">Montando as páginas...</p>';mt.parentNode.replaceChild(box,mt);var tok=Date.now();box._t=tok;imMake(c.material,c.tipo).then(function(us){var bx=document.getElementById("prvpages");if(!bx||bx._t!==tok)return;IMGS=us;bx.innerHTML=us.map(function(u,i){return '<img alt="Página '+(i+1)+' de '+us.length+'" src="'+u+'">'}).join('')}).catch(function(){var bx=document.getElementById("prvpages");if(bx)bx.innerHTML='<p class="note">Não consegui montar a prévia agora.</p>'})}}}};
 document.addEventListener("input",function(e){var el=e.target,c=state.cr;if(!el.dataset)return;
   if(el.dataset.prp!==undefined&&c.material){c.material.secoes[parseInt(el.dataset.prp,10)].preco=el.value;saveCr();return}
@@ -2570,6 +2572,38 @@ document.addEventListener("click",async function(e){var b=e.target.closest&&e.ta
   if(a[0]==="fclear"){(c.fotos||[]).forEach(fotoDel);c.fotos=[];saveCr();render();return}
   if(a[0]==="chip"){var it=(BR.items||[]).filter(function(x){return x.text&&String(x.text).trim()})[parseInt(a[1],10)];if(!it)return;var r=c.respostas=c.respostas||[],k=-1;for(var q=0;q<(c.perguntas||[]).length;q++){if(!String(r[q]||"").trim()){k=q;break}}if(k<0)k=0;r[k]=(String(r[k]||"").trim()?r[k]+"\n":"")+perfClean(it.text);saveCr();render();return}
 });
+/* ============ v59: guia e roteiro sem IA ============ */
+function guiaLocal(c){var g=gOf(c),L=function(t){return String(t||"").trim()},ph=function(t){return "[PREENCHER: "+t+"]"};
+  var arq=L(g.arquivos).split(/[\n;]+|\.\s+/).map(function(x){return x.trim()}).filter(Boolean);
+  var refs=(g.refs||[]).filter(function(r){return L(r.url)||L(r.nota)});
+  var sec=[
+   {titulo:"Objetivo do vídeo",corpo:L(g.diretriz)||ph("o assunto, a sensação e a mensagem do vídeo"),itens:[]},
+   {titulo:"Formato e entrega",corpo:"Formato: "+(L(g.formato)||"Reels 9:16")+".",itens:["Duração: "+ph("ex.: até 40 segundos"),"Prazo para a primeira versão: "+ph("data"),"Onde vai ao ar: "+ph("Reels, Stories, Feed")]},
+   {titulo:"Arquivos enviados",corpo:arq.length?"Tudo o que está na pasta e o que tem em cada arquivo:":ph("liste cada arquivo e o que tem nele"),itens:arq},
+   {titulo:"Ritmo e cortes",corpo:"Edição leve e natural, no jeito da Mari.",itens:["Abrir com o gancho nos primeiros 2 segundos","Cortar silêncios, pausas longas e erros de fala","Manter o ritmo: um corte novo a cada 2 ou 3 segundos","Fechar com a chamada para ação, sem esticar"].concat(refs.filter(function(r){return L(r.nota)}).map(function(r,i){return "Da referência "+(i+1)+": "+L(r.nota)}))},
+   {titulo:"Cor, texto na tela e áudio",corpo:"",itens:["Cor: natural e quente, sem saturar demais a pele","Texto na tela: "+ph("fonte, tamanho e posição"),"Legenda automática: conferir e corrigir as palavras","Áudio: "+ph("música ou fala em destaque, e volume")]}];
+  if(refs.length)sec.push({titulo:"Referências",corpo:"Vídeos que mostram o clima e o ritmo que a Mari quer.",itens:refs.map(function(r,i){return (L(r.url)||"Sem link")+(L(r.nota)?" · "+L(r.nota):"")})});
+  if(L(g.legenda))sec.push({titulo:"Legenda da referência",corpo:L(g.legenda),itens:[]});
+  c.material={titulo:L(g.titulo)||"Guia de captação e edição",subtitulo:(L(g.formato)||"Reels 9:16")+" · direcionamento para a editora",intro:"Este guia acompanha os arquivos brutos. Qualquer dúvida, me chame antes de cortar.",fechamento:"Obrigada pelo cuidado. Mande a primeira versão para eu revisar antes de finalizar.",secoes:sec};
+  c.step=3;c.view="edit";c.undo=null;c.err="";saveCr();render();window.scrollTo(0,0)}
+var _crAction59=crAction;
+crAction=function(a,el){var c=state.cr;if(c&&c.tipo==="guia"&&a==="gerarguia"&&!S){guiaLocal(c);return}return _crAction59(a,el)};
+/* roteiro sem IA: usa os modelos do calendário */
+var _hubRot59=hubRoteiro;
+hubRoteiro=function(){if(S)return _hubRot59();
+  var r=state.rot,h='<div><h2>Roteiro de conteúdo</h2><p class="sub">Para o seu conteúdo, sem marca. Escolha o formato e escreva a ideia: o app monta o roteiro com os seus modelos.</p><div class="btns"><button class="btn ghost small" data-gopub="parc">Ir para Parcerias</button></div></div>';
+  h+='<div class="card"><div class="pills">'+["Reels","Story","Carrossel","Melhores Amigos"].map(function(f){return '<button class="pill" data-rotfmt="'+f+'" aria-pressed="'+(r.formato===f)+'">'+f+'</button>'}).join('')+'</div>'
+   +'<label class="lab">Sua ideia<textarea data-cr="qi" placeholder="Ex.: mostrar como confiro o estoque antes de comprar...">'+esc(r.ideia)+'</textarea></label>'
+   +'<div class="btns"><button class="btn" data-rot59="gerar">Montar roteiro</button></div></div>';
+  if(r.loc){var it=r.loc;h+='<div class="card"><h3>'+esc(it.t)+'</h3><p class="note">'+esc(it.canal+" · "+it.fmt)+'</p>'+calFull(it).map(function(z){return '<div><b>'+esc(z.h)+'</b><p class="note" style="white-space:pre-line;color:var(--ink)">'+esc(z.t)+'</p></div>'}).join('')
+     +'<label class="lab">Dia para publicar<input type="date" data-rot59d="1" value="'+esc(it.d)+'"></label><div class="btns"><button class="btn small" data-rot59="cal">Salvar no calendário</button><button class="btn ghost small" data-rot59="copy">Copiar roteiro</button></div><p class="note" id="rot59-msg"></p></div>'}
+  return h};
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-rot59]");if(!b)return;var r=state.rot,a=b.dataset.rot59;
+  if(a==="gerar"){if(!String(r.ideia||"").trim()){return}var can=r.formato==="Story"?"Stories":r.formato==="Melhores Amigos"?"Melhores Amigos":"Feed principal",fm=r.formato==="Melhores Amigos"?"Story":r.formato;
+    r.loc=calNew({t:String(r.ideia).trim().slice(0,120),canal:can,fmt:fm,d:addDays(isoToday(),1)});saveRot();render();return}
+  if(a==="copy"&&r.loc){copyText(calFullText(r.loc),b);return}
+  if(a==="cal"&&r.loc){var d0=document.querySelector('[data-rot59d]');if(d0&&d0.value)r.loc.d=d0.value;var it=JSON.parse(JSON.stringify(r.loc));it.id="c"+Date.now();CALD.items.push(it);calSave();saveRot();var z=document.getElementById("rot59-msg");if(z)z.textContent="Salvo no calendário em "+it.d.slice(8,10)+"/"+it.d.slice(5,7)+".";b.textContent="Salvo"}});
+document.addEventListener("input",function(e){var el=e.target;if(el.dataset&&el.dataset.rot59d&&state.rot.loc){state.rot.loc.d=el.value;saveRot()}});
 fotoLoad();
 prodLoad();
 
@@ -2645,7 +2679,7 @@ function addHero(){
 }
 /* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
 var S=null,D=null;
-var NOAI="A IA não está ligada. Dentro do Claude ela funciona sozinha. Fora dele, em Mais > Ajustes você pode colocar a sua própria chave da Anthropic (opcional). O resto do app funciona normalmente, sem IA.";
+var NOAI="Este recurso usa inteligência artificial, que não está ligada nesta versão. Todo o resto do app funciona normalmente.";
 var TIPOS=[["ebook","eBook"],["catalogo","Catálogo de produtos"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
 var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
 function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}
@@ -2799,7 +2833,7 @@ function renderCriar(){
   var G=c.tipo==="guia";
   var h='<div class="stack"><div class="btns">'+(state.tab==="criar"?'<button class="btn ghost small" data-hub="inicio">← Criar</button>':state.tab==="pub"?'<button class="btn ghost small" data-pub="camp">← Publis</button>':'<button class="btn ghost small" data-pback="1">← Produtos</button>')+'</div>'
    +(isDirect(c.tipo)&&!G?'<div><h2>'+esc(tipoLabel(c.tipo))+'</h2><p class="sub">Edite o texto, preencha o que está em [PREENCHER] e salve o PDF.</p></div>':G?'<div><h2>Guia de captação e edição</h2><p class="sub">Conte o que o vídeo precisa ser, mostre referências e o app monta o direcionamento para a editora, em PDF.</p></div>':'<div><h2>Criar material</h2><p class="sub">Escreva a ideia, responda algumas perguntas e o material sai montado com a sua identidade.</p></div>');
-  if(!S&&!c.material&&(G||isDirect(c.tipo))){
+  if(!S&&!c.material&&!G&&isDirect(c.tipo)){
     h+='<div class="draft">'+NOAI+'</div></div>';
     $("#view").innerHTML=h;return;
   }
@@ -2963,7 +2997,7 @@ function guiaForm(c){
    +'<label class="lab">Formato<input type="text" data-cr="gf" value="'+esc(g.formato)+'"></label>'
    +'<label class="lab">Diretriz do conteúdo: o assunto, a sensação e a mensagem<textarea data-cr="gd" placeholder="Ex.: mostrar a rotina de compras com leveza, sem parecer propaganda...">'+esc(g.diretriz)+'</textarea></label>'
    +'<label class="lab">Arquivos que você vai enviar e o que tem em cada um<textarea data-cr="ga" placeholder="Ex.: VIDEO_01: chegada ao mercado. VIDEO_02: provando peças...">'+esc(g.arquivos)+'</textarea></label></div>';
-  h+='<div class="card"><h3>2. Referências</h3><p class="note">O app não abre links. Os links entram no guia para a editora. Para o app analisar a referência, cole a legenda ou a transcrição e envie prints ou o vídeo.</p>';
+  h+='<div class="card"><h3>2. Referências</h3><p class="note">'+(S?'O app não abre links. Os links entram no guia para a editora. Para o app analisar a referência, cole a legenda ou a transcrição e envie prints ou o vídeo.':'Cole os links e escreva o que chamou sua atenção em cada um. Tudo entra no guia, para a editora abrir e seguir.')+'</p>';
   g.refs.forEach(function(r,i){h+='<label class="lab">Referência '+(i+1)+'<input type="text" data-cr="gu'+i+'" value="'+esc(r.url)+'" placeholder="Link do vídeo"></label><label class="lab">O que chamou sua atenção (ritmo, corte, cor, texto na tela...)<input type="text" data-cr="gn'+i+'" value="'+esc(r.nota)+'"></label>'});
   h+='<label class="lab">Legenda ou transcrição da referência (opcional)<textarea data-cr="gl">'+esc(g.legenda)+'</textarea></label>';
   if(canImg){
@@ -3544,7 +3578,7 @@ function pubInput(el){
 function htmlAjustes(){
   var C2=cfg();
   return '<div><h2>Ajustes</h2><p class="sub">Tudo aqui é seu. Mude e o app passa a usar do seu jeito.</p></div>'
-   +'<div class="card"><h3>Minhas regras</h3><p class="note">Vale para tudo que o Claude escrever no app: o que você nunca faz, expressões que ama, limites. Exemplo: “nunca falar de rotina escolar do filho”.</p><textarea data-cfg="regras" placeholder="Escreva uma regra por linha...">'+esc(C2.regras||"")+'</textarea></div>'
+   +'<div class="card"><h3>Minhas regras</h3><p class="note">Vale para tudo que o app escrever: o que você nunca faz, expressões que ama, limites. Exemplo: “nunca falar de rotina escolar do filho”.</p><textarea data-cfg="regras" placeholder="Escreva uma regra por linha...">'+esc(C2.regras||"")+'</textarea></div>'
    +'<div class="card"><h3>Meu jeito de falar</h3><p class="note">Cole 1 ou 2 textos seus (legenda, roteiro, áudio transcrito). Fica neste aparelho.</p><textarea data-cr="voz" placeholder="Cole aqui um texto seu...">'+esc(state.voz||"")+'</textarea></div>'
    +'<div class="card"><h3>Limites das publis</h3><div class="fields"><label>Contratos por mês<input type="text" inputmode="numeric" data-ed="lim|contratos" data-num="1" value="'+esc(C2.lim.contratos)+'"></label><label>Meta por mês (R$)<input type="text" inputmode="decimal" data-ed="lim|meta" data-num="1" value="'+esc(C2.lim.meta)+'"></label></div><label class="lab">Categorias que você recusa (separe por vírgula)<input type="text" data-ed="lim|recusa" value="'+esc(C2.lim.recusa)+'"></label></div>'
    +'<div class="card"><h3>Meu mídia kit</h3><p class="note">Preencha uma vez. O “Documento para marcas” usa estes dados em vez de pedir de novo. O que ficar vazio continua como [PREENCHER].</p>'
