@@ -1516,6 +1516,8 @@ document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest)r
 /* ============ v38: abrir todas as linhas do dia no calendário ============ */
 CAL.rd=null;
 function crSec(a,h,t){if(t)a.push({h:h,t:t})}
+function genSecs(it){var tg=calTag(it),g=String(it.t||"").replace(/\s+$/,"");if(!/[.?!]$/.test(g))g+=".";var b=rotBuild(it,[g,PBEATS[tg],CTAK[tg],tg]);
+  return [{h:"Roteiro",t:b.nota},{h:"CTA (chamada para ação)",t:b.cta},{h:"Legenda",t:b.leg},{h:"Hashtags",t:b.tags}]}
 function calRowSecs(x){var q=String(x.go||"").split("|"),k=q[0],o=[];
   if(k==="plano"){var d=dayById(q[1]);if(!d)return o;
     crSec(o,"Tema",d.theme+" · "+d.phase);crSec(o,"Atenção",d.urgent);
@@ -1525,10 +1527,12 @@ function calRowSecs(x){var q=String(x.go||"").split("|"),k=q[0],o=[];
     d.stories.forEach(function(st,i){crSec(o,"Story "+(i+1),st[1]+(d.copy&&d.copy["s"+(i+1)]?"\n\n"+cpText(d,"s"+(i+1)):""))});
     crSec(o,"Melhores Amigos",d.copy&&d.copy.ma?cpText(d,"ma"):d.ma);crSec(o,"Assinatura",d.copy&&d.copy.ass?cpText(d,"ass"):d.ass);
     crSec(o,"Como terminar",d.finish);return o}
-  if(k==="canais"){crSec(o,"Assinatura",x.t);crSec(o,"Roteiro completo","Abra o plano do dia, se existir, para ver fala, passo a passo e sticker.");return o}
+  if(k==="canais"){crSec(o,"Assinatura",x.t);var pdA=DAYS.filter(function(z){return z.date===CAL.sel})[0];
+    if(pdA&&pdA.copy&&pdA.copy.ass){crSec(o,"Roteiro completo",cpText(pdA,"ass"))}else{genSecs({t:x.t.replace(/\s*\+.*$/,""),canal:"Assinatura",fmt:"Reels",marca:""}).forEach(function(z){o.push(z)})}return o}
   if(k==="prz"){var p=PRAZOS[+q[1]];if(p){crSec(o,"Marca",p.brand);crSec(o,"Prazo",p.t);crSec(o,"Detalhe",p.d)}return o}
   if(k==="camp"){var c=(state.camp||{})[q[1]];if(c){crSec(o,"Parceria",c.m+(c.t?" · "+c.t:""));crSec(o,"Dia da postagem",c.d?acFmt(c.d):"");
-      var ds=etapaDates(c);crSec(o,"Etapas",cfg().etapas.map(function(e){return (((c.done||{})[e.id])?"✓ ":"• ")+e.label+(ds[e.id]?" · "+acFmt(ds[e.id]):"")}).join("\n"))}return o}
+      var ds=etapaDates(c);crSec(o,"Etapas",cfg().etapas.map(function(e){return (((c.done||{})[e.id])?"✓ ":"• ")+e.label+(ds[e.id]?" · "+acFmt(ds[e.id]):"")}).join("\n"));
+      genSecs({t:(c.t||"Publi "+c.m),canal:"Feed principal",fmt:"Reels",marca:c.m}).forEach(function(z){o.push(z)})}return o}
   if(k==="acgo"){var a=acGet(q[1]);if(a){crSec(o,a.tipo,a.nome);crSec(o,"Período",acFmt(a.ini)+" a "+acFmt(a.fim));if(a.notas&&a.notas.length)crSec(o,"Notas",a.notas.map(function(n){return "• "+(n.t||n)}).join("\n"))}return o}
   if(k==="md"){var l=(MD.items||[]).filter(function(z){return z.d===q[1]&&z.st!=="cancelado"});crSec(o,"Tarefas do dia",l.map(function(z){return (z.st==="feito"?"✓ ":"• ")+z.t+(z.quem?" ("+z.quem+")":"")}).join("\n"));return o}
   crSec(o,x.tag,x.t);return o}
@@ -1542,7 +1546,10 @@ function calRowRead(x,ix){var q0=String(x.go||"").split("|");
     var hh='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag">Tarefas</span><h3 style="margin:6px 0 2px">Tarefas do dia '+esc(acFmt(q0[1]))+'</h3><span class="note">Toque para marcar como feita. Toque de novo para desmarcar.</span></div>';
     l.forEach(function(z){hh+='<div class="row'+(z.st==="feito"?' chkd':'')+'"><input type="checkbox" id="mt-'+z.id+'" data-mdtog="'+z.id+'"'+(z.st==="feito"?' checked':'')+'><label for="mt-'+z.id+'">'+esc(z.t)+(z.quem?' <span class="note">('+esc(z.quem)+')</span>':'')+'</label></div>'});
     if(!l.length)hh+='<p class="note">Nenhuma tarefa neste dia.</p>';
-    return hh+'<div class="btns"><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>'}
+    var pdM=DAYS.filter(function(z){return z.date===q0[1]})[0];
+    if(pdM){hh+='<div class="crs"><span class="crh">Roteiros de hoje (feed, stories, Melhores Amigos e assinatura)</span></div>';calRowSecs({go:"plano|"+pdM.id}).filter(function(z){return /^(Feed|Legenda|Story|Melhores|Assinatura)/.test(z.h)}).forEach(function(z){hh+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
+      if(pdM.feed&&pdM.feed.cta)hh+='<div class="crs"><span class="crh">CTA do feed</span><span class="crt">'+esc(pdM.feed.cta)+'</span></div>';if(pdM.feed&&pdM.feed.tags)hh+='<div class="crs"><span class="crh">Hashtags do feed</span><span class="crt">'+esc(pdM.feed.tags)+'</span></div>'}
+    return hh+'<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">Abrir minhas tarefas</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>'}
   var secs=calRowSecs(x);
   var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span><h3 style="margin:6px 0 2px">'+esc(x.t)+'</h3></div>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
