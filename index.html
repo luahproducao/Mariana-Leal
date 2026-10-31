@@ -2607,6 +2607,139 @@ document.addEventListener("input",function(e){var el=e.target;if(el.dataset&&el.
 fotoLoad();
 prodLoad();
 
+/* ============ v60: publis, briefing e marcas sem IA ============ */
+var BF_MESES={janeiro:1,fevereiro:2,"março":3,marco:3,abril:4,maio:5,junho:6,julho:7,agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12};
+function bfDate(l){
+  var d=0,mo=0,y=0,m=/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/.exec(l);
+  if(m){d=+m[1];mo=+m[2];y=m[3]?+m[3]:0}
+  else{var n=/(\d{1,2})\s+de\s+(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?/i.exec(l);if(n){d=+n[1];mo=BF_MESES[n[2].toLowerCase()];y=n[3]?+n[3]:0}}
+  if(d<1||d>31||mo<1||mo>12)return "";
+  var t=isoToday(),cy=+t.slice(0,4);if(y&&y<100)y+=2000;
+  if(!y){y=cy;if(y+"-"+pad2(mo)+"-"+pad2(d)<t)y=cy+1}
+  return y+"-"+pad2(mo)+"-"+pad2(d);
+}
+function bfLines(tx){
+  var seen={};
+  return String(tx||"").replace(/([.!?;])\s+(?=[A-ZÀ-Ú])/g,"$1\n").replace(/\s·\s/g,"\n").split(/\n+/).map(function(l){return l.replace(/^[\s\-–•*·>]+|^\d+[.)]\s+/,"").replace(/^(obrigat[óo]rio|evitar|prazos|cupom e link|entreg[áa]veis):\s*(?=\S)/i,"").replace(/;\s*$/,"").trim()}).filter(function(l){var k=l.toLowerCase().replace(/[.\s]+$/,"");if(l.length<4||/^\[.*\]$/.test(l)||/^[A-ZÀ-Ú0-9 ()·\-]+:?$/.test(l)||seen[k])return false;seen[k]=1;return true});
+}
+function briefLocal(tx){
+  var L=bfLines(tx),ent=[],obr=[],evi=[],cup=[],links=[],datas=[],post="",all=String(tx||"");
+  var rEnt=/\b(\d+|um|uma|dois|duas|três|tres|quatro)\s*(x\s*)?(reels?|stories|story|carross[eé]is|carrossel|posts?|v[ií]deos?|fotos?|collab)/i,
+      rEvi=/\bevit|\bnão\s+(fale|falar|use|usar|cite|citar|mencione|mencionar|pode|podem|mostre|mostrar|compare|comparar|prometa|prometer)|\bnunca\b|\bjamais\b|proibid|\bsem\s+(falar|citar|mencionar)/i,
+      rObr=/obrigat|\bprecisa|\bdeve\b|\bdevem\b|necess[aá]ri|tem que|\bsempre\b|mencion|marcar|marque|citar|cite |incluir|inclua|\buse\b|\busar\b|utilizar|#\w+|@\w+/i,
+      rCup=/cupom|c[oó]digo|desconto/i,rPost=/post|publica|vai ao ar|go.?live|data de/i,rMarca=/aprova|retorno|devolutiv|pagamento|pagaremos|libera|enviaremos|enviamos|nossa equipe|a marca/i;
+  var urls=all.match(/https?:\/\/\S+|www\.\S+/g)||[];urls.forEach(function(u){u=u.replace(/[.,;)]+$/,"");if(links.indexOf(u)<0)links.push(u)});
+  L.forEach(function(l){
+    var dt=bfDate(l);
+    if(rEnt.test(l)&&ent.length<4)ent.push(l);
+    if(rCup.test(l))cup.push(l);
+    if(rEvi.test(l))evi.push(l);else if(rObr.test(l)&&!rCup.test(l)&&!dt)obr.push(l);
+    if(dt){datas.push({data:dt,o_que:l.slice(0,100),quem:rMarca.test(l)&&!/mari/i.test(l)?"Marca":"Mari"});if(!post&&rPost.test(l))post=dt}
+  });
+  var duv=[],has=function(r){return r.test(all)};
+  if(!ent.length)duv.push("Quais são os entregáveis (quantos reels, stories ou posts)?");
+  if(!post)duv.push("Qual é a data de postagem?");
+  if(!cup.length&&!links.length)duv.push("Tem cupom ou link para colocar na legenda?");
+  if(!obr.length)duv.push("O que é obrigatório dizer ou mostrar?");
+  if(!evi.length)duv.push("A marca pede para evitar alguma coisa?");
+  if(!has(/aprova/i))duv.push("A marca aprova o roteiro antes de gravar? Em quanto tempo responde?");
+  if(!has(/valor|R\$|pagamento|nota fiscal|\bNF\b/i))duv.push("Valor, nota fiscal e prazo de pagamento?");
+  if(!has(/exclusiv/i))duv.push("Há exclusividade ou período de uso do conteúdo?");
+  return {entregaveis:ent.join("; "),obrigatorio:obr.slice(0,8),evitar:evi.slice(0,8),prazos:datas.map(function(x){return x.o_que}).join("; "),cupom:cup.concat(links.filter(function(u){return cup.join(" ").indexOf(u)<0})).join(" · "),duvidas:duv.slice(0,6),postagem:post,datas:datas.slice(0,8)};
+}
+function prLocal(r){
+  var fm=r.fmt||"Reels",m=r.marca,g=cfg().marcas[m]||{},B=briefLocal(r.briefing||""),obj=String(r.obj||"").trim();
+  var ph=function(t){return "[PREENCHER: "+t+"]"},ideia=obj?"Ideia: "+obj:"";
+  var gan=((g.gan||[])[0]||"").trim(),cta=String(g.cta||"").trim()||ph("uma ação só para a seguidora"),cup=B.cupom||"";
+  var apoio=String(g.prod||"").trim(),tom=String(g.tom||"").trim();
+  var bl=function(n,t,f,te){return {nome:n,tempo:t,fala:f,tela:te}};
+  var gFala=gan||ph("frase que para o dedo: uma situação, um número real ou uma pergunta"+(obj?" sobre: "+obj:""));
+  var B5=[bl("1. Gancho","0-3s",gFala,"Frase em texto grande logo no início"+(gan?". Gancho que já funcionou com esta marca":"")),
+    bl("2. História","3-15s",ph("o que aconteceu com você ou com uma seguidora"+(obj?" ("+obj+")":"")),"Cenas reais do seu dia"),
+    bl("3. Virada","15-25s",ph("o que mudou e a solução prática"),"Mostrar o antes e o depois"),
+    bl("4. Marca","25-40s",ph("como "+m+" entrou na história, na sua voz"),"Tela real da ferramenta ou do produto, sem dados de clientes"+(apoio?". Apoio sobre a marca: "+apoio:"")),
+    bl("5. CTA","últimos segundos",cta+(cup?"":" "+ph("cupom e link")),"Texto do cupom na tela e apontar para a legenda")];
+  var blocos;
+  if(fm==="Reels")blocos=B5;
+  else if(fm==="Collab"){blocos=B5.map(function(b,i){var q=i===3?"MARCA: ":"MARI: ";return bl(b.nome,b.tempo,q+b.fala,b.tela)});blocos[3].fala+="\nMARI: "+ph("sua reação ou exemplo logo depois")}
+  else if(fm==="Stories")blocos=[bl("Tela 1","5s",ph("a situação real, em uma frase"+(obj?" ("+obj+")":"")),"Você falando para a câmera"),bl("Tela 2","5s",ph("o problema que a seguidora conhece"),"Texto curto na tela"),bl("Tela 3","10s",ph("a solução, na sua voz"),"Gravação de tela real mostrando "+m),bl("Tela 4","7s",ph("um exemplo ou prova"),"Print ou foto real"),bl("Tela 5","5s",ph("pergunta para a seguidora responder"),"Sticker de enquete ou caixinha"),bl("Tela 6","5s",cta+(cup?"":" "+ph("cupom e link")),"Sticker de link e texto do cupom")];
+  else if(fm==="Carrossel")blocos=[bl("Capa","",gFala,"Promessa concreta em fonte grande"),bl("Slide 2","",ph("o problema"),"Uma ideia por slide"),bl("Slide 3","",ph("por que isso acontece"),"Visual simples"),bl("Slide 4","",ph("primeiro passo"),"Passo numerado"),bl("Slide 5","",ph("segundo passo"),"Passo numerado"),bl("Slide 6","",ph("como "+m+" ajuda nisso, na sua voz"),"Print real"+(apoio?". Apoio: "+apoio:"")),bl("Slide 7","",ph("o resultado ou o exemplo"),"Sem prometer ganho de vendas"),bl("Slide 8","",cta+(cup?"":" "+ph("cupom e link")),"Chamada final com @ da marca")];
+  else blocos=[bl("1. Gancho de dor","3s",gFala,"Legenda na tela, vertical"),bl("2. Prova ou demonstração","10s",ph("mostrar "+m+" funcionando"),"Gravação de tela ou produto real"),bl("3. Benefício claro","7s",ph("o benefício em uma frase"+(apoio?" (apoio: "+apoio+")":"")),"Texto de apoio na tela"),bl("4. CTA direto","5s",cta+(cup?"":" "+ph("cupom e link")),"Botão ou texto final")];
+  var leg=[ph("abertura da legenda, no seu jeito"+(obj?" ("+obj+")":""))];
+  if(!/#publi/i.test(String(g.leg||"")))leg.push("Publicidade · parceria paga com "+m+" #publi");
+  if(g.leg)leg.push(String(g.leg));
+  B.obrigatorio.forEach(function(o){if(/[#@]/.test(o))leg.push(o)});
+  leg.push(cup||ph("cupom e link"));
+  var conf=B.duvidas.slice(0,4);
+  if(B.evitar.length)conf.push("A marca pede para evitar: "+B.evitar.slice(0,3).join("; "));
+  if(B.obrigatorio.length)conf.push("Obrigatório no briefing: "+B.obrigatorio.slice(0,3).join("; "));
+  if(tom)conf.push("Tom da marca x tom da Mari: "+tom);
+  conf.push("Completar todos os trechos em [PREENCHER] antes de gravar");
+  var nm=(PRF.filter(function(x){return x[0]===fm})[0]||[0,fm])[1];
+  return {titulo:nm+" · "+m+(obj?" · "+obj.slice(0,50):""),blocos:blocos,legenda:leg.join("\n\n"),confirmar:conf};
+}
+function prGanLocal(r){
+  var g=cfg().marcas[r.marca]||{},t=String(r.obj||"").trim(),te=t?"Tema: "+t:"Tema do vídeo",o=[];
+  (g.gan||[]).slice(0,2).forEach(function(x){o.push({tipo:"Já funcionou com a marca",fala:String(x),tela:"Frase em texto grande"})});
+  [["Pergunta","Você já passou por isso? [PREENCHER: a situação, em uma frase]"],["Confissão","Eu demorei para entender isso: [PREENCHER: o que você aprendeu tarde]"],["Número real","[PREENCHER: um número real seu] foi o que aconteceu quando eu [PREENCHER: o que você fez]"],["Contraste","Todo mundo diz [PREENCHER: o que se costuma dizer], mas na prática é [PREENCHER: o que acontece de verdade]"],["Cena","[PREENCHER: a cena, por exemplo você no estoque com a caixa na mão]. Foi aí que eu percebi."]].forEach(function(x){o.push({tipo:x[0],fala:x[1],tela:te})});
+  return o.slice(0,5);
+}
+function prCheckLocal(r){
+  var x=r.res,g=cfg().marcas[r.marca]||{},B=briefLocal(r.briefing||""),it=[];
+  var corpo=x.blocos.map(function(b){return b.fala+" "+b.tela}).join(" "),leg=String(x.legenda||""),tudo=(corpo+" "+leg).toLowerCase(),brief=String(r.briefing||"");
+  var np=(corpo+" "+leg).split("[PREENCHER").length-1;
+  it.push({ok:np===0,ponto:np===0?"Nenhum trecho em [PREENCHER] sobrando.":np+" trecho(s) ainda em [PREENCHER].",ajuste:"Complete antes de gravar. Não invente número nem condição."});
+  var sel=/#publi|publicidade|parceria paga|#ad\b/i.test(leg);
+  it.push({ok:sel,ponto:sel?"Selo de parceria paga na legenda.":"Falta o selo de parceria paga na legenda.",ajuste:"Inclua “Publicidade · parceria paga com "+r.marca+" #publi”."});
+  var tk=(String(g.leg||"")+" "+B.obrigatorio.join(" ")).match(/[#@][\wÀ-ú.]+/g)||[],falta=[];tk.forEach(function(t){if(falta.indexOf(t)<0&&leg.toLowerCase().indexOf(t.toLowerCase())<0)falta.push(t)});
+  if(tk.length)it.push({ok:!falta.length,ponto:falta.length?"Marcações ou hashtags do perfil e do briefing que não estão na legenda.":"Hashtags e marcações obrigatórias estão na legenda.",ajuste:"Acrescente: "+falta.join(" ")});
+  if(B.cupom){var cods=(B.cupom.match(/[A-Z0-9]{4,}|https?:\/\/\S+/g)||[]),achou=cods.length?cods.some(function(c){return (leg+" "+corpo).indexOf(c)>=0}):true;it.push({ok:achou,ponto:achou?"Cupom ou link do briefing aparece no roteiro.":"O cupom ou o link do briefing não aparece no roteiro.",ajuste:"Coloque na legenda e na fala do CTA: "+B.cupom})}
+  var ultimo=x.blocos[x.blocos.length-1];it.push({ok:!!(ultimo&&String(ultimo.fala).trim()),ponto:ultimo&&String(ultimo.fala).trim()?"Termina com uma chamada para ação.":"O último bloco está sem chamada para ação.",ajuste:"Feche com uma ação só."});
+  var nums=(corpo.replace(/\[PREENCHER[^\]]*\]/g,"").match(/\d[\d.,]*%?/g)||[]).filter(function(n){return brief.indexOf(n)<0});
+  it.push({ok:!nums.length,ponto:nums.length?"Número que não está no briefing: "+nums.slice(0,3).join(", ")+".":"Nenhum número fora do briefing.",ajuste:"Confirme com a marca ou troque por [PREENCHER]."});
+  var pr=/garant|certeza|100%|sem risco|dobr|milh[aã]o|fic(ar|a) rica/i.test(tudo);
+  it.push({ok:!pr,ponto:pr?"Tem uma frase que parece promessa de resultado.":"Sem promessa de resultado.",ajuste:"Troque por algo que você viveu, sem prometer ganho."});
+  var ev=(g.evitar||[]).filter(function(e){var k=String(e).toLowerCase().trim();return k.length>3&&tudo.indexOf(k)>=0});
+  if((g.evitar||[]).length)it.push({ok:!ev.length,ponto:ev.length?"Apareceu algo que o perfil manda evitar.":"Termos a evitar do perfil (comparação literal): nenhum encontrado. Lembrete: "+g.evitar.slice(0,3).join("; ")+".",ajuste:"Remova: "+ev.join("; ")});
+  return it.slice(0,8);
+}
+var _pra60=pubRoteiroAction;
+pubRoteiroAction=function(a,el){
+  if(S||(a!=="gerar"&&a!=="ganchos"&&a!=="checar"))return _pra60(a,el);
+  var r=state.pr;
+  if(a==="gerar"){
+    if(!r.briefing.trim()&&!r.obj.trim()){r.err="Cole o briefing ou escreva a sua ideia.";render();return}
+    r.err="";r.res=normPr(prLocal(r),null);r.res.fmt=r.fmt||"Reels";r.ck={};r.gan=[];r.chk=null;rosSave(r);savePr();render();return;
+  }
+  if(!r.res)return;
+  if(a==="ganchos"){r.gan=prGanLocal(r);savePr();render();return}
+  if(a==="checar"){r.chk=prCheckLocal(r);savePr();render();return}
+};
+function mxLocal(m){
+  var out={prod:"",pub:"",obj:[],gan:[],cta:"",hist:"",res:"",fmt:"",leg:"",tom:""},its=PARC.items.filter(function(x){return x.marca===m});
+  var fm=[],ap=[],lg=[],ct=[],ga=[];
+  its.forEach(function(p){
+    if(String(p.entregaveis||"").trim())fm.push(p.entregaveis.trim());
+    if(String(p.aprend||"").trim())ap.push(p.aprend.trim());
+    var c=p.campId&&state.camp[p.campId];if(c&&c.rep&&String(c.rep.apr||"").trim())ap.push(c.rep.apr.trim());
+    var tx=(p.briefs||[]).map(function(b){return b.x}).join("\n")+"\n"+(p.regras||"");
+    bfLines(tx).forEach(function(l){if(/legenda|#publi|selo|#\w+|@\w+/i.test(l))lg.push(l);if(/cupom|c[oó]digo/i.test(l))ct.push(l)});
+    (p.roteiros||[]).forEach(function(r){if((r.st==="Aprovado"||r.st==="Postado")&&r.res&&r.res.blocos&&r.res.blocos[0]&&String(r.res.blocos[0].fala||"").trim()&&r.res.blocos[0].fala.indexOf("[PREENCHER")<0)ga.push(r.res.blocos[0].fala.trim())});
+  });
+  var u=function(a){return a.filter(function(x,i){return a.indexOf(x)===i})};
+  out.fmt=u(fm).join("; ");out.res=u(ap).join("\n");out.leg=u(lg).slice(0,4).join("; ");out.cta=u(ct).slice(0,1).join("");out.gan=u(ga).slice(0,3);
+  return out;
+}
+function brSepara(tx){
+  var K=[["marcas",/marca|parceria|publi|cupom|bling|melhor envio|\b99\b|\bmeta\b|\btom\b/i],["publico",/seguidora|p[uú]blico|lojista|empres[aá]ria|iniciante|quem me acompanha/i],["negocio",/loja|estoque|venda|cliente|fornecedor|lucro|pre[cç]o|faturamento|custo|produto/i],["aprend",/funcionou|aprendi|deu certo|n[aã]o funcionou|resultado|engaj|erro/i],["decisao",/decidi|vou |vamos |a partir de|combinamos|regra|prefiro/i],["voz",/\bfalo\b|\bfala\b|jeito|express[aã]o|g[ií]ria|tom de voz|palavra/i]];
+  var ex=(BR.items||[]).map(function(x){return String(x.text||"").toLowerCase().trim()}),out=[];
+  String(tx||"").replace(/([.!?])\s+(?=[A-ZÀ-Ú])/g,"$1\n\n").split(/\n{2,}|\n(?=[-•*])/).forEach(function(p){
+    p=p.replace(/^[\s\-•*]+/,"").trim();if(p.length<18||out.length>=8||ex.indexOf(p.toLowerCase())>=0)return;
+    var cat="historia";for(var i=0;i<K.length;i++){if(K[i][1].test(p)){cat=K[i][0];break}}
+    out.push({cat:cat,texto:p});
+  });
+  return {itens:out};
+}
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -3171,23 +3304,22 @@ function campAdd(m,t,d,env){var id="c"+Date.now(),o={m:m,t:t,d:d,env:env||"",v:"
 /* ---- roteiro de publi ---- */
 function guiaTxt(m){var g=cfg().marcas[m];if(!g)return "(sem guia desta marca: siga só o briefing)";return "Ângulo: "+g.ang+"\nUsar: "+(g.usar.join("; ")||"-")+"\nEvitar: "+(g.evitar.join("; ")||"-")+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+(g.temas.join("; ")||"-")}
 function pubRoteiro(){
-  var r=state.pr,h='<div class="btns"><button class="btn ghost small" data-pcb="back2">← '+(r.parcId&&parcGet(r.parcId)?'Painel da parceria':'Parcerias')+'</button></div><div><h2>Roteiro de publi</h2><p class="sub">Escolha o formato e o app escreve com o perfil da marca, o briefing e a sua voz. Você edita.</p></div>';
-  if(!S)return h+'<div class="draft">'+NOAI+'</div>';
+  var r=state.pr,h='<div class="btns"><button class="btn ghost small" data-pcb="back2">← '+(r.parcId&&parcGet(r.parcId)?'Painel da parceria':'Parcerias')+'</button></div><div><h2>Roteiro de publi</h2><p class="sub">'+(S?'Escolha o formato e o app escreve com o perfil da marca, o briefing e a sua voz. Você edita.':'Escolha o formato e o app monta a estrutura com o perfil da marca e o briefing. Você completa o que estiver em [PREENCHER] e edita à vontade.')+'</p></div>';
   if(r.err)h+='<div class="draft" style="background:var(--bad-soft);color:var(--bad)">'+esc(r.err)+'</div>';
   if(r.busy)return h+'<div class="card"><h3>'+esc(r.busy)+'</h3><p class="sub">Pode levar de 10 a 60 segundos.</p></div>';
   if(r.parcId&&parcGet(r.parcId))h+='<div class="draft">Painel: '+esc(parcTitle(parcGet(r.parcId)))+'. O briefing, as regras e o seu ângulo já vieram do painel.</div>';
   h+='<div class="card"><div class="pills">'+PRF.map(function(f){return '<button class="pill" data-prfmt="'+f[0]+'" aria-pressed="'+((r.fmt||"Reels")===f[0])+'">'+f[1]+'</button>'}).join('')+'</div><label class="lab">Marca<select data-pr="pm">'+marcaList().map(function(m){return '<option'+(m===r.marca?' selected':'')+'>'+esc(m)+'</option>'}).join('')+'</select></label>'
    +'<label class="lab">Briefing da marca (cole aqui)<textarea data-pr="pb" style="min-height:140px" placeholder="Entregáveis, mensagem principal, termos obrigatórios, o que evitar, cupom, link...">'+esc(r.briefing)+'</textarea></label>'
    +'<label class="lab">Sua ideia ou ângulo (opcional)<input type="text" data-pr="po" value="'+esc(r.obj)+'" placeholder="Ex.: contar o dia em que quase vendi sem conferir o estoque"></label>'
-   +'<p class="note">Não cole aqui o briefing confidencial de marcas que pediram sigilo.</p><div class="btns"><button class="btn" data-pra="gerar">Escrever roteiro</button></div></div>';
+   +'<p class="note">Não cole aqui o briefing confidencial de marcas que pediram sigilo.</p><div class="btns"><button class="btn" data-pra="gerar">'+(S?'Escrever roteiro':'Montar roteiro')+'</button></div></div>';
   if(r.res){
     var x=r.res;
     h+='<div class="card"><h3>Roteiro</h3><label class="lab">Título<input type="text" data-pr="pt" value="'+esc(x.titulo)+'"></label>';
     x.blocos.forEach(function(b,i){h+='<label class="lab"><b style="color:var(--ink)">'+esc(b.nome)+'</b> <span class="note">'+esc(b.tempo)+'</span><textarea data-pr="pf'+i+'" placeholder="Fala">'+esc(b.fala)+'</textarea><textarea data-pr="ps'+i+'" placeholder="Na tela">'+esc(b.tela)+'</textarea></label>'});
     h+='<label class="lab">Legenda<textarea data-pr="pl">'+esc(x.legenda)+'</textarea></label>'
      +'<label class="lab">Para confirmar antes de gravar (um por linha)<textarea data-pr="pc">'+esc((x.confirmar||[]).join("\n"))+'</textarea></label>'
-     +'<label class="lab">Ajuste extra (opcional)<input type="text" data-pr="pa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais direto, mais animado"></label>'
-     +'<div class="btns"><button class="btn small" data-pra="voz">Reescrever no meu jeito</button><button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button><button class="btn ghost small" data-pra="ganchos">Variações de gancho</button><button class="btn ghost small" data-pra="checar">Checar com a marca</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
+     +(S?'<label class="lab">Ajuste extra (opcional)<input type="text" data-pr="pa" value="'+esc(r.instr||"")+'" placeholder="Ex.: mais direto, mais animado"></label>':'')
+     +'<div class="btns">'+(S?'<button class="btn small" data-pra="voz">Reescrever no meu jeito</button>':'')+'<button class="btn small" data-pra="pdf">Salvar PDF</button><button class="btn ghost small" data-pra="copy">Copiar</button><button class="btn ghost small" data-pra="draft">Salvar rascunho</button><button class="btn ghost small" data-pra="ganchos">Variações de gancho</button><button class="btn ghost small" data-pra="checar">Checar com a marca</button>'+(r.parcId&&parcGet(r.parcId)?'<button class="btn small" data-pcb="saveros">Guardar no painel da parceria</button>':'')+'</div></div>'
      +'';
   }
   if(r.res)h+='<div class="stickbar">'+(r.parcId&&parcGet(r.parcId)?'<button class="btn" data-pcb="saveros">Guardar no painel</button>':'<button class="btn" data-pra="draft">Salvar rascunho</button>')+'<button class="btn ghost" data-pra="pdf">Salvar PDF</button></div>'+(r.parcId?'<p class="note">Este roteiro é guardado sozinho no painel da parceria.</p>':'');
@@ -3285,7 +3417,7 @@ function pubMarcas(){
        +'<label class="lab">Evitar (um por linha)<textarea data-ed="'+esc(pm)+'evitar" data-lines="1">'+esc(g.evitar.join("\n"))+'</textarea></label>'
        +'<label class="lab">Visual<input type="text" data-ed="'+esc(pm)+'visual" value="'+esc(g.visual||"")+'"></label>'
        +'<label class="lab">Temas que funcionam (um por linha)<textarea data-ed="'+esc(pm)+'temas" data-lines="1">'+esc(g.temas.join("\n"))+'</textarea></label>'
-       +mxEdit(g,pm)+'<div class="btns">'+(S?'<button class="btn small" data-mxb="ia" data-m="'+esc(m)+'">Completar com IA</button>':'')+'<button class="btn small" data-cfx="marca-edit|">Pronto</button><button class="btn ghost small" data-cfx="marca-del|'+esc(m)+'">Remover marca</button></div>';
+       +mxEdit(g,pm)+'<div class="btns">'+'<button class="btn small" data-mxb="ia" data-m="'+esc(m)+'">'+(S?'Completar com IA':'Completar com os painéis')+'</button>'+'<button class="btn small" data-cfx="marca-edit|">Pronto</button><button class="btn ghost small" data-cfx="marca-del|'+esc(m)+'">Remover marca</button></div>';
     }
     h+='</div>';
   });
@@ -3990,13 +4122,13 @@ function guiaFull(m){var g=cfg().marcas[m];if(!g)return "(sem perfil desta marca
  return "Ângulo: "+g.ang+"\nO que é e o que a Mari mostra: "+(g.prod||"-")+"\nPúblico da marca: "+(g.pub||"-")+"\nObjeções do público: "+L(g.obj)+"\nGanchos que funcionam: "+L(g.gan)+"\nCTA padrão: "+(g.cta||"-")+"\nComo a Mari já usou: "+(g.hist||"-")+"\nJá funcionou ou não: "+(g.res||"-")+"\nFormatos pedidos: "+(g.fmt||"-")+"\nObrigatório na legenda: "+(g.leg||"-")+"\nTom: "+(g.tom||"-")+"\nUsar: "+L(g.usar)+"\nEvitar: "+L(g.evitar)+"\nVisual: "+(g.visual||"-")+"\nTemas que funcionam: "+L(g.temas)}
 document.addEventListener("click",async function(e){
   var b=e.target.closest&&e.target.closest("[data-mxb]");if(!b)return;
-  var m=b.dataset.m,g=cfg().marcas[m];if(!g)return;if(!S){MXMSG=NOAI;render();return}
+  var m=b.dataset.m,g=cfg().marcas[m];if(!g)return;
   var src=PARC.items.filter(function(x){return x.marca===m}).map(function(x){return "Parceria "+parcTitle(x)+":\nBriefings: "+x.briefs.map(function(q){return q.x}).join("\n---\n").slice(0,2500)+"\nRegras: "+x.regras+"\nAprendizados: "+x.aprend+"\nRoteiros aprovados: "+x.roteiros.filter(function(r){return r.st==="Aprovado"||r.st==="Postado"}).map(function(r){return JSON.stringify(r.res)}).join("\n").slice(0,2500)}).join("\n\n");
   MXMSG="Completando o perfil...";render();
   try{
-    var x=await S.json("Complete o perfil da marca "+m+" para a influenciadora Mari usando SOMENTE o que está no perfil atual, nos painéis das parcerias e no cérebro dela. Não invente fatos, números, resultados nem condições comerciais: o que não houver, deixe vazio. Perfil atual:\n"+guiaFull(m)+"\n\nPainéis desta marca:\n"+(src||"(nenhum)")+"\n\nResponda SOMENTE com JSON {\"prod\":\"\",\"pub\":\"\",\"obj\":[\"\"],\"gan\":[\"\"],\"cta\":\"\",\"hist\":\"\",\"res\":\"\",\"fmt\":\"\",\"leg\":\"\",\"tom\":\"\"}. Preencha apenas o que estiver vazio no perfil atual.",{modelTier:"default"});
+    var x=!S?mxLocal(m):await S.json("Complete o perfil da marca "+m+" para a influenciadora Mari usando SOMENTE o que está no perfil atual, nos painéis das parcerias e no cérebro dela. Não invente fatos, números, resultados nem condições comerciais: o que não houver, deixe vazio. Perfil atual:\n"+guiaFull(m)+"\n\nPainéis desta marca:\n"+(src||"(nenhum)")+"\n\nResponda SOMENTE com JSON {\"prod\":\"\",\"pub\":\"\",\"obj\":[\"\"],\"gan\":[\"\"],\"cta\":\"\",\"hist\":\"\",\"res\":\"\",\"fmt\":\"\",\"leg\":\"\",\"tom\":\"\"}. Preencha apenas o que estiver vazio no perfil atual.",{modelTier:"default"});
     var n=0;MXF.forEach(function(f){var k=f[0],cur=g[k],emp=f[2]==="l"?!(cur&&cur.length):!String(cur||"").trim(),v=x[k];if(emp&&v&&(f[2]==="l"?v.length:String(v).trim())){g[k]=f[2]==="l"?v.map(String).filter(Boolean):String(v);n++}});
-    cfgSave();MXMSG=n?n+" campo(s) sugerido(s) pela IA. Revise antes de usar.":"Nada novo para sugerir com o que já existe."
+    cfgSave();MXMSG=n?n+" campo(s) "+(S?"sugerido(s) pela IA":"preenchido(s) com o que está nos painéis desta marca")+". Revise antes de usar.":"Nada novo para sugerir com o que já existe."
   }catch(err){MXMSG=crErr(err)||"Não consegui agora."}
   render();
 });
@@ -4120,14 +4252,14 @@ function pubParc(){
   h+='<div class="card"><h3>Briefings</h3><p class="note">Cole cada briefing que a marca mandar. Os mais recentes pesam mais. Não cole briefing que a marca pediu para manter em sigilo.</p>'
    +'<label class="lab">Título<input type="text" id="pc-bt" value="'+esc(PCUI.bt)+'" placeholder="Ex.: Briefing inicial, ajuste de 05/11"></label>'
    +'<label class="lab">Texto do briefing<textarea id="pc-bx" style="min-height:120px" placeholder="Cole aqui...">'+esc(PCUI.bx)+'</textarea></label><div class="btns"><button class="btn small" data-pcb="addbrief">Guardar briefing</button></div>';
-  h+=p.briefs.slice().map(function(b,i){return {b:b,i:i}}).reverse().map(function(o){return '<div class="card" style="background:var(--bg)"><input type="text" data-pcbt="'+o.i+'" value="'+esc(o.b.t)+'" aria-label="Título do briefing"><textarea data-pcbx="'+o.i+'" style="min-height:100px">'+esc(o.b.x)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(o.b.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px">'+(S?'<button class="btn small" data-pcb="ler" data-i="'+o.i+'">Ler com IA</button>':'')+'<button class="btn ghost small" data-pcb="delbrief" data-i="'+o.i+'">Apagar</button></span></div></div>'}).join('')+'</div>';
+  h+=p.briefs.slice().map(function(b,i){return {b:b,i:i}}).reverse().map(function(o){return '<div class="card" style="background:var(--bg)"><input type="text" data-pcbt="'+o.i+'" value="'+esc(o.b.t)+'" aria-label="Título do briefing"><textarea data-pcbx="'+o.i+'" style="min-height:100px">'+esc(o.b.x)+'</textarea><div class="meta" style="padding:0"><span class="note">'+new Date(o.b.at||Date.now()).toLocaleDateString("pt-BR")+'</span><span class="btns" style="gap:6px">'+(S?'<button class="btn small" data-pcb="ler" data-i="'+o.i+'">Ler com IA</button>':'<button class="btn small" data-pcb="ler" data-i="'+o.i+'">Ler briefing</button>')+'<button class="btn ghost small" data-pcb="delbrief" data-i="'+o.i+'">Apagar</button></span></div></div>'}).join('')+'</div>';
   h+='<div class="card"><h3>Combinados e meu ângulo</h3>'
    +pcTa("regras","Regras e combinados (obrigatório, evitar, cupom e link, prazos)",p.regras,"Uma por linha...",100)
    +pcTa("angulo","Como eu quero falar desta marca",p.angulo,"Ex.: contar o dia em que quase comprei sem conferir o estoque...",80)
    +pcTa("duvidas","Dúvidas para perguntar à marca",p.duvidas,"Uma por linha...",70)+'</div>';
   h+='<div class="card"><h3>Roteiros desta parceria</h3>'
    +p.roteiros.map(function(r,i){return '<div class="card" style="background:var(--bg)"><b>'+esc((r.res&&r.res.titulo)||"Roteiro")+'</b> <span class="tag">'+esc((PRF.filter(function(f){return f[0]===((r.res&&r.res.fmt)||"Reels")})[0]||[0,"Reels"])[1])+'</span><div class="fields"><label>Situação<select data-pcrs="'+i+'">'+PCROS.map(function(x){return '<option'+(x===r.st?' selected':'')+'>'+x+'</option>'}).join('')+'</select></label></div><div class="btns"><button class="btn small" data-pcb="openros" data-i="'+i+'">Abrir e editar</button><button class="btn ghost small" data-pcb="delros" data-i="'+i+'">Apagar</button></div></div>'}).join('')
-   +(S?'<div class="btns"><button class="btn" data-pcb="roteiro">Escrever roteiro com este painel</button></div>':'<p class="note">'+esc(NOAI)+'</p>')+'</div>';
+   +'<div class="btns"><button class="btn" data-pcb="roteiro">'+(S?'Escrever roteiro com este painel':'Montar roteiro com este painel')+'</button></div></div>';
   var e9=ds&&c.done&&c.done.e9,e10=c.done&&c.done.e10,fin=e10?'Pago.':(e9?(daysUntil(ds.e10)<0?'Prazo vencido em '+fd(ds.e10)+' ('+(-daysUntil(ds.e10))+' dia(s) de atraso).':'A receber até '+fd(ds.e10)+'.'):'Marque “Nota fiscal emitida” no caminho para calcular o vencimento.');
   h+='<div class="card"><h3>Financeiro</h3><div class="fields"><label>Valor (R$)<input type="text" inputmode="decimal" data-cf="'+cid+'|v" value="'+esc(c.v||"")+'"></label><label>Data da nota<input type="date" data-cf="'+cid+'|nf" value="'+esc(c.nf||"")+'"></label></div><p class="note"><b>'+fin+'</b></p></div>';
   var rl=c.rep||{};
@@ -4165,10 +4297,10 @@ document.addEventListener("click",async function(e){
     savePr();state.pub="roteiro";render();window.scrollTo(0,0);return;
   }
   if(a==="ler"){
-    var br=p.briefs[i];if(!br||!S){PCUI.msg=NOAI;render();return}
+    var br=p.briefs[i];if(!br)return;
     PCUI.busy="Lendo o briefing...";render();
     try{
-      var res=await S.json("Leia o briefing de uma marca para a influenciadora Mari e extraia, SEM inventar nada que não esteja no texto: entregáveis, o que é obrigatório, o que evitar, prazos (com datas), cupom e link, e as dúvidas que ainda faltam para escrever o roteiro. Hoje é "+isoToday()+". Converta toda data citada para AAAA-MM-DD (se faltar o ano, use o próximo que vem).\n\nMarca: "+p.marca+"\nBriefing:\n"+br.x+"\n\nResponda SOMENTE com JSON {\"entregaveis\":\"\",\"obrigatorio\":[\"\"],\"evitar\":[\"\"],\"prazos\":\"\",\"cupom\":\"\",\"duvidas\":[\"\"],\"postagem\":\"\",\"datas\":[{\"data\":\"\",\"o_que\":\"\",\"quem\":\"Mari ou Marca\"}]}.",{modelTier:"default"});
+      var res=!S?briefLocal(br.x):await S.json("Leia o briefing de uma marca para a influenciadora Mari e extraia, SEM inventar nada que não esteja no texto: entregáveis, o que é obrigatório, o que evitar, prazos (com datas), cupom e link, e as dúvidas que ainda faltam para escrever o roteiro. Hoje é "+isoToday()+". Converta toda data citada para AAAA-MM-DD (se faltar o ano, use o próximo que vem).\n\nMarca: "+p.marca+"\nBriefing:\n"+br.x+"\n\nResponda SOMENTE com JSON {\"entregaveis\":\"\",\"obrigatorio\":[\"\"],\"evitar\":[\"\"],\"prazos\":\"\",\"cupom\":\"\",\"duvidas\":[\"\"],\"postagem\":\"\",\"datas\":[{\"data\":\"\",\"o_que\":\"\",\"quem\":\"Mari ou Marca\"}]}.",{modelTier:"default"});
       var L=function(a2){return (a2||[]).map(String).filter(Boolean)},isD=function(x){return /^\d{4}-\d{2}-\d{2}$/.test(String(x||""))};
       if(res.entregaveis&&!p.entregaveis.trim())p.entregaveis=String(res.entregaveis);
       var rg=[];if(L(res.obrigatorio).length)rg.push("Obrigatório: "+L(res.obrigatorio).join("; "));if(L(res.evitar).length)rg.push("Evitar: "+L(res.evitar).join("; "));if(res.prazos)rg.push("Prazos: "+res.prazos);if(res.cupom)rg.push("Cupom e link: "+res.cupom);
@@ -4177,7 +4309,7 @@ document.addEventListener("click",async function(e){
       if(isD(res.postagem)&&!p.post)p.post=res.postagem;
       var nt=0,ex2={};MD.items.forEach(function(x){if(x.src)ex2[x.src]=1});
       (res.datas||[]).forEach(function(q,qi){if(!q||!isD(q.data)||!q.o_que)return;var src="br:"+(br.id||i)+":"+qi;if(ex2[src])return;var mari=String(q.quem||"").toLowerCase().indexOf("mari")===0;var it2=mdNew({t:parcTitle(p)+" · "+String(q.o_que),tipo:"enviar",quem:mari?"Mari":"Marca",d:q.data,parc:p.id,src:src,nota:"Vindo do briefing “"+br.t+"”."});MD.items.push(it2);mdPut(it2);nt++});
-      parcLog(p,"Briefing lido com IA");parcPut(p);PCUI.msg="Briefing lido. Confira os combinados e as dúvidas."+(nt?" "+nt+" prazo(s) do briefing viraram tarefa em Meu dia.":"");
+      parcLog(p,S?"Briefing lido com IA":"Briefing lido");parcPut(p);PCUI.msg="Briefing lido"+(S?"":" pelo app, por palavras-chave. Confira se não ficou nada de fora")+". Confira os combinados e as dúvidas."+(nt?" "+nt+" prazo(s) do briefing viraram tarefa em Meu dia.":"");
     }catch(err){PCUI.msg=crErr(err)||"Não consegui ler agora."}
     PCUI.busy="";render();return;
   }
@@ -4300,8 +4432,8 @@ function brHtml(){
   h+='<div class="card"><h3>Acrescentar à base</h3><div class="pills">'+BRCATS.map(function(c){return '<button class="pill" data-brcat="'+c[0]+'" aria-pressed="'+(BRUI.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>'
    +'<p class="note">Para pensar: <b>'+esc(q)+'</b></p><div class="btns"><button class="btn ghost small" data-brb="outra">Outra pergunta</button></div>'
    +'<textarea data-br="novo" aria-label="Nova anotação" placeholder="Escreva ou cole aqui: um áudio transcrito, uma legenda, uma lembrança, uma regra...">'+esc(BRUI.txt)+'</textarea>'
-   +'<div class="btns"><button class="btn" data-brb="add">Guardar em “'+esc(brLabel(BRUI.cat))+'”</button>'+(S?'<button class="btn ghost small" data-brb="digest">Separar por assunto com IA</button>':'')+'</div>'
-   +(S?'':'<p class="note">Para a IA separar um texto grande por assunto, coloque a chave em Ajustes → Inteligência artificial. Guardar manualmente funciona sempre.</p>')
+   +'<div class="btns"><button class="btn" data-brb="add">Guardar em “'+esc(brLabel(BRUI.cat))+'”</button>'+'<button class="btn ghost small" data-brb="digest">Separar por assunto'+(S?' com IA':'')+'</button>'+'</div>'
+   +(S?'':'<p class="note">O app separa o texto por assunto usando palavras-chave. Confira cada item antes de guardar.</p>')
    +(BRUI.busy?'<p class="note">'+esc(BRUI.busy)+'</p>':'')+(BRUI.msg?'<p class="note"><b>'+esc(BRUI.msg)+'</b></p>':'')+'</div>';
   if(BRUI.props.length){
     h+='<div class="card"><h3>O app separou assim. Marque o que quer guardar</h3>'+BRUI.props.map(function(x,i){return '<label class="lab" style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" data-brp="'+i+'"'+(x.on?' checked':'')+' style="margin-top:4px"><span><span class="tag">'+esc(brLabel(x.cat))+'</span><br>'+esc(x.texto)+'</span></label>'}).join('')
@@ -4331,10 +4463,9 @@ document.addEventListener("click",async function(e){
   if(a==="digest"){
     var ta2=document.querySelector('[data-br="novo"]');var tx2=String(ta2?ta2.value:BRUI.txt).trim();BRUI.txt=tx2;
     if(!tx2){BRUI.msg="Cole um texto para o app separar.";render();return}
-    if(!S){BRUI.msg=NOAI;render();return}
     BRUI.busy="Lendo seu texto...";BRUI.msg="";render();
     try{
-      var r=await S.json("Leia o texto da Mari e extraia até 8 aprendizados duráveis sobre ela (jeito de falar, expressões, história, público, negócio, marcas, decisões, o que funcionou ou não). Use as palavras dela quando possível, uma ideia por item, sem inventar nem interpretar além do texto e sem repetir o que já está no cérebro. Categorias permitidas: voz, historia, publico, negocio, marcas, aprend, decisao.\n\nTexto:\n"+tx2+"\n\nResponda SOMENTE com JSON {\"itens\":[{\"cat\":\"\",\"texto\":\"\"}]}.",{modelTier:"default"});
+      var r=!S?brSepara(tx2):await S.json("Leia o texto da Mari e extraia até 8 aprendizados duráveis sobre ela (jeito de falar, expressões, história, público, negócio, marcas, decisões, o que funcionou ou não). Use as palavras dela quando possível, uma ideia por item, sem inventar nem interpretar além do texto e sem repetir o que já está no cérebro. Categorias permitidas: voz, historia, publico, negocio, marcas, aprend, decisao.\n\nTexto:\n"+tx2+"\n\nResponda SOMENTE com JSON {\"itens\":[{\"cat\":\"\",\"texto\":\"\"}]}.",{modelTier:"default"});
       var ok=BRCATS.map(function(c){return c[0]});
       BRUI.props=(r.itens||[]).filter(function(x){return x&&x.texto&&ok.indexOf(x.cat)>=0}).map(function(x){return {cat:x.cat,texto:String(x.texto),on:true}});
       BRUI.msg=BRUI.props.length?"":"Não encontrei nada novo para guardar nesse texto.";
