@@ -424,6 +424,8 @@ h3{font-size:21px}
 .acc .code{font-size:22px;font-weight:700;letter-spacing:.08em;background:var(--accent-soft);border-radius:10px;padding:8px 12px;display:inline-block}
 
 .tkc{display:flex;flex-direction:column;gap:6px}
+
+.nfile .kinds{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 
 <div class="wrap">
@@ -1940,7 +1942,7 @@ calEditor=function(it){var h=_calEditor3(it);if(!it||CAL.mode==="ler"||!it.d)ret
   return h.replace('<h3>Conteúdo</h3>','<h3>Conteúdo</h3><div class="momc"><b>Momento do ano</b>'+esc(seasonText(it.d,it))+'</div>')};
 
 /* ============ v49: conta, login e Notion ============ */
-var WORKER_URL="https://marileal.luahproducao.workers.dev";
+var WORKER_URL="";
 var AUTH={token:"",email:"",name:"",notion:false,avail:false};
 function inClaude(){return !!(window.claude&&window.claude.use)}
 function noLogin(){try{return localStorage.getItem("nologin-hoje")==="1"}catch(e){return false}}
@@ -1955,7 +1957,7 @@ async function api(path,opt){opt=opt||{};var h={"content-type":"application/json
 var AERR={bad_login:"E-mail ou senha incorretos.",too_many:"Muitas tentativas. Espere 15 minutos e tente de novo.",bad_invite:"Convite inválido, vencido ou já usado.",exists:"Esse e-mail já tem conta. Toque em Entrar.",weak_password:"A senha precisa ter 8 caracteres ou mais.",bad_email:"Confira o e-mail.",network:"Sem conexão com o serviço. Confira a internet e tente de novo.",unauthorized:"Código de administradora incorreto.",notion_not_configured:"O Notion ainda não foi ligado no serviço pela assessoria.",ai_off:"A IA está desligada."};
 function aerr(e){return (e&&AERR[e.code])||(e&&e.code&&/^notion_/.test(e.code)?"O Notion recusou o pedido"+(e.detail?": "+e.detail:"")+".":"Algo deu errado. Tente de novo.")}
 var GATE={mode:"in",msg:""};
-function gateNeeded(){return !inClaude()&&!AUTH.token&&!noLogin()}
+function gateNeeded(){return !!authBase()&&!inClaude()&&!AUTH.token&&!noLogin()}
 function gateHtml(){var up=GATE.mode==="up";
   return '<div class="ag"><div><h1>Hoje com a Mari</h1><p class="note" style="margin:6px 0 0">'+(up?'Primeiro acesso: use o convite que a assessoria enviou.':'Entre para abrir o seu painel.')+'</p></div>'
    +'<div class="tabs"><button type="button" data-gate="in" aria-pressed="'+!up+'">Entrar</button><button type="button" data-gate="up" aria-pressed="'+up+'">Primeiro acesso</button></div>'
@@ -2136,6 +2138,81 @@ crAction=function(a,el){if(!S&&(a==="ask"||a==="outline"||a==="write")&&!isDirec
 var _renderCriar50=renderCriar;
 renderCriar=function(){_renderCriar50();var c=state.cr;if(!S&&c&&c.guided&&c.step>=1&&!c.busy){var v=$("#view");if(v)v.insertAdjacentHTML("afterbegin",'<div class="draft">Modo guiado, sem IA: o app monta o esqueleto com as suas respostas e deixa marcado onde falta o seu texto. Você escreve direto nos campos e salva em PDF. Para a IA escrever por você, é preciso ligar a IA.</div>')}};
 
+/* ============ v51: app independente. Notion por arquivo (CSV), IA opcional com chave própria ============ */
+var NF={kind:"cal",msg:""};
+var NFCOLS={
+ cal:[["Título","t"],["Data","d"],["Canal","canal"],["Formato","fmt"],["Etapa","st"],["Marca","marca"],["Roteiro","nota"],["CTA","cta"],["Legenda","leg"],["Hashtags","tags"],["Slides","slides"],["ID","id"]],
+ base:[["Texto","text"],["Categoria","cat"],["ID","id"]],
+ parc:[["Marca","marca"],["Nome","nome"],["Status","status"],["Valor","valor"],["Nota fiscal","nf"],["Nota emitida em","nfData"],["Pago em","pagoEm"],["Entregáveis","entregaveis"],["Regras","regras"],["ID","id"]]};
+var NFNAME={cal:"Calendário",base:"Minha base",parc:"Parcerias"};
+var NFHEAD={ // nomes aceitos nos cabeçalhos do Notion (sem acento, minúsculo)
+ cal:{t:["titulo","title","name","nome","conteudo"],d:["data","date","dia"],canal:["canal","channel"],fmt:["formato","format"],st:["etapa","status","situacao","estado"],marca:["marca","brand"],nota:["roteiro","script","anotacoes","notas"],cta:["cta","chamada para acao"],leg:["legenda","caption"],tags:["hashtags","tags"],slides:["slides"],id:["id"]},
+ base:{text:["texto","text","titulo","title","name","nome"],cat:["categoria","category","tipo"],id:["id"]},
+ parc:{marca:["marca","brand","titulo","title","name"],nome:["nome"],status:["status","etapa"],valor:["valor","value"],nf:["nota fiscal","nf"],nfData:["nota emitida em"],pagoEm:["pago em"],entregaveis:["entregaveis"],regras:["regras"],id:["id"]}};
+function nfNorm(t){return String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim()}
+function csvEsc(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'}
+function csvParse(t){t=String(t||"").replace(/^﻿/,"");var first=t.split(/\r?\n/)[0]||"",sep=(first.split(";").length>first.split(",").length)?";":",";
+  var rows=[],row=[],f="",q=false;
+  for(var i=0;i<t.length;i++){var ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;
+    else if(ch===sep){row.push(f);f=""}
+    else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&t[i+1]==="\n")i++;row.push(f);f="";if(row.some(function(x){return x!==""}))rows.push(row);row=[]}
+    else f+=ch}
+  row.push(f);if(row.some(function(x){return x!==""}))rows.push(row);return rows}
+var MPT={janeiro:1,fevereiro:2,marco:3,abril:4,maio:5,junho:6,julho:7,agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12},MEN={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+function p2(n){return String(n).padStart(2,"0")}
+function dParse(v){v=String(v||"").trim();if(!v)return "";v=v.split(/→|->| to /)[0].trim();var m;
+  if((m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v)))return m[1]+"-"+m[2]+"-"+m[3];
+  if((m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(v)))return m[3]+"-"+p2(m[2])+"-"+p2(m[1]);
+  var n=nfNorm(v);
+  if((m=/^(\d{1,2}) de ([a-z]+)(?: de)? (\d{4})/.exec(n))&&MPT[m[2]])return m[3]+"-"+p2(MPT[m[2]])+"-"+p2(m[1]);
+  if((m=/^([a-z]+) (\d{1,2}) (\d{4})/.exec(n))&&MEN[m[1]])return m[3]+"-"+p2(MEN[m[1]])+"-"+p2(m[2]);
+  return ""}
+function stParse(v){var n=nfNorm(v);if(/^ideia/.test(n))return "Ideia";if(/^roteiro/.test(n))return "Roteiro";if(/^grav/.test(n))return "Gravado";if(/^edit/.test(n))return "Editado";if(/^(public|post)/.test(n))return "Publicado";return ""}
+function nfExport(k){var A=NSF[k],cols=NFCOLS[k],lines=[cols.map(function(c){return csvEsc(c[0])}).join(",")];
+  A.list().forEach(function(i){var r=A.rem(i);lines.push(cols.map(function(c){return csvEsc(r[c[1]])}).join(","))});
+  return "﻿"+lines.join("\r\n")+"\r\n"}
+function nfImport(k,text){var rows=csvParse(text);if(rows.length<2)return {err:"O arquivo está vazio ou não é um CSV."};
+  var head=rows[0].map(nfNorm),A=NSF[k],map={};
+  Object.keys(NFHEAD[k]).forEach(function(f){for(var a=0;a<NFHEAD[k][f].length;a++){var ix=head.indexOf(NFHEAD[k][f][a]);if(ix>=0){map[f]=ix;break}}});
+  var mainF=k==="cal"?"t":k==="base"?"text":"marca";
+  if(map[mainF]===undefined)return {err:"Não achei a coluna principal ("+NFCOLS[k][0][0]+"). Confira o cabeçalho do CSV."};
+  var novos=0,atual=0,seq=0;
+  NS.applying=true;
+  try{rows.slice(1).forEach(function(row){
+    var r={};Object.keys(map).forEach(function(f){var v=String(row[map[f]]||"").trim();if(v!=="")r[f]=v});
+    if(!r[mainF])return;
+    if(k==="cal"){if(r.d)r.d=dParse(r.d);if(r.st)r.st=stParse(r.st)||undefined;if(r.canal){var cn=Object.keys(CALKIND).filter(function(x){return nfNorm(x)===nfNorm(r.canal)})[0];r.canal=cn||"Feed principal"}}
+    if(k==="parc"){["nfData","pagoEm"].forEach(function(x){if(r[x])r[x]=dParse(r[x])})}
+    var loc=A.list().filter(function(i){return (r.id&&A.id(i)===r.id)||(!r.id&&(k==="cal"?(i.t===r.t&&(!r.d||i.d===r.d)):k==="base"?i.text===r.text:(i.marca===r.marca&&(!r.nome||i.nome===r.nome))))})[0];
+    if(loc){var cur=A.rem(loc),m2=Object.assign({},cur);Object.keys(r).forEach(function(f){if(f!=="id"&&r[f]!==undefined)m2[f]=r[f]});if(A.sig(m2)!==A.sig(cur)){A.apply(loc,m2);atual++}}
+    else{var m3=Object.assign({id:"i"+Date.now()+(seq++)},r);if(k==="cal"&&!m3.st)m3.st="Ideia";A.add(A.make(m3));novos++}
+  });A.save()}finally{NS.applying=false}
+  return {novos:novos,atual:atual}}
+function nfCard(){var k=NF.kind;
+  return '<div class="card nfile"><h3>Notion, por arquivo</h3><p class="note">Sem conectar nada: o app exporta e importa arquivos CSV, que o Notion lê e gera. Para levar ao Notion: exporte aqui e, no Notion, use Importar e depois CSV. Para trazer do Notion: abra o banco, menu ••• e Exportar como CSV, e importe aqui. Novas linhas entram e as existentes são atualizadas.</p>'
+   +'<div class="kinds" role="group" aria-label="O que levar">'+["cal","base","parc"].map(function(x){return '<button class="pill" data-nf="kind|'+x+'" aria-pressed="'+(k===x)+'">'+NFNAME[x]+'</button>'}).join('')+'</div>'
+   +'<div class="btns"><button class="btn small" data-nf="export">Exportar '+NFNAME[k]+' (CSV)</button><label class="btn ghost small" style="cursor:pointer">Importar CSV do Notion<input type="file" accept=".csv,text/csv" data-nf="import" style="display:none"></label></div>'
+   +(NF.msg?'<p class="note" role="status">'+esc(NF.msg)+'</p>':'')+'</div>'}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-nf]");if(!b||b.tagName==="INPUT")return;var a=b.dataset.nf.split("|");
+  if(a[0]==="kind"){NF.kind=a[1];NF.msg="";render();return}
+  if(a[0]==="export"){var k=NF.kind,n=NSF[k].list().length;
+    if(!n){NF.msg="Ainda não há nada em "+NFNAME[k]+" para exportar.";render();return}
+    D.save({filename:{cal:"calendario",base:"minha-base",parc:"parcerias"}[k]+"-para-notion.csv",data:nfExport(k)}).then(function(){NF.msg=n+" linha(s) exportada(s). No Notion: Importar > CSV."},function(er){NF.msg=(er&&er.code==="declined")?"Salvar cancelado.":"Não consegui salvar o arquivo.";}).then(function(){render()});return}});
+document.addEventListener("change",async function(e){var el=e.target;if(!el.dataset||el.dataset.nf!=="import")return;var f=el.files&&el.files[0];if(!f)return;
+  try{var r=nfImport(NF.kind,await f.text());NF.msg=r.err?r.err:"Importado: "+r.novos+" nova(s), "+r.atual+" atualizada(s)."}catch(er){NF.msg="Não consegui ler esse arquivo."}
+  el.value="";render()});
+function iaCardOwn(){var cf=aiGet(),dentro=inClaude()||(S&&!S.own),tem=!!cf.key;
+  var st=dentro?"Dentro do Claude a IA já funciona, sem configurar nada.":tem?"Usando a sua chave (termina em …"+esc(String(cf.key).slice(-4))+").":"Desligada. O app funciona normalmente sem ela.";
+  return '<div class="card"><h3>Inteligência artificial (opcional)</h3><p class="note">Sem IA, o app monta roteiros, esqueletos de eBook e planos com modelos prontos. Com IA, ele escreve e reescreve no seu jeito. Para ligar fora do Claude, use a sua própria chave da Anthropic. Ela fica só neste aparelho.</p><p class="note"><b>'+st+'</b></p>'
+   +'<label class="lab">Chave da API<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="key" placeholder="sk-ant-..."></label>'
+   +'<div class="btns"><button class="btn small" data-aib="test">Testar</button>'+(tem?'<button class="btn ghost small" data-aib="clear">Desligar</button>':'')+'</div>'
+   +(AIMSG?'<p class="note" id="ai-msg">'+esc(AIMSG)+'</p>':'')+'</div>'}
+var _htmlAI51=htmlAI;
+htmlAI=function(){var h=_htmlAI51();if(AUTH.token&&!inClaude())return h;var i=h.indexOf('<div class="card"><h3>Backup dos seus dados');
+  return nfCard()+iaCardOwn()+(i>=0?h.slice(i):'')};
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -2208,7 +2285,7 @@ function addHero(){
 }
 /* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
 var S=null,D=null;
-var NOAI="A IA ainda não está ligada neste aparelho. Peça à assessoria o link de configuração (ele liga a IA e a sincronização) ou abra o app pelo Claude. O resto do app funciona normalmente.";
+var NOAI="A IA não está ligada. Dentro do Claude ela funciona sozinha. Fora dele, em Mais > Ajustes você pode colocar a sua própria chave da Anthropic (opcional). O resto do app funciona normalmente, sem IA.";
 var TIPOS=[["ebook","eBook"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
 var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
 function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}

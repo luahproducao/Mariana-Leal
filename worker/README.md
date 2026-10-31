@@ -1,4 +1,6 @@
-# Serviço do app "Hoje com a Mari" (Cloudflare Worker)
+# Serviço opcional (Cloudflare Worker): contas e sincronização
+
+**O app NÃO precisa disso.** Ele roda sozinho, com dados no aparelho, backup em arquivo e Notion por CSV. Esta pasta só existe para quem quiser montar contas com login no futuro.
 
 Contas com e-mail e senha, sincronização entre aparelhos e Notion. Uma instalação serve várias clientes.
 
