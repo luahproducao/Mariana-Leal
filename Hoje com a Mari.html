@@ -449,6 +449,18 @@ h3{font-size:21px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap}
 .thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 @media (min-width:700px){.bottom{left:50%;right:auto;width:min(680px,calc(100% - 24px));transform:translateX(-50%)}}
+#tour62{position:fixed;inset:0;z-index:95;background:var(--bg);overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#tour62 .tr-in{width:100%;max-width:520px;min-height:100%;display:flex;flex-direction:column;gap:14px;padding:10px 0 20px}
+#tour62 .tr-top{display:flex;justify-content:space-between;align-items:center}
+#tour62 .tr-n{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+#tour62 h2{font-family:var(--display);font-size:32px;line-height:1.1;color:var(--accent);margin:8px 0 0;text-wrap:balance}
+#tour62 .tr-x{font-size:16px;line-height:1.55;margin:0;color:var(--ink)}
+#tour62 .tr-ex{background:var(--gold-soft);color:var(--ink);border-radius:12px;padding:12px 14px;margin:0;font-size:15px;line-height:1.5}
+#tour62 .tr-dots{display:flex;gap:6px;justify-content:center;margin-top:auto;padding-top:14px}
+#tour62 .tr-dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+#tour62 .tr-dots i.on{background:var(--accent);width:20px;border-radius:4px}
+#tour62 .tr-nav{display:flex;gap:10px}
+#tour62 .tr-nav .btn{flex:1}
 </style>
 
 <div class="wrap">
@@ -2823,6 +2835,41 @@ renderCriar=function(){_renderCriar61();if(S)return;var v=$("#view");if(!v)retur
       if(n&&!String(n.value).trim()){toast("Escreva algo no campo antes de tocar aqui.");try{n.focus()}catch(_){}}
     },350)},true);
 })();
+/* ============ v63: guia de primeiro acesso ============ */
+var TOUR=[
+ {t:"Bem-vinda ao seu espaço",x:"Aqui ficam as suas ideias, roteiros, calendário, produtos digitais e parcerias, tudo num lugar só.\n\nEm menos de um minuto eu mostro cada parte. Você pode pular e rever quando quiser, em Mais > Ajustes."},
+ {t:"Hoje e Calendário",x:"Hoje mostra o que fazer agora e o checklist do dia. O Calendário guarda o que vai ao ar em cada dia: feed, stories, Melhores Amigos e publis.",ex:"Toque no dia de amanhã no Calendário para abrir o roteiro e a legenda.",go:["Abrir o Calendário","cal"]},
+ {t:"Anotar uma ideia e planejar",x:"Teve uma ideia? Anote na hora, escrevendo ou falando, e decida o destino depois. Em “O que estou planejando” você escreve a semana inteira e o app separa cada item: calendário, tarefa, campanha ou ideia.",ex:"“Semana que vem quero um reels na terça. Lembrar de comprar etiquetas.” Vira um item no calendário e uma tarefa.",go:["Abrir a caixa de ideias","ideias"]},
+ {t:"Roteiro e produto digital",x:"Em Criar, o Roteiro de conteúdo monta a estrutura de Reels, Story ou Carrossel. O Produto digital aceita o que você já tem: ideia, anotações, fotos. Salve e continue depois, em etapas, e baixe em PDF ou em imagens.",ex:"Comece com uma frase e algumas fotos. O app guarda como rascunho até você concluir.",go:["Abrir Criar","criar"]},
+ {t:"Guia de captação e edição",x:"Reúna o que o vídeo precisa ser, os arquivos e os links de referência. O app monta o direcionamento em PDF para você enviar junto com os vídeos para a editora.",ex:"Escreva o que cada arquivo tem e o que você quer sentir no vídeo. O guia sai pronto, com o seu visual.",go:["Abrir o Guia de edição","guia"]},
+ {t:"Publis e parcerias",x:"Cada marca tem um painel, do briefing ao pagamento. Cole o briefing e o app separa o que é obrigatório, o que evitar e os prazos, monta o roteiro e calcula quando emitir a nota e quando receber.",ex:"Crie o painel da marca, cole o briefing e toque em Ler briefing.",go:["Abrir Parcerias","parc"]},
+ {t:"Seus dados",x:"Tudo fica guardado neste aparelho e neste navegador. Se trocar de celular ou limpar os dados do navegador, o que está aqui se perde.\n\nEm Ajustes você faz o backup e leva o calendário, a base e as parcerias para o Notion. Faça um backup de vez em quando.",go:["Abrir Ajustes","ajustes"]}
+];
+var TOURI=0;
+var TOURGO={cal:function(){state.tab="cal"},ideias:function(){state.tab="criar";hubGo("ideias")},criar:function(){state.tab="criar";state.hub="inicio"},guia:function(){state.tab="criar";hubGo("guia")},parc:function(){state.tab="pub";state.pub="parc";PCUI.open=null},ajustes:function(){state.tab="mais";state.more="ajustes"}};
+function tourSeen(){try{localStorage.setItem("hoje-onb","1")}catch(e){}}
+function tourClose(){var o=document.getElementById("tour62");if(o)o.remove();document.body.style.overflow="";tourSeen();render()}
+function tourDraw(){
+  var o=document.getElementById("tour62");
+  if(!o){o=document.createElement("div");o.id="tour62";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-label","Como usar o app");document.body.appendChild(o);document.body.style.overflow="hidden"}
+  var st=TOUR[TOURI],n=TOUR.length,d="";for(var k=0;k<n;k++)d+='<i'+(k===TOURI?' class="on"':'')+'></i>';
+  o.innerHTML='<div class="tr-in"><div class="tr-top"><span class="tr-n">'+(TOURI+1)+' de '+n+'</span><button class="btn ghost small" data-tour="skip">Pular</button></div><h2>'+esc(st.t)+'</h2><p class="tr-x">'+esc(st.x).replace(/\n/g,"<br>")+'</p>'+(st.ex?'<p class="tr-ex"><b>Exemplo:</b> '+esc(st.ex)+'</p>':'')+(st.go?'<div class="btns"><button class="btn ghost" data-tour="go">'+esc(st.go[0])+'</button></div>':'')+'<div class="tr-dots" aria-hidden="true">'+d+'</div><div class="tr-nav">'+(TOURI?'<button class="btn ghost" data-tour="prev">Voltar</button>':'')+'<button class="btn" data-tour="next">'+(TOURI===n-1?'Começar a usar':'Próximo')+'</button></div></div>';
+  o.scrollTop=0;var nb=o.querySelector('[data-tour="next"]');if(nb)try{nb.focus({preventScroll:true})}catch(e){}
+}
+function tourOpen(i){TOURI=i||0;tourDraw()}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-tour]");if(!b)return;var a=b.dataset.tour;
+  if(a==="open"){tourOpen(0);return}
+  if(a==="next"){if(TOURI>=TOUR.length-1){tourClose();return}TOURI++;tourDraw();return}
+  if(a==="prev"){if(TOURI>0){TOURI--;tourDraw()}return}
+  if(a==="skip"){tourClose();return}
+  if(a==="go"){var g=TOUR[TOURI].go;var f=g&&TOURGO[g[1]];tourSeen();var o=document.getElementById("tour62");if(o)o.remove();document.body.style.overflow="";if(f)f();render();window.scrollTo(0,0)}
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.getElementById("tour62"))tourClose()});
+onbHtml=function(){return ""};
+function tourCard(){return '<div class="card"><h3>Como usar o app</h3><p class="note">Um passo a passo curto, parte por parte: Hoje e Calendário, ideias, roteiro e produto digital, guia de edição, publis e seus dados.</p><div class="btns"><button class="btn small" data-tour="open">Ver o guia</button></div></div>'}
+var _htmlAI63=htmlAI;
+htmlAI=function(){return tourCard()+_htmlAI63()};
+setTimeout(function(){var seen=false;try{seen=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(!seen)tourOpen(0)},500);
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
