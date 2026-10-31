@@ -2286,9 +2286,9 @@ function ntCard(){
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
     +'<div class="btns"><button class="btn small" data-nt="sync"'+(NS.busy?' disabled':'')+'>Sincronizar agora</button><button class="btn ghost small" data-nt="off">Desconectar</button></div>'}
   else if(!rb){h+='<p class="note">A conexão automática com o Notion ainda não está ativa nesta versão. Use a troca por arquivo logo abaixo.</p>'}
-  else{h+='<p class="note">1. Duplique o modelo para o seu Notion.<br>2. Toque em Conectar e, na tela do Notion, marque a página duplicada.<br>3. Pronto: o app lê e grava nela.</p>'
+  else{h+='<p class="note">Toque em Conectar. Na tela do Notion, escolha usar o modelo do app e permita. O Notion cria a sua cópia e o app já passa a ler e gravar nela.</p>'
     +(NS.msg?'<p class="note" role="status">'+esc(NS.msg)+'</p>':'')
-    +'<div class="btns">'+(NT_TEMPLATE_URL?'<a class="btn ghost small" href="'+esc(NT_TEMPLATE_URL)+'" target="_blank" rel="noopener">Abrir o modelo</a>':'')+'<button class="btn small" data-nt="on">Conectar com Notion</button></div>'}
+    +'<div class="btns"><button class="btn small" data-nt="on">Conectar com Notion</button></div>'}
   return h+'</div>'}
 document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-nt]");if(!b)return;var a=b.dataset.nt;
   if(a==="on"){location.href=relayBase()+"/oauth/start?ret="+encodeURIComponent(location.href.split("#")[0]);return}
