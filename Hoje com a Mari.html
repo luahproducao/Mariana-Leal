@@ -380,6 +380,9 @@ h3{font-size:21px}
 
 #flash{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:60;background:#2b1d22;color:#fff;padding:10px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:calc(100% - 32px);font-size:14px;text-align:center}
 #flash[hidden]{display:none}
+
+.crtop{position:sticky;top:6px;z-index:6;display:flex;justify-content:flex-end;margin:-4px 0 0;pointer-events:none}
+.crtop .btn{pointer-events:auto;background:var(--card,#fffaf3);box-shadow:0 2px 8px rgba(0,0,0,.12)}
 </style>
 
 <div class="wrap">
@@ -881,7 +884,7 @@ function calFilter(x){return CAL.f==="todos"||x.k===CAL.f||(CAL.f==="p"&&x.pub)}
 var CALTAGC={f:"",s:"m",a:"t",m:"l",r:"",p:"l",z:"t",t:"",d:""};
 function calEditor(it){
   if(CAL.mode==="ler")return calRead(it);
-  var h='<div class="card cal-open" style="background:var(--bg)"><h3>Conteúdo</h3><div class="btns"><button class="btn small ghost" data-calx="ler">‹ Ver conteúdo completo</button></div>'
+  var h='<div class="card cal-open" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calx="close">▲ Minimizar</button></div><h3>Conteúdo</h3><div class="btns"><button class="btn small ghost" data-calx="ler">‹ Ver conteúdo completo</button></div>'
    +'<label class="lab">O que é<input type="text" data-cif="t" value="'+esc(it.t)+'"></label>'
    +'<div class="pills" role="group" aria-label="Situação">'+CALST.map(function(s){return'<button class="pill" data-cst="'+it.id+'|'+s+'" aria-pressed="'+(it.st===s)+'">'+calLbl(s)+'</button>'}).join('')+'</div>'
    +'<div class="fields"><label>Dia<input type="date" data-cif="d" value="'+esc(it.d)+'"></label><label>Canal<select data-cif="canal">'+Object.keys(CALKIND).map(function(c){return'<option'+(c===it.canal?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label></div>'
@@ -1502,7 +1505,7 @@ function calFull(it){var out=[],d=DAYS.filter(function(x){return x.date===it.d})
   return out}
 function calFullText(it){return it.t+"\n"+it.canal+(it.fmt?" · "+it.fmt:"")+(it.marca?" · "+it.marca:"")+" · "+(it.d||"sem data")+"\n\n"+calFull(it).map(function(z){return z.h+":\n"+z.t}).join("\n\n")}
 function calRead(it){var secs=calFull(it);
-  var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[CALKIND[it.canal]||"f"]+'">'+esc(it.canal+(it.marca?" · "+it.marca:""))+'</span>'+(it.fmt?' <span class="tag">'+esc(it.fmt)+'</span>':'')+(it.tipo?' <span class="tag">'+esc(it.tipo)+'</span>':'')+'<h3 style="margin:6px 0 2px">'+esc(it.t)+'</h3><span class="note">'+esc(calLbl(it.st))+' '+calDots(it.st)+(it.d?' · '+it.d.slice(8,10)+'/'+it.d.slice(5,7):'')+'</span></div>';
+  var h='<div class="card cal-open cr" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calx="close">▲ Minimizar</button></div><div><span class="tag '+CALTAGC[CALKIND[it.canal]||"f"]+'">'+esc(it.canal+(it.marca?" · "+it.marca:""))+'</span>'+(it.fmt?' <span class="tag">'+esc(it.fmt)+'</span>':'')+(it.tipo?' <span class="tag">'+esc(it.tipo)+'</span>':'')+'<h3 style="margin:6px 0 2px">'+esc(it.t)+'</h3><span class="note">'+esc(calLbl(it.st))+' '+calDots(it.st)+(it.d?' · '+it.d.slice(8,10)+'/'+it.d.slice(5,7):'')+'</span></div>';
   if(!secs.length)h+='<p class="note">Este conteúdo ainda não tem roteiro. Toque em Editar para escrever, ou use Roteiro com IA.</p>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
   h+='<div class="btns"><button class="btn" data-calx="editar">Editar</button><button class="btn ghost" data-calx="copyall|'+it.id+'">Copiar tudo</button><button class="btn small ghost" data-calx="close">Fechar</button></div>';
@@ -1543,7 +1546,7 @@ function calOpenLbl(go){var q=String(go).split("|");if(q[0]==="acgo"){var a=acGe
   return {plano:"Abrir o plano no Hoje",md:"Abrir minhas tarefas",canais:"Abrir os canais",prz:"Abrir em Publis",camp:"Abrir em Publis",acgo:"Abrir em Publis"}[q[0]]||"Abrir no app"}
 function calRowRead(x,ix){var q0=String(x.go||"").split("|");
   if(q0[0]==="md"){var l=(MD.items||[]).filter(function(z){return z.d===q0[1]&&z.st!=="cancelado"});
-    var hh='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag">Tarefas</span><h3 style="margin:6px 0 2px">Tarefas do dia '+esc(acFmt(q0[1]))+'</h3><span class="note">Toque para marcar como feita. Toque de novo para desmarcar.</span></div>';
+    var hh='<div class="card cal-open cr" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calrdx="close">▲ Minimizar</button></div><div><span class="tag">Tarefas</span><h3 style="margin:6px 0 2px">Tarefas do dia '+esc(acFmt(q0[1]))+'</h3><span class="note">Toque para marcar como feita. Toque de novo para desmarcar.</span></div>';
     l.forEach(function(z){hh+='<div class="row'+(z.st==="feito"?' chkd':'')+'"><input type="checkbox" id="mt-'+z.id+'" data-mdtog="'+z.id+'"'+(z.st==="feito"?' checked':'')+'><label for="mt-'+z.id+'">'+esc(z.t)+(z.quem?' <span class="note">('+esc(z.quem)+')</span>':'')+'</label></div>'});
     if(!l.length)hh+='<p class="note">Nenhuma tarefa neste dia.</p>';
     var pdM=DAYS.filter(function(z){return z.date===q0[1]})[0];
@@ -1551,7 +1554,7 @@ function calRowRead(x,ix){var q0=String(x.go||"").split("|");
       if(pdM.feed&&pdM.feed.cta)hh+='<div class="crs"><span class="crh">CTA do feed</span><span class="crt">'+esc(pdM.feed.cta)+'</span></div>';if(pdM.feed&&pdM.feed.tags)hh+='<div class="crs"><span class="crh">Hashtags do feed</span><span class="crt">'+esc(pdM.feed.tags)+'</span></div>'}
     return hh+'<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">Abrir minhas tarefas</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>'}
   var secs=calRowSecs(x);
-  var h='<div class="card cal-open cr" style="background:var(--bg)"><div><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span><h3 style="margin:6px 0 2px">'+esc(x.t)+'</h3></div>';
+  var h='<div class="card cal-open cr" style="background:var(--bg)"><div class="crtop"><button class="btn small ghost" data-calrdx="close">▲ Minimizar</button></div><div><span class="tag '+CALTAGC[x.k]+'">'+esc(x.tag)+'</span><h3 style="margin:6px 0 2px">'+esc(x.t)+'</h3></div>';
   secs.forEach(function(z){h+='<div class="crs"><span class="crh">'+esc(z.h)+'</span><span class="crt">'+esc(z.t)+'</span></div>'});
   h+='<div class="btns"><button class="btn" data-calopen="'+esc(x.go)+'">'+esc(calOpenLbl(x.go))+'</button><button class="btn ghost" data-calrdx="copy|'+ix+'">Copiar tudo</button><button class="btn small ghost" data-calrdx="close">Fechar</button></div></div>';
   return h}
