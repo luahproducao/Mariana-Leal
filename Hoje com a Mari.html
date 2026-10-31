@@ -2334,6 +2334,7 @@ function prodListHtml(){var cur=state.cr&&state.cr.pid,l=PRODS.filter(function(x
   return '<div class="card"><h3>Meus produtos</h3><p class="note">Tudo fica salvo sozinho. Volte quando quiser e continue de onde parou.</p><div class="prd">'+l.map(function(x){var c=x.cr,stg=crStage(c);
     return '<div class="row'+(x.id===cur?' cur':'')+'"><div><b>'+esc(prodTitle(c))+'</b><span class="stg'+(stg==="Pronto"?' ok':'')+'">'+stg+'</span> <span class="note">'+esc(tipoLabel(c.tipo))+' · '+new Date(x.at).toLocaleDateString("pt-BR")+'</span></div><div class="btns"><button class="btn small" data-prs="open|'+x.id+'">'+(x.id===cur?'Continuar aqui':'Continuar')+'</button><button class="btn ghost small" data-prs="del|'+x.id+'">Apagar</button></div></div>'}).join('')+'</div></div>'}
 function prodExtraHtml(c){var h='',mx=crMax(c),names=["1 Ideia","2 Perguntas","3 Esqueleto","4 Texto"],cs=c.material?3:c.step;
+  if(c.fb&&c.step>=1)h+='<div class="draft">A IA não respondeu agora, então o app seguiu no modo guiado, sem IA. Tudo o que você escreveu está salvo.</div>';
   if(c.step===0&&!c.material)h+=prodListHtml();
   h+='<div class="stnav" role="group" aria-label="Etapas">'+names.map(function(n,i){return '<button class="pill" data-prs="go|'+i+'" aria-pressed="'+(cs===i)+'"'+(i>mx?' disabled':'')+'>'+n+'</button>'}).join('')+'</div>';
   if(c.step===0&&!c.material)h+='<div class="card"><h3>Tudo o que eu já tenho (opcional)</h3><p class="note">Cole aqui ideias soltas, partes de áudio, tópicos, números, exemplos. Pode ser pouco ou muito, e você pode voltar e acrescentar depois.</p><textarea data-cr="bruto" placeholder="Qualquer coisa que você já pensou sobre esse produto...">'+esc(c.bruto||"")+'</textarea></div>';
@@ -2408,6 +2409,11 @@ document.addEventListener("click",async function(e){var b=e.target.closest&&e.ta
 });
 var _qa56=qa;qa=function(){var c=state.cr;return (c.bruto&&c.bruto.trim()?"Anotações soltas da Mari (use como base):\n"+c.bruto.trim()+"\n\n":"")+_qa56()};
 var _crAction56=crAction;crAction=function(a,el){var c=state.cr;if(a==="ask"&&c&&!String(c.ideia||"").trim()&&c.bruto&&c.bruto.trim())c.ideia=c.bruto.trim().split(/[.!?\n]/)[0].slice(0,140);return _crAction56(a,el)};
+/* v57: se a IA externa falhar, segue no modo guiado em vez de travar */
+var _crRun57=crRun;
+crRun=async function(label,fn){await _crRun57(label,fn);var c=state.cr;
+  if(c&&c.err&&S&&S.own&&!inClaude()&&/^(Pensando|Montando|Escrevendo)/.test(label)&&isProd(c)){
+    var a=label.indexOf("Pensando")===0?"ask":label.indexOf("Montando")===0?"outline":"write";c.err="";c.fb=1;crGuided(a,c)}};
 prodLoad();
 
 /* ---- Mais ---- */
