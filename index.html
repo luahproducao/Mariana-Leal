@@ -2239,7 +2239,7 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
 document.addEventListener("change",async function(e){var el=e.target;if(!el.dataset||el.dataset.nf!=="import")return;var f=el.files&&el.files[0];if(!f)return;
   try{var r=nfImport(NF.kind,await f.text());NF.msg=r.err?r.err:"Importado: "+r.novos+" nova(s), "+r.atual+" atualizada(s)."}catch(er){NF.msg="Não consegui ler esse arquivo."}
   el.value="";render()});
-function iaCardOwn(){var cf=aiGet(),dentro=inClaude()||(S&&!S.own),tem=!!cf.key;
+function iaCardOwn(){if(!AI_ON)return "";var cf=aiGet(),dentro=inClaude()||(S&&!S.own),tem=!!cf.key;
   var st=dentro?"Dentro do Claude a IA já funciona, sem configurar nada.":tem?"Usando a sua chave (termina em …"+esc(String(cf.key).slice(-4))+").":"Desligada. O app funciona normalmente sem ela.";
   return '<div class="card"><h3>Inteligência artificial (opcional)</h3><p class="note">Sem IA, o app monta roteiros, esqueletos de eBook e planos com modelos prontos. Com IA, ele escreve e reescreve no seu jeito. Para ligar fora do Claude, use a sua própria chave da Anthropic. Ela fica só neste aparelho.</p><p class="note"><b>'+st+'</b></p>'
    +'<label class="lab">Chave da API<input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-ai="key" placeholder="sk-ant-..."></label>'
@@ -4011,7 +4011,9 @@ function aiGet(){try{return JSON.parse(localStorage.getItem("hoje-ai")||"{}")||{
 function aiSet(o){try{localStorage.setItem("hoje-ai",JSON.stringify(o))}catch(e){}}
 function blobB64(b){return new Promise(function(res,rej){var f=new FileReader();f.onload=function(){res(String(f.result).split(",")[1]||"")};f.onerror=function(){rej({code:"img"})};f.readAsDataURL(b)})}
 function jsonFrom(t){t=String(t||"").replace(/```json|```/g,"");var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw {code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw {code:"parse"}}}
+var AI_ON=false;try{AI_ON=localStorage.getItem("hoje-ai-on")==="1"}catch(e){}
 function makeAI(){
+  if(!AI_ON)return null;
   var cf0=aiGet();if(!(cf0.key||(cf0.proxy&&cf0.code)))return null;
   return {own:true,
     limits:async function(){return {images:{maxCount:6,mediaTypes:["image/jpeg","image/png","image/webp"]}}},
