@@ -2487,9 +2487,10 @@ function pagesCanvas(m,tipo,c,fi){var st=estOf(c),M=96,W=IMW-2*M,pages=[],cv,x,y
     para(sc.titulo||"","600 66px "+SERIF,st.ink,70,6,2);
     if(sc.preco&&String(sc.preco).trim()){x.font="700 28px "+CAPS;var pr=String(sc.preco).trim(),pw=x.measureText(pr).width+48;need(70);x.fillStyle=st.ac;rrect(x,M,y,pw,52,26);x.fill();x.fillStyle=(c&&c.estilo==="noite")||(c&&c.estilo==="vinho")?st.bg:"#FBF3EA";x.fillText(pr,M+24,y+36);y+=52+24}
     if(sc.corpo&&sc.corpo.trim())para(sc.corpo,"400 32px "+SANS,st.ink,50,14,3);
-    if(tipo==="fornecedores"){[["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;x.font="700 22px "+CAPS;var ln=p[0].toUpperCase();var lw2=x.measureText(ln).width;x.font="400 30px "+SANS;var ls=imWrap2(x,vv,W-lw2-30);need(Math.max(46,ls.length*46));ls.forEach(function(l,k){if(k===0){x.font="700 22px "+CAPS;x.fillStyle=st.ac;x.fillText(ln,M,y+30)}x.font="400 30px "+SANS;x.fillStyle=st.ink;x.fillText(l,M+lw2+30,y+32);y+=46});y+=4});y+=6}
+    if(tipo==="fornecedores"){[["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link],["Faixa de preço",sc.faixa],["Prazo",sc.prazo],["Pedido mínimo",sc.minimo]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;x.font="700 22px "+CAPS;var ln=p[0].toUpperCase();var lw2=x.measureText(ln).width;x.font="400 30px "+SANS;var ls=imWrap2(x,vv,W-lw2-30);need(Math.max(46,ls.length*46));ls.forEach(function(l,k){if(k===0){x.font="700 22px "+CAPS;x.fillStyle=st.ac;x.fillText(ln,M,y+30)}x.font="400 30px "+SANS;x.fillStyle=st.ink;x.fillText(l,M+lw2+30,y+32);y+=46});y+=4});if(sc.nota&&String(sc.nota).trim())para("“"+String(sc.nota).trim()+"”","italic 600 36px "+SERIF,st.ac,48,10,2);if(sc.nao&&String(sc.nao).trim())para("Quando eu não indicaria: "+String(sc.nao).trim(),"400 28px "+SANS,st.mut,42,10,2);if(sc.com)para("Aviso: tenho parceria ou comissão com este fornecedor.","400 24px "+SANS,st.mut,36,8,1);y+=6}
     (sc.itens||[]).forEach(function(it){x.font="400 32px "+SANS;var ls=imWrap2(x,it,W-60),h=Math.max(50,ls.length*50)+10;need(h);x.strokeStyle=st.ac;x.lineWidth=3;x.beginPath();x.arc(M+16,y+26,13,0,Math.PI*2);x.stroke();x.fillStyle=st.ink;x.font="400 32px "+SANS;ls.forEach(function(l,k){need(50);x.fillText(l,M+60,y+36+k*50)});y+=h});
     y+=44});
+  if(tipo==="fornecedores"&&m.msgorc&&String(m.msgorc).trim()){need(420);x.font="700 21px "+CAPS;x.fillStyle=st.ac;x.fillText("COMO PEDIR ORÇAMENTO",M,y+18);y+=54;para("Modelo de mensagem","600 56px "+SERIF,st.ink,62,8,2);para(String(m.msgorc).trim(),"400 32px "+SANS,st.ink,50,14,3);if(m.atualizado&&String(m.atualizado).trim())para("Guia atualizado em "+String(m.atualizado).trim()+". Confirme valores e contatos antes de fechar.","400 26px "+SANS,st.mut,40,6,2)}
   pages.forEach(function(p,i){var q=p.getContext("2d");q.fillStyle=st.gold;q.fillRect(M,IMH-104,W,1.5);q.fillStyle=st.mut;q.font="400 40px "+SCRIPT;q.fillText("Mariana Leal",M,IMH-48);q.font="700 20px "+CAPS;var t=String(i+2),tw=q.measureText(t).width;q.fillText(t,IMW-M-tw,IMH-52)});
   return pages}
 function contraCanvas(m,c){var st=estOf(c),cv=document.createElement("canvas");cv.width=IMW;cv.height=IMH;var x=cv.getContext("2d"),cx=IMW/2,v=(c&&c.venda)||{};x.textBaseline="alphabetic";
@@ -2497,6 +2498,7 @@ function contraCanvas(m,c){var st=estOf(c),cv=document.createElement("canvas");c
   var ink=(c&&c.estilo)==="creme"?"#FBF3EA":st.ink,gold=(c&&c.estilo)==="creme"?"#E9CF9B":st.gold;x.textAlign="center";
   x.fillStyle=gold;x.font="400 120px "+SCRIPT;x.fillText("Obrigada",cx,360);
   var y=470;x.fillStyle=ink;x.font="italic 600 46px "+SERIF;var fe=String(m.fechamento||"").trim();if(fe){imWrap2(x,fe,IMW-260).slice(0,7).forEach(function(l){x.fillText(l,cx,y);y+=62});y+=30}
+  if(c&&c.versao==="ent"&&!guia){var pv=c.venda||{};x.fillStyle=gold;x.font="700 22px "+CAPS;x.fillText("PRÓXIMO PASSO",cx,y);y+=60;x.fillStyle=ink;x.font="500 34px "+SANS;imWrap2(x,String(pv.prox&&pv.prox.trim()?pv.prox:"Me conta o que você aplicou primeiro. Eu respondo."),IMW-300).slice(0,4).forEach(function(l){x.fillText(l,cx,y);y+=48});y+=16;if(pv.proxlink&&pv.proxlink.trim()){x.fillStyle=gold;x.font="600 32px "+SANS;imWrap2(x,String(pv.proxlink).trim(),IMW-300).slice(0,2).forEach(function(l){x.fillText(l,cx,y);y+=44});y+=16}x.fillStyle=ink;x.font="italic 600 34px "+SERIF;x.fillText("Se ajudou, me marca: @mariana.leaal",cx,y+20);y+=70;v={}}
   if(v.preco){x.font="700 30px "+CAPS;var pr=String(v.preco).trim(),pw=x.measureText(pr).width+64;x.strokeStyle=gold;x.lineWidth=2.5;rrect(x,cx-pw/2,y,pw,66,33);x.stroke();x.fillStyle=gold;x.fillText(pr,cx,y+44);y+=110}
   if(v.link){x.fillStyle=ink;x.font="500 32px "+SANS;imWrap2(x,String(v.link),IMW-300).slice(0,2).forEach(function(l){x.fillText(l,cx,y);y+=44});y+=24}
   if(!guia&&v.ec!==false){x.fillStyle=gold;x.font="700 20px "+CAPS;x.fillText("ORGANIZE CUSTOS E ESTOQUE COM O",cx,IMH-250);x.font="600 50px "+SERIF;x.fillStyle=ink;x.fillText("Estoque Crescente",cx,IMH-190)}
@@ -2536,7 +2538,7 @@ var CRQ_DEF=CRQ0.slice(),CRQ_CAT=["Para quem é e em que momento essa pessoa est
 CRT.catalogo=["Produto 1","Produto 2","Produto 3"];
 var CRQ_FOR=["Para quem é este guia e o que ela está montando (loja, vitrine, reforma)?","Quais serviços ou itens ela mais precisa contratar?","Como você escolheu esses fornecedores (já usou, indicação, preço, prazo)?","O que ela deve fazer depois de ler (chamar no WhatsApp, pedir orçamento, comprar)?"];
 CRT.fornecedores=["Visual merchandising (VM)","Móveis sob medida","Placas e fachada","Embalagens e sacolas","Itens para a loja (links de compra)"];
-var _crPH58=crPH;crPH=function(t,i,a){if(t==="fornecedores")return "[PREENCHER: o que este fornecedor faz, para que serve e por que você indica.]";if(t==="catalogo")return "[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]";return _crPH58(t,i,a)};
+var _crPH58=crPH;crPH=function(t,i,a){if(t==="fornecedores")return "[PREENCHER: o que faz, em uma frase. Ex.: Monta vitrines e reorganiza o layout da loja em 1 dia.]";if(t==="catalogo")return "[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]";return _crPH58(t,i,a)};
 var _crAction58=crAction;
 crAction=function(a,el){var c=state.cr;
   if(isProd(c)&&a==="ask")CRQ0=(c.tipo==="catalogo"?CRQ_CAT:c.tipo==="fornecedores"?CRQ_FOR:CRQ_DEF).slice();
@@ -2554,7 +2556,10 @@ function vendaCard(c){var v=vendaOf(c);return '<div class="card"><h3>Para vender
   +'<label class="lab">Preço<input type="text" data-prv="preco" value="'+esc(v.preco)+'" placeholder="Ex.: R$ 47"></label><label class="lab">Link ou WhatsApp para comprar<input type="text" data-prv="link" value="'+esc(v.link)+'" placeholder="Ex.: wa.me/55..."></label><label class="lab">Bônus (opcional)<input type="text" data-prv="bonus" value="'+esc(v.bonus)+'" placeholder="Ex.: planilha de conferência de estoque"></label>'
   +'<label class="lab" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" data-prv="ec"'+(v.ec!==false?' checked':'')+'> Mostrar o Estoque Crescente na contracapa</label>'
   +'<div class="btns"><button class="btn small" data-prs="venda">Copiar texto da página de venda</button><button class="btn small" data-prs="cal">'+(c.calAt?'Enviar de novo ao calendário':'Enviar ao calendário (5 conteúdos)')+'</button></div><p class="note" id="prs-msg2"></p></div>'}
-function frnFields(c,i,sc){return '<div class="frn" style="display:grid;gap:8px;width:100%;margin-top:8px"><label class="lab">Categoria<input type="text" data-prx="cat|'+i+'" value="'+esc(sc.cat||"")+'" placeholder="Ex.: Móveis sob medida"></label><label class="lab">Cidade<input type="text" data-prx="cidade|'+i+'" value="'+esc(sc.cidade||"")+'" placeholder="Ex.: São Paulo"></label><label class="lab">Contato (WhatsApp ou telefone)<input type="text" data-prx="contato|'+i+'" value="'+esc(sc.contato||"")+'" placeholder="Ex.: (11) 99999-0000"></label><label class="lab">Link (site, Instagram ou compra)<input type="text" data-prx="link|'+i+'" value="'+esc(sc.link||"")+'" placeholder="Ex.: instagram.com/..."></label></div>'}
+function frnFields(c,i,sc){var L=function(k,lb,ph){return '<label class="lab">'+lb+'<input type="text" data-prx="'+k+'|'+i+'" value="'+esc(sc[k]||"")+'" placeholder="'+ph+'"></label>'};
+  return '<div class="frn" style="display:grid;gap:8px;width:100%;margin-top:8px">'+L("cat","Categoria","Ex.: Móveis sob medida")+L("cidade","Cidade","Ex.: São Paulo")+L("contato","Contato (WhatsApp ou telefone)","Ex.: (11) 99999-0000")+L("link","Link (site, Instagram ou compra)","Ex.: instagram.com/...")+L("faixa","Faixa de preço","Ex.: a partir de R$ 800 por vitrine")+L("prazo","Prazo de entrega","Ex.: 15 dias úteis")+L("minimo","Pedido mínimo","Ex.: sem mínimo")
+  +'<label class="lab">Minha opinião (com a sua voz)<textarea data-prx="nota|'+i+'" placeholder="Ex.: Usei em 2024, entregou no prazo e o acabamento é caprichado.">'+esc(sc.nota||"")+'</textarea></label><label class="lab">Quando eu não indicaria<textarea data-prx="nao|'+i+'" placeholder="Ex.: para quem precisa de entrega em menos de uma semana.">'+esc(sc.nao||"")+'</textarea></label>'
+  +'<label class="lab" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" data-prx="com|'+i+'"'+(sc.com?' checked':'')+'> Tenho parceria ou ganho comissão deste fornecedor</label><label class="lab" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" data-prx="ok|'+i+'"'+(sc.ok?' checked':'')+'> Tenho autorização para divulgar este contato</label></div>'}
 function secExtras(c){var m=c.material;if(!m)return;var cat=c.tipo==="catalogo";var frn=c.tipo==="fornecedores";
   (m.secoes||[]).forEach(function(sc,i){var inp=document.querySelector('[data-cr="mst'+i+'"]');if(!inp)return;var card=inp.closest(".card");if(!card||card.querySelector(".phs"))return;
     var d=document.createElement("div");d.className="phs";var has=sc.foto&&FOTOS[sc.foto];
@@ -2877,7 +2882,7 @@ htmlAI=function(){return tourCard()+_htmlAI63()};
 setTimeout(function(){var seen=false;try{seen=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(!seen)tourOpen(0)},500);
 
 /* ============ v65: guia de fornecedores + ida ao Canva ============ */
-document.addEventListener("input",function(e){var el=e.target,c=state.cr;if(!el.dataset||!el.dataset.prx||!c||!c.material)return;var p=el.dataset.prx.split("|"),sc=c.material.secoes[parseInt(p[1],10)];if(!sc)return;sc[p[0]]=el.value;saveCr()});
+document.addEventListener("input",function(e){var el=e.target,c=state.cr;if(!el.dataset||!el.dataset.prx||!c||!c.material)return;var p=el.dataset.prx.split("|"),sc=c.material.secoes[parseInt(p[1],10)];if(!sc)return;sc[p[0]]=el.type==="checkbox"?el.checked:el.value;saveCr()});
 var PPTX_URL="https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundle.js";
 function pptxLoad(){return new Promise(function(res,rej){if(window.PptxGenJS)return res(window.PptxGenJS);var s=document.createElement("script");s.src=PPTX_URL;s.onload=function(){window.PptxGenJS?res(window.PptxGenJS):rej(new Error("pptx"))};s.onerror=function(){rej(new Error("pptx"))};document.head.appendChild(s)})}
 function urlOf(t){t=String(t||"").trim();if(!t)return "";if(/^https?:\/\//i.test(t))return t;if(/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(t)||/^wa\.me\//i.test(t))return "https://"+t;var d=t.replace(/\D/g,"");if(/^\+?[\d\s()-]{10,}$/.test(t)&&d.length>=10)return "https://wa.me/"+(d.length<=11?"55"+d:d);return ""}
@@ -2890,19 +2895,23 @@ async function pptxFromMaterial(c){var P=await pptxLoad(),m=c.material,st=estOf(
   if(m.intro&&m.intro.trim()){var si=px.addSlide();bgOf(si,st.bg);si.addText(m.intro,{x:0.6,y:1.2,w:4.8,h:5,fontFace:F1,fontSize:20,italic:true,color:hx(st.ink),valign:"top"})}
   var fi={};
   for(var i=0;i<(m.secoes||[]).length;i++){var sc=m.secoes[i];if(sc.foto&&FOTOS[sc.foto])fi[sc.foto]=FOTOS[sc.foto]}
-  (m.secoes||[]).forEach(function(sc,i){var sl=px.addSlide();bgOf(sl,st.bg);var y=0.6;
+  (m.secoes||[]).forEach(function(sc,i){var sl=px.addSlide(),y=0.6;bgOf(sl,st.bg);
+    function room(h){if(y+h>6.95){sl=px.addSlide();bgOf(sl,st.bg);y=0.6}}
     sl.addText(String(sc.cat||("FORNECEDOR "+(i+1))).toUpperCase(),{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,fontSize:10,bold:true,color:hx(st.ac),charSpacing:3});y+=0.5;
-    if(fi[sc.foto]){sl.addImage({data:fi[sc.foto],x:0.6,y:y,w:4.8,h:2.6,sizing:{type:"cover",w:4.8,h:2.6}});y+=2.8}
-    sl.addText(sc.titulo||"",{x:0.6,y:y,w:4.8,h:0.9,fontFace:F1,fontSize:26,bold:true,color:hx(st.ink),valign:"top"});y+=1;
-    if(sc.preco)sl.addText(String(sc.preco),{x:0.6,y:y,w:2.2,h:0.4,fontFace:F2,fontSize:12,bold:true,color:hx(st.ac)});
-    var h=fi[sc.foto]?1.2:2.6;
-    if(sc.corpo&&sc.corpo.trim()){sl.addText(sc.corpo,{x:0.6,y:y,w:4.8,h:h,fontFace:F2,fontSize:13,color:hx(st.ink),valign:"top"});y+=h+0.1}
-    [["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;var u=p[0]==="Cidade"?"":urlOf(vv);var runs=[{text:p[0].toUpperCase()+"  ",options:{bold:true,fontSize:9,color:hx(st.ac)}},{text:vv,options:u?{fontSize:12,color:hx(st.ac),hyperlink:{url:u,tooltip:vv}}:{fontSize:12,color:hx(st.ink)}}];sl.addText(runs,{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,valign:"middle"});y+=0.38});
-    (sc.itens||[]).forEach(function(it){sl.addText("• "+it,{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,fontSize:12,color:hx(st.ink)});y+=0.36})});
+    if(fi[sc.foto]){sl.addImage({data:fi[sc.foto],x:0.6,y:y,w:4.8,h:1.7,sizing:{type:"cover",w:4.8,h:1.7}});y+=1.85}
+    sl.addText(sc.titulo||"",{x:0.6,y:y,w:4.8,h:0.8,fontFace:F1,fontSize:24,bold:true,color:hx(st.ink),valign:"top"});y+=0.85;
+    if(sc.preco){sl.addText(String(sc.preco),{x:0.6,y:y,w:2.2,h:0.4,fontFace:F2,fontSize:12,bold:true,color:hx(st.ac)});y+=0.4}
+    if(sc.corpo&&sc.corpo.trim()){var hh=fi[sc.foto]?1.0:1.5;sl.addText(sc.corpo,{x:0.6,y:y,w:4.8,h:hh,fontFace:F2,fontSize:12,color:hx(st.ink),valign:"top"});y+=hh+0.05}
+    [["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link],["Faixa de preço",sc.faixa],["Prazo",sc.prazo],["Pedido mínimo",sc.minimo]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;room(0.33);var u=(p[0]==="Contato"||p[0]==="Link")?urlOf(vv):"";var runs=[{text:p[0].toUpperCase()+"  ",options:{bold:true,fontSize:9,color:hx(st.ac)}},{text:vv,options:u?{fontSize:12,color:hx(st.ac),hyperlink:{url:u,tooltip:vv}}:{fontSize:12,color:hx(st.ink)}}];sl.addText(runs,{x:0.6,y:y,w:4.8,h:0.3,fontFace:F2,valign:"middle"});y+=0.33});
+    if(sc.nota&&String(sc.nota).trim()){room(0.8);sl.addText("“"+String(sc.nota).trim()+"”",{x:0.6,y:y,w:4.8,h:0.75,fontFace:F1,fontSize:13,italic:true,color:hx(st.ac),valign:"top"});y+=0.8}
+    if(sc.nao&&String(sc.nao).trim()){room(0.6);sl.addText("Quando eu não indicaria: "+String(sc.nao).trim(),{x:0.6,y:y,w:4.8,h:0.55,fontFace:F2,fontSize:10,color:hx(st.mut),valign:"top"});y+=0.6}
+    if(sc.com){room(0.4);sl.addText("Aviso: tenho parceria ou comissão com este fornecedor.",{x:0.6,y:y,w:4.8,h:0.3,fontFace:F2,fontSize:9,color:hx(st.mut)});y+=0.35}
+    (sc.itens||[]).forEach(function(it){room(0.36);sl.addText("• "+it,{x:0.6,y:y,w:4.8,h:0.33,fontFace:F2,fontSize:12,color:hx(st.ink)});y+=0.36})});
+  if(m.msgorc&&String(m.msgorc).trim()){var so=px.addSlide();bgOf(so,st.bg);so.addText("COMO PEDIR ORÇAMENTO",{x:0.6,y:0.7,w:4.8,h:0.35,fontFace:F2,fontSize:10,bold:true,color:hx(st.ac),charSpacing:3});so.addText("Modelo de mensagem",{x:0.6,y:1.2,w:4.8,h:0.7,fontFace:F1,fontSize:24,bold:true,color:hx(st.ink)});so.addText(String(m.msgorc).trim(),{x:0.6,y:2.0,w:4.8,h:3,fontFace:F2,fontSize:13,color:hx(st.ink),valign:"top"});if(m.atualizado)so.addText("Guia atualizado em "+m.atualizado+". Confirme valores e contatos antes de fechar.",{x:0.6,y:5.2,w:4.8,h:0.7,fontFace:F2,fontSize:10,color:hx(st.mut),valign:"top"})}
   var sf=px.addSlide();bgOf(sf,st.ac);sf.addText("Obrigada",{x:0.6,y:1.2,w:4.8,h:1,fontFace:F1,fontSize:40,italic:true,color:"FBF3EA",align:"center"});
   if(m.fechamento)sf.addText(m.fechamento,{x:0.6,y:2.5,w:4.8,h:1.8,fontFace:F1,fontSize:16,italic:true,color:"FBF3EA",align:"center",valign:"top"});
-  var yy=4.5;if(v.preco){sf.addText(String(v.preco),{x:1.5,y:yy,w:3,h:0.5,fontFace:F2,fontSize:16,bold:true,color:"E9CF9B",align:"center"});yy+=0.7}
-  if(v.link){var uu=urlOf(v.link);sf.addText(uu?[{text:String(v.link),options:{hyperlink:{url:uu},color:"FBF3EA",underline:true}}]:String(v.link),{x:0.6,y:yy,w:4.8,h:0.5,fontFace:F2,fontSize:13,color:"FBF3EA",align:"center"});yy+=0.6}
+  var ent=c.versao==="ent";var yy=4.5;if(ent){sf.addText("PRÓXIMO PASSO",{x:0.6,y:yy-0.1,w:4.8,h:0.3,fontFace:F2,fontSize:10,bold:true,color:"E9CF9B",align:"center"});sf.addText(String(v.prox&&v.prox.trim()?v.prox:"Me conta o que você aplicou primeiro. Eu respondo."),{x:0.6,y:yy+0.25,w:4.8,h:0.9,fontFace:F2,fontSize:13,color:"FBF3EA",align:"center",valign:"top"});yy+=1.2;if(v.proxlink){var up=urlOf(v.proxlink);sf.addText(up?[{text:String(v.proxlink),options:{hyperlink:{url:up},color:"E9CF9B",underline:true}}]:String(v.proxlink),{x:0.6,y:yy,w:4.8,h:0.4,fontFace:F2,fontSize:12,color:"E9CF9B",align:"center"});yy+=0.5}}else if(v.preco){sf.addText(String(v.preco),{x:1.5,y:yy,w:3,h:0.5,fontFace:F2,fontSize:16,bold:true,color:"E9CF9B",align:"center"});yy+=0.7}
+  if(!ent&&v.link){var uu=urlOf(v.link);sf.addText(uu?[{text:String(v.link),options:{hyperlink:{url:uu},color:"FBF3EA",underline:true}}]:String(v.link),{x:0.6,y:yy,w:4.8,h:0.5,fontFace:F2,fontSize:13,color:"FBF3EA",align:"center"});yy+=0.6}
   sf.addText("@mariana.leaal",{x:0.6,y:6.5,w:4.8,h:0.4,fontFace:F2,fontSize:12,color:"E9CF9B",align:"center"});
   return await px.write({outputType:"arraybuffer"})}
 document.addEventListener("click",async function(e){var b=e.target.closest&&e.target.closest("[data-prs]");if(!b||b.dataset.prs!=="canva")return;var c=state.cr,z=document.getElementById("prs-msg3"),t0=b.textContent;
@@ -2914,6 +2923,81 @@ var _renderCriar65=renderCriar;
 renderCriar=function(){_renderCriar65();var c=state.cr;if(!c||!c.material||c.busy||!isProd(c)||c.view==="ver")return;var st=document.querySelector("#view .stack");if(!st||st.querySelector("#prs-msg3"))return;
   var d=document.createElement("div");d.className="card";d.innerHTML='<h3>Finalizar no Canva</h3><p class="note">Leva tudo o que você escreveu para o Canva, uma página por item. Lá você ajusta o visual e confere os links.</p><div class="btns"><button class="btn small" data-prs="canva">Baixar para editar no Canva</button></div><p class="note" id="prs-msg3"></p>';
   var bt=st.lastElementChild;st.insertBefore(d,bt)};
+
+
+/* ============ v66: promessa, validação, venda completa, versão entregue, progresso ============ */
+function pr66(c){c.promessa=c.promessa||{resultado:"",prazo:"",objecao:""};return c.promessa}
+function ideiaCurta(c){return String(c.ideia||c.bruto||"").trim().split(/[.!?\n]/)[0].slice(0,90)||"[PREENCHER: o produto]"}
+function pendN(c){try{return (JSON.stringify(c.material||{}).match(/\[PREENCHER/g)||[]).length}catch(e){return 0}}
+function semOk(c){return ((c.material&&c.material.secoes)||[]).filter(function(z){return z.contato&&String(z.contato).trim()&&!z.ok}).length}
+function progHtml(c){var n=pendN(c),w=c.tipo==="fornecedores"?semOk(c):0;var t=n?('Faltam <b>'+n+'</b> trecho'+(n>1?'s':'')+' para preencher. Procure por [PREENCHER] nos campos.'):'Tudo preenchido. Confira a prévia antes de salvar.';
+  if(w)t+=' <b>'+w+'</b> contato'+(w>1?'s':'')+' sem autorização marcada.';return '<div class="card" id="prog66"><h3>'+(n?'Seu progresso':'Pronto para revisar')+'</h3><p class="note" id="prog66t">'+t+'</p></div>'}
+function updProg66(){var c=state.cr,e=document.getElementById("prog66t");if(!c||!c.material||!e)return;var n=pendN(c),w=c.tipo==="fornecedores"?semOk(c):0;var t=n?('Faltam <b>'+n+'</b> trecho'+(n>1?'s':'')+' para preencher. Procure por [PREENCHER] nos campos.'):'Tudo preenchido. Confira a prévia antes de salvar.';if(w)t+=' <b>'+w+'</b> contato'+(w>1?'s':'')+' sem autorização marcada.';e.innerHTML=t}
+function promCard(c){var p=pr66(c);return '<div class="card"><h3>A promessa do produto</h3><p class="note">Antes de escrever, defina o que a pessoa ganha. Ela compra o resultado, não o arquivo.</p>'
+  +'<label class="lab">Que resultado a pessoa tem depois de usar?<input type="text" data-pro="resultado" value="'+esc(p.resultado)+'" placeholder="Ex.: Montar a vitrine da loja sem pagar caro"></label>'
+  +'<label class="lab">Em quanto tempo?<input type="text" data-pro="prazo" value="'+esc(p.prazo)+'" placeholder="Ex.: 7 dias"></label>'
+  +'<label class="lab">O que faz ela duvidar de comprar?<input type="text" data-pro="objecao" value="'+esc(p.objecao)+'" placeholder="Ex.: Medo de contratar fornecedor ruim e perder dinheiro"></label>'
+  +'<p class="note">Esse resultado vira o título quando você montar o esqueleto, e a dúvida é respondida na página de venda.</p></div>'
+  +'<div class="card"><h3>Teste antes de produzir</h3><p class="note">Descubra se tem gente querendo, antes de gastar horas.</p><div class="btns"><button class="btn small" data-prs="enq">Copiar enquete para os Stories</button><button class="btn small" data-prs="espera">Copiar convite para os Melhores Amigos</button><button class="btn small" data-prs="pre">Copiar mensagem de pré-venda</button></div><p class="note" id="prs-msg4">Se poucas pessoas responderem que sim, ajuste a promessa antes de seguir.</p></div>'}
+function txtTeste(c,k){var p=pr66(c),ic=ideiaCurta(c),res=(p.resultado&&p.resultado.trim())||"[PREENCHER: o resultado]",dv=(p.objecao&&p.objecao.trim())||"[PREENCHER: a dúvida mais comum]";
+  if(k==="enq")return "STORIES, ENQUETE\nEstou pensando em montar: "+ic+".\nPergunta: Você ia querer?\nOpções: Quero muito / Quero ver antes\n\nCAIXINHA\nQual a sua maior dúvida sobre isso hoje?\n\nDEPOIS\nMostre quantos votaram em “quero muito” e responda 3 caixinhas em vídeo.";
+  if(k==="espera")return "MELHORES AMIGOS\nVocês são os primeiros a saber. Estou montando "+ic+" para você "+res.charAt(0).toLowerCase()+res.slice(1)+(p.prazo&&p.prazo.trim()?" em "+p.prazo.trim():"")+".\nSe você quer entrar primeiro na lista, responde “eu quero” aqui.\nMe conta também: "+dv+"? Quero resolver isso dentro do material.";
+  return "PRÉ-VENDA\nVou abrir poucas vagas antes do lançamento, com valor de pré-venda de [PREENCHER: preço].\nO que você vai ter: "+res+(p.prazo&&p.prazo.trim()?" em "+p.prazo.trim():"")+".\nSobre "+dv.charAt(0).toLowerCase()+dv.slice(1)+": [PREENCHER: sua garantia ou como você reduz esse risco].\nQuer garantir? Me responde aqui ou use o link: [PREENCHER: link]."}
+vendaTxt=function(c){var m=c.material||{},v=vendaOf(c),p=pr66(c),L=[],T=function(x){return String(x||"").trim()};
+  L.push((m.titulo||"[PREENCHER: título]")+(m.subtitulo?"\n"+m.subtitulo:""));
+  if(T(p.resultado))L.push("O RESULTADO\n"+T(p.resultado)+(T(p.prazo)?" em "+T(p.prazo):"")+".");
+  L.push("PARA QUEM É\n"+(m.intro&&m.intro.trim()?m.intro.trim():(c.publico?"Para "+c.publico+".":"[PREENCHER: para quem é]")));
+  L.push("O QUE VOCÊ VAI ENCONTRAR\n"+(m.secoes||[]).map(function(z,i){return (i+1)+". "+(z.cat?z.cat+": ":"")+(z.titulo||"")+(z.preco?" ("+z.preco+")":"")}).join("\n"));
+  if(T(v.prova))L.push("POR QUE CONFIAR\n"+T(v.prova));
+  if(T(p.objecao))L.push("SE VOCÊ TEM DÚVIDA\n"+T(p.objecao)+(T(v.garantia)?"\n"+T(v.garantia):""));else if(T(v.garantia))L.push("GARANTIA\n"+T(v.garantia));
+  if(T(v.ancora))L.push("QUANTO CUSTA NÃO TER ISSO\n"+T(v.ancora));
+  if(T(v.bonus))L.push("BÔNUS\n"+T(v.bonus));
+  L.push("INVESTIMENTO\n"+(T(v.preco)||"[PREENCHER: preço]"));
+  if(T(v.urgencia))L.push("ATENÇÃO\n"+T(v.urgencia));
+  L.push("COMO GARANTIR\n"+(T(v.link)||"[PREENCHER: link ou WhatsApp]"));
+  if(v.ec!==false)L.push("Quer organizar custos e estoque da sua loja? Conheça o Estoque Crescente.");
+  L.push("@mariana.leaal");return L.join("\n\n")};
+calDoProduto=function(c){var m=c.material,v=vendaOf(c),p=pr66(c),T=function(x){return String(x||"").trim()},secs=(m.secoes||[]).filter(function(z){return z.titulo}),t3=secs.slice(0,3).map(function(z){return z.titulo}),base=isoToday(),n=0,tt=m.titulo||"meu material",lk=T(v.link)||"[PREENCHER: link]";
+  var dor=T(p.objecao)||"[PREENCHER: a dor da lojista em uma frase]",res=T(p.resultado)||"[PREENCHER: o resultado]";
+  var slides=[{t:"Capa",txt:tt}];if(m.intro&&m.intro.trim())slides.push({t:"Para quem é",txt:m.intro.trim()});secs.slice(0,6).forEach(function(z,i){slides.push({t:(c.tipo==="catalogo"?"Produto ":c.tipo==="fornecedores"?"Fornecedor ":"Capítulo ")+(i+1),txt:z.titulo+(firstSent(z.corpo)?": "+firstSent(z.corpo):"")})});slides.push({t:"Chamada",txt:"Garanta o seu: "+lk});
+  var L=[
+   {d:addDays(base,1),canal:"Feed principal",fmt:"Reels",t:"1. A dor: "+dor.slice(0,60),nota:"GANCHO: "+dor+"\nDESENVOLVIMENTO: conte uma situação real em que isso aconteceu com você ou com uma cliente.\nFECHAMENTO: “montei algo para resolver isso, vou mostrar nos próximos dias”."},
+   {d:addDays(base,2),canal:"Feed principal",fmt:"Carrossel",t:"2. Por dentro de “"+tt+"”",nota:"Carrossel que mostra o material por dentro: "+res+". Um slide por parte, na ordem do material.",slides:slides,cta:"Garanta o seu pelo link: "+lk,leg:"Montei “"+tt+"” para você. Passa os slides e me conta qual parte você mais precisa."},
+   {d:addDays(base,3),canal:"Stories",fmt:"Story",t:"3. A prova: por que confiar",nota:"Story 1: o problema.\nStory 2: "+(T(v.prova)||"[PREENCHER: sua prova, como print de cliente, resultado ou bastidor]")+"\nStory 3: uma página do material por dentro.\nStory 4: enquete “quer receber primeiro?”"},
+   {d:addDays(base,4),canal:"Melhores Amigos",fmt:"Story",t:"4. A objeção e a garantia",nota:"Responda a dúvida mais comum: "+dor+"\n"+(T(v.garantia)?"Garantia: "+T(v.garantia):"[PREENCHER: sua garantia ou amostra grátis]")+"\nAbra a conversa: “o que ainda te faz hesitar?”"},
+   {d:addDays(base,5),canal:"Feed principal",fmt:"Post estático",t:"5. Lançamento: "+tt,nota:"Post de lançamento com a capa do material."+(T(v.urgencia)?"\nUrgência real: "+T(v.urgencia):""),leg:vendaTxt(c),cta:"Link na bio"}];
+  L.forEach(function(o,i){var it=calNew({t:o.t,canal:o.canal,fmt:o.fmt,d:o.d,marca:"",st:"Ideia"});it.nota=o.nota||"";it.leg=o.leg||"";it.cta=o.cta||"";if(o.slides)it.slides=o.slides;it.cp=1;CALD.items.push(it);n++});calSave();c.calAt=Date.now();saveCr();return n};
+var _vendaCard66=vendaCard;
+vendaCard=function(c){var v=vendaOf(c),h=_vendaCard66(c),T=function(k,lb,ph,ta){return '<label class="lab">'+lb+(ta?'<textarea data-prv="'+k+'" placeholder="'+ph+'">'+esc(v[k]||"")+'</textarea>':'<input type="text" data-prv="'+k+'" value="'+esc(v[k]||"")+'" placeholder="'+ph+'">')+'</label>'};
+  var ext=T("prova","Prova (por que confiar em você)","Ex.: Montei 3 lojas e usei todos esses fornecedores",1)+T("ancora","Quanto custa não ter isso","Ex.: Um fornecedor errado pode custar mais do que o guia inteiro",1)+T("garantia","Garantia ou amostra grátis","Ex.: 7 dias para pedir o dinheiro de volta",0)+T("urgencia","Urgência real (só se for verdade)","Ex.: Bônus só até sexta, 20h",0)
+   +'<h3 style="margin-top:14px">Depois da compra</h3><p class="note">Escolha a versão do arquivo. A de divulgação leva preço e link na última página. A entregue leva o próximo passo da cliente.</p><div class="estl" role="group" aria-label="Versão"><button class="pill" data-prs="versao|div" aria-pressed="'+(c.versao!=="ent")+'">Divulgação</button><button class="pill" data-prs="versao|ent" aria-pressed="'+(c.versao==="ent")+'">Entregue à cliente</button></div>'
+   +T("prox","Próximo passo da cliente","Ex.: Me manda uma foto da sua vitrine pronta que eu comento",1)+T("proxlink","Link do próximo passo","Ex.: wa.me/55... ou o link do Estoque Crescente",0);
+  h=h.replace('<div class="btns"><button class="btn small" data-prs="venda">',ext+'<div class="btns"><button class="btn small" data-prs="venda">');
+  var cv=(+v.vistas>0)?((+v.vendas||0)/+v.vistas*100).toFixed(1).replace(".",",")+"% de conversão":"Preencha as pessoas que viram e as vendas.";
+  return h+'<div class="card"><h3>Resultado das vendas</h3><p class="note">Anote depois do lançamento para saber o que repetir.</p><label class="lab">Pessoas que viram a página de venda<input type="number" inputmode="numeric" data-prv="vistas" value="'+esc(v.vistas||"")+'"></label><label class="lab">Vendas feitas<input type="number" inputmode="numeric" data-prv="vendas" value="'+esc(v.vendas||"")+'"></label><label class="lab">De onde vieram as vendas<input type="text" data-prv="origem" value="'+esc(v.origem||"")+'" placeholder="Ex.: Stories, Melhores Amigos, indicação"></label><p class="note" id="conv66"><b>'+cv+'</b></p></div>'};
+document.addEventListener("input",function(e){var el=e.target,c=state.cr;if(!el.dataset||!c)return;
+  if(el.dataset.pro){pr66(c)[el.dataset.pro]=el.value;saveCr();return}
+  if(el.dataset.prm&&c.material){c.material[el.dataset.prm]=el.value;saveCr();return}
+  if(el.dataset.prv==="vistas"||el.dataset.prv==="vendas"){var v=vendaOf(c),z=document.getElementById("conv66");if(z)z.innerHTML="<b>"+((+v.vistas>0)?((+v.vendas||0)/+v.vistas*100).toFixed(1).replace(".",",")+"% de conversão":"Preencha as pessoas que viram e as vendas.")+"</b>"}
+  if(c.material)updProg66()});
+document.addEventListener("change",function(e){var c=state.cr;if(c&&c.material&&e.target&&e.target.dataset&&e.target.dataset.prx)updProg66()});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-prs]");if(!b)return;var a=b.dataset.prs.split("|"),c=state.cr;if(!c)return;
+  if(a[0]==="versao"){c.versao=a[1];saveCr();render();return}
+  if(a[0]==="enq"||a[0]==="espera"||a[0]==="pre"){copyText(txtTeste(c,a[0]),b)}});
+var _crAction66=crAction;
+crAction=function(a,el){var c=state.cr,r=_crAction66(a,el);
+  if(c&&isProd(c)&&a==="outline"&&c.outline&&pr66(c).resultado.trim()){var p=pr66(c);c.outline.titulo=p.resultado.trim()+(p.prazo.trim()?" em "+p.prazo.trim():"");saveCr();render()}
+  if(c&&isProd(c)&&a==="write"&&!S&&c.material){var m=c.material;if(m.intro&&m.intro.indexOf("por que eu montei")<0)m.intro+="\n[PREENCHER: por que eu montei isso, em 2 frases com a sua voz.]";
+    if(c.tipo==="fornecedores"){var d=new Date(),ms=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];m.atualizado=ms[d.getMonth()]+" de "+d.getFullYear();m.msgorc="Oi, tudo bem? Vim pelo guia da Mariana Leal. Preciso de [serviço] para a minha loja em [cidade]. Pode me passar valores, prazo e pedido mínimo? Obrigada!"}
+    saveCr();render()}
+  return r};
+var _renderCriar66=renderCriar;
+renderCriar=function(){var c0=state.cr;if(c0&&c0.material&&c0.tipo==="fornecedores"&&c0.material.msgorc===undefined){var d=new Date(),ms=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];c0.material.atualizado=ms[d.getMonth()]+" de "+d.getFullYear();c0.material.msgorc="Oi, tudo bem? Vim pelo guia da Mariana Leal. Preciso de [serviço] para a minha loja em [cidade]. Pode me passar valores, prazo e pedido mínimo? Obrigada!";saveCr()}
+  _renderCriar66();var c=state.cr;if(!c||c.busy||!isProd(c))return;var st=document.querySelector("#view .stack");if(!st)return;
+  if(c.step===0&&!c.material&&!st.querySelector("[data-pro]")){var d1=document.createElement("div");d1.innerHTML=promCard(c);var ref=st.firstElementChild?st.firstElementChild.nextSibling:null;while(d1.firstChild)st.insertBefore(d1.firstChild,ref)}
+  if(c.material&&c.view==="edit"&&!st.querySelector("#prog66")){var d2=document.createElement("div");var h2=progHtml(c);
+    if(c.tipo==="fornecedores")h2+='<div class="card"><h3>Detalhes do guia</h3><label class="lab">Atualizado em<input type="text" data-prm="atualizado" value="'+esc(c.material.atualizado||"")+'" placeholder="Ex.: novembro de 2026"></label><label class="lab">Modelo de mensagem para pedir orçamento<textarea data-prm="msgorc">'+esc(c.material.msgorc||"")+'</textarea></label></div>';
+    d2.innerHTML=h2;while(d2.lastChild)st.insertBefore(d2.lastChild,st.firstChild)}};
 
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
