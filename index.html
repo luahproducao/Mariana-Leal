@@ -2483,10 +2483,11 @@ function pagesCanvas(m,tipo,c,fi){var st=estOf(c),M=96,W=IMW-2*M,pages=[],cv,x,y
   secs.forEach(function(sc,i){var ph=sc.foto&&fi[sc.foto];
     if(tipo==="catalogo"||ph){var ph0=ph?Math.min(520,Math.round(W*ph.height/ph.width)):0;need(ph0+330);if(ph){var ph1=ph0;x.save();rrect(x,M,y,W,ph1,30);x.clip();drawCover(x,ph,M,y,W,ph1);x.restore();y+=ph1+34}}
     else need(260);
-    x.font="700 21px "+CAPS;var lab=String(pdfLabel(tipo,i,secs.length)).toUpperCase();x.fillStyle=st.ac;x.fillText(tipo==="catalogo"?"PRODUTO "+(i+1):lab,M,y+18);var lw=x.measureText(tipo==="catalogo"?"PRODUTO "+(i+1):lab).width;x.fillStyle=st.gold;x.fillRect(M+lw+20,y+11,70,2);y+=54;
+    x.font="700 21px "+CAPS;var lab=String(pdfLabel(tipo,i,secs.length)).toUpperCase();x.fillStyle=st.ac;if(tipo==="fornecedores")lab=String(sc.cat||"FORNECEDOR "+(i+1)).toUpperCase();var lab2=tipo==="catalogo"?"PRODUTO "+(i+1):lab;x.fillText(lab2,M,y+18);var lw=x.measureText(lab2).width;x.fillStyle=st.gold;x.fillRect(M+lw+20,y+11,70,2);y+=54;
     para(sc.titulo||"","600 66px "+SERIF,st.ink,70,6,2);
     if(sc.preco&&String(sc.preco).trim()){x.font="700 28px "+CAPS;var pr=String(sc.preco).trim(),pw=x.measureText(pr).width+48;need(70);x.fillStyle=st.ac;rrect(x,M,y,pw,52,26);x.fill();x.fillStyle=(c&&c.estilo==="noite")||(c&&c.estilo==="vinho")?st.bg:"#FBF3EA";x.fillText(pr,M+24,y+36);y+=52+24}
     if(sc.corpo&&sc.corpo.trim())para(sc.corpo,"400 32px "+SANS,st.ink,50,14,3);
+    if(tipo==="fornecedores"){[["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;x.font="700 22px "+CAPS;var ln=p[0].toUpperCase();var lw2=x.measureText(ln).width;x.font="400 30px "+SANS;var ls=imWrap2(x,vv,W-lw2-30);need(Math.max(46,ls.length*46));ls.forEach(function(l,k){if(k===0){x.font="700 22px "+CAPS;x.fillStyle=st.ac;x.fillText(ln,M,y+30)}x.font="400 30px "+SANS;x.fillStyle=st.ink;x.fillText(l,M+lw2+30,y+32);y+=46});y+=4});y+=6}
     (sc.itens||[]).forEach(function(it){x.font="400 32px "+SANS;var ls=imWrap2(x,it,W-60),h=Math.max(50,ls.length*50)+10;need(h);x.strokeStyle=st.ac;x.lineWidth=3;x.beginPath();x.arc(M+16,y+26,13,0,Math.PI*2);x.stroke();x.fillStyle=st.ink;x.font="400 32px "+SANS;ls.forEach(function(l,k){need(50);x.fillText(l,M+60,y+36+k*50)});y+=h});
     y+=44});
   pages.forEach(function(p,i){var q=p.getContext("2d");q.fillStyle=st.gold;q.fillRect(M,IMH-104,W,1.5);q.fillStyle=st.mut;q.font="400 40px "+SCRIPT;q.fillText("Mariana Leal",M,IMH-48);q.font="700 20px "+CAPS;var t=String(i+2),tw=q.measureText(t).width;q.fillText(t,IMW-M-tw,IMH-52)});
@@ -2533,14 +2534,17 @@ function calDoProduto(c){var m=c.material,v=vendaOf(c),secs=(m.secoes||[]).filte
 /* interface */
 var CRQ_DEF=CRQ0.slice(),CRQ_CAT=["Para quem é e em que momento essa pessoa está?","Qual critério você usou para escolher esses produtos?","Para que coleção ou ocasião eles servem?","O que ela deve fazer depois de ver o catálogo (loja, WhatsApp, link)?"];
 CRT.catalogo=["Produto 1","Produto 2","Produto 3"];
-var _crPH58=crPH;crPH=function(t,i,a){if(t==="catalogo")return "[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]";return _crPH58(t,i,a)};
+var CRQ_FOR=["Para quem é este guia e o que ela está montando (loja, vitrine, reforma)?","Quais serviços ou itens ela mais precisa contratar?","Como você escolheu esses fornecedores (já usou, indicação, preço, prazo)?","O que ela deve fazer depois de ler (chamar no WhatsApp, pedir orçamento, comprar)?"];
+CRT.fornecedores=["Visual merchandising (VM)","Móveis sob medida","Placas e fachada","Embalagens e sacolas","Itens para a loja (links de compra)"];
+var _crPH58=crPH;crPH=function(t,i,a){if(t==="fornecedores")return "[PREENCHER: o que este fornecedor faz, para que serve e por que você indica.]";if(t==="catalogo")return "[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]";return _crPH58(t,i,a)};
 var _crAction58=crAction;
 crAction=function(a,el){var c=state.cr;
-  if(isProd(c)&&a==="ask")CRQ0=(c.tipo==="catalogo"?CRQ_CAT:CRQ_DEF).slice();
+  if(isProd(c)&&a==="ask")CRQ0=(c.tipo==="catalogo"?CRQ_CAT:c.tipo==="fornecedores"?CRQ_FOR:CRQ_DEF).slice();
   if((isProd(c)||c.tipo==="guia")&&a==="pdf"){if(!c.material)return;var b0=el,t0=el&&el.textContent;if(el)el.textContent="Montando o PDF...";
     pdfFromPages(c.material,c.tipo,c).then(function(doc){if(!doc){if(el)el.textContent="PDF indisponível agora";return}return D.save({filename:crName(c.material)+".pdf",data:doc.output("arraybuffer")}).then(function(){if(el)el.textContent="PDF salvo"})}).catch(function(e){if(el)el.textContent=(e&&e.code==="declined")?"Salvar cancelado":"Não consegui salvar o PDF"});return}
   var r=_crAction58(a,el);
   if(isProd(c)&&c.tipo==="catalogo"&&a==="write"&&!S&&c.material&&(c.fotos||[]).length){c.material.secoes=c.fotos.map(function(id,i){return {titulo:"Produto "+(i+1),corpo:"[PREENCHER: por que você escolheu este produto, para quem ele é e como usar.]",itens:[],foto:id,preco:""}});saveCr();render()}
+  if(isProd(c)&&c.tipo==="fornecedores"&&a==="write"&&!S&&c.material){var sc0=c.material.secoes||[];c.material.secoes=sc0.map(function(z,i){return {cat:z.titulo,titulo:"[PREENCHER: nome do fornecedor]",corpo:z.corpo,itens:[],foto:(c.fotos||[])[i]||"",cidade:"",contato:"",link:""}});saveCr();render()}
   return r};
 function pfPerfil(c){if(c.pf||c.step!==1)return;var r=c.respostas=c.respostas||[];if(!String(r[0]||"").trim()){try{var pb=perfBR("publico");if(pb.length)r[0]=perfClean(pb[0].text).slice(0,200);else if(c.publico)r[0]="Para "+c.publico+"."}catch(e){}}c.pf=1;saveCr()}
 function baseChips(c){var it=(BR.items||[]).filter(function(x){return x.text&&String(x.text).trim()}).slice(0,6);if(!it.length)return '';
@@ -2550,11 +2554,12 @@ function vendaCard(c){var v=vendaOf(c);return '<div class="card"><h3>Para vender
   +'<label class="lab">Preço<input type="text" data-prv="preco" value="'+esc(v.preco)+'" placeholder="Ex.: R$ 47"></label><label class="lab">Link ou WhatsApp para comprar<input type="text" data-prv="link" value="'+esc(v.link)+'" placeholder="Ex.: wa.me/55..."></label><label class="lab">Bônus (opcional)<input type="text" data-prv="bonus" value="'+esc(v.bonus)+'" placeholder="Ex.: planilha de conferência de estoque"></label>'
   +'<label class="lab" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" data-prv="ec"'+(v.ec!==false?' checked':'')+'> Mostrar o Estoque Crescente na contracapa</label>'
   +'<div class="btns"><button class="btn small" data-prs="venda">Copiar texto da página de venda</button><button class="btn small" data-prs="cal">'+(c.calAt?'Enviar de novo ao calendário':'Enviar ao calendário (5 conteúdos)')+'</button></div><p class="note" id="prs-msg2"></p></div>'}
-function secExtras(c){var m=c.material;if(!m)return;var cat=c.tipo==="catalogo";
+function frnFields(c,i,sc){return '<div class="frn" style="display:grid;gap:8px;width:100%;margin-top:8px"><label class="lab">Categoria<input type="text" data-prx="cat|'+i+'" value="'+esc(sc.cat||"")+'" placeholder="Ex.: Móveis sob medida"></label><label class="lab">Cidade<input type="text" data-prx="cidade|'+i+'" value="'+esc(sc.cidade||"")+'" placeholder="Ex.: São Paulo"></label><label class="lab">Contato (WhatsApp ou telefone)<input type="text" data-prx="contato|'+i+'" value="'+esc(sc.contato||"")+'" placeholder="Ex.: (11) 99999-0000"></label><label class="lab">Link (site, Instagram ou compra)<input type="text" data-prx="link|'+i+'" value="'+esc(sc.link||"")+'" placeholder="Ex.: instagram.com/..."></label></div>'}
+function secExtras(c){var m=c.material;if(!m)return;var cat=c.tipo==="catalogo";var frn=c.tipo==="fornecedores";
   (m.secoes||[]).forEach(function(sc,i){var inp=document.querySelector('[data-cr="mst'+i+'"]');if(!inp)return;var card=inp.closest(".card");if(!card||card.querySelector(".phs"))return;
     var d=document.createElement("div");d.className="phs";var has=sc.foto&&FOTOS[sc.foto];
     d.innerHTML=(has?'<img alt="Foto do bloco '+(i+1)+'" src="'+FOTOS[sc.foto]+'">':'')+'<label class="btn ghost small" style="cursor:pointer">'+(has?'Trocar foto':'Adicionar foto')+'<input type="file" accept="image/*" data-prf="'+i+'" style="display:none"></label>'+(has?'<button class="btn ghost small" data-prs="fdel|'+i+'">Remover foto</button>':'')
-      +(cat?'<label class="lab" style="flex:1;min-width:140px">Preço<input type="text" data-prp="'+i+'" value="'+esc(sc.preco||"")+'" placeholder="Ex.: R$ 89,90"></label>':'');
+      +(cat?'<label class="lab" style="flex:1;min-width:140px">Preço<input type="text" data-prp="'+i+'" value="'+esc(sc.preco||"")+'" placeholder="Ex.: R$ 89,90"></label>':'')+(frn?frnFields(c,i,sc):'');
     card.insertBefore(d,card.firstChild.nextSibling||null)})}
 var _renderCriar58=renderCriar;
 renderCriar=function(){var c0=state.cr;if(isProd(c0))pfPerfil(c0);_renderCriar58();var c=state.cr,P=isProd(c);if((!P&&!(c.tipo==="guia"&&c.material))||c.busy)return;var st=document.querySelector("#view .stack");if(!st)return;
@@ -2870,6 +2875,46 @@ function tourCard(){return '<div class="card"><h3>Como usar o app</h3><p class="
 var _htmlAI63=htmlAI;
 htmlAI=function(){return tourCard()+_htmlAI63()};
 setTimeout(function(){var seen=false;try{seen=localStorage.getItem("hoje-onb")==="1"}catch(e){}if(!seen)tourOpen(0)},500);
+
+/* ============ v65: guia de fornecedores + ida ao Canva ============ */
+document.addEventListener("input",function(e){var el=e.target,c=state.cr;if(!el.dataset||!el.dataset.prx||!c||!c.material)return;var p=el.dataset.prx.split("|"),sc=c.material.secoes[parseInt(p[1],10)];if(!sc)return;sc[p[0]]=el.value;saveCr()});
+var PPTX_URL="https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundle.js";
+function pptxLoad(){return new Promise(function(res,rej){if(window.PptxGenJS)return res(window.PptxGenJS);var s=document.createElement("script");s.src=PPTX_URL;s.onload=function(){window.PptxGenJS?res(window.PptxGenJS):rej(new Error("pptx"))};s.onerror=function(){rej(new Error("pptx"))};document.head.appendChild(s)})}
+function urlOf(t){t=String(t||"").trim();if(!t)return "";if(/^https?:\/\//i.test(t))return t;if(/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(t)||/^wa\.me\//i.test(t))return "https://"+t;var d=t.replace(/\D/g,"");if(/^\+?[\d\s()-]{10,}$/.test(t)&&d.length>=10)return "https://wa.me/"+(d.length<=11?"55"+d:d);return ""}
+async function pptxFromMaterial(c){var P=await pptxLoad(),m=c.material,st=estOf(c),v=vendaOf(c),px=new P();px.defineLayout({name:"MARI",width:6,height:7.5});px.layout="MARI";
+  var hx=function(h){return String(h).replace("#","")},F1="Georgia",F2="Arial";
+  function bgOf(sl,col){sl.background={color:hx(col)}}
+  var s0=px.addSlide();bgOf(s0,st.cv);s0.addText("MARIANA LEAL",{x:0.6,y:1.1,w:4.8,h:0.4,fontFace:F2,fontSize:11,bold:true,color:hx(st.gold),charSpacing:4});
+  s0.addText(m.titulo||"",{x:0.6,y:2.4,w:4.8,h:2.2,fontFace:F1,fontSize:36,bold:true,color:hx(st.cvInk),valign:"middle"});
+  if(m.subtitulo)s0.addText(m.subtitulo,{x:0.6,y:4.7,w:4.8,h:0.9,fontFace:F2,fontSize:14,color:hx(st.cvInk)});
+  if(m.intro&&m.intro.trim()){var si=px.addSlide();bgOf(si,st.bg);si.addText(m.intro,{x:0.6,y:1.2,w:4.8,h:5,fontFace:F1,fontSize:20,italic:true,color:hx(st.ink),valign:"top"})}
+  var fi={};
+  for(var i=0;i<(m.secoes||[]).length;i++){var sc=m.secoes[i];if(sc.foto&&FOTOS[sc.foto])fi[sc.foto]=FOTOS[sc.foto]}
+  (m.secoes||[]).forEach(function(sc,i){var sl=px.addSlide();bgOf(sl,st.bg);var y=0.6;
+    sl.addText(String(sc.cat||("FORNECEDOR "+(i+1))).toUpperCase(),{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,fontSize:10,bold:true,color:hx(st.ac),charSpacing:3});y+=0.5;
+    if(fi[sc.foto]){sl.addImage({data:fi[sc.foto],x:0.6,y:y,w:4.8,h:2.6,sizing:{type:"cover",w:4.8,h:2.6}});y+=2.8}
+    sl.addText(sc.titulo||"",{x:0.6,y:y,w:4.8,h:0.9,fontFace:F1,fontSize:26,bold:true,color:hx(st.ink),valign:"top"});y+=1;
+    if(sc.preco)sl.addText(String(sc.preco),{x:0.6,y:y,w:2.2,h:0.4,fontFace:F2,fontSize:12,bold:true,color:hx(st.ac)});
+    var h=fi[sc.foto]?1.2:2.6;
+    if(sc.corpo&&sc.corpo.trim()){sl.addText(sc.corpo,{x:0.6,y:y,w:4.8,h:h,fontFace:F2,fontSize:13,color:hx(st.ink),valign:"top"});y+=h+0.1}
+    [["Cidade",sc.cidade],["Contato",sc.contato],["Link",sc.link]].forEach(function(p){var vv=String(p[1]||"").trim();if(!vv)return;var u=p[0]==="Cidade"?"":urlOf(vv);var runs=[{text:p[0].toUpperCase()+"  ",options:{bold:true,fontSize:9,color:hx(st.ac)}},{text:vv,options:u?{fontSize:12,color:hx(st.ac),hyperlink:{url:u,tooltip:vv}}:{fontSize:12,color:hx(st.ink)}}];sl.addText(runs,{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,valign:"middle"});y+=0.38});
+    (sc.itens||[]).forEach(function(it){sl.addText("• "+it,{x:0.6,y:y,w:4.8,h:0.35,fontFace:F2,fontSize:12,color:hx(st.ink)});y+=0.36})});
+  var sf=px.addSlide();bgOf(sf,st.ac);sf.addText("Obrigada",{x:0.6,y:1.2,w:4.8,h:1,fontFace:F1,fontSize:40,italic:true,color:"FBF3EA",align:"center"});
+  if(m.fechamento)sf.addText(m.fechamento,{x:0.6,y:2.5,w:4.8,h:1.8,fontFace:F1,fontSize:16,italic:true,color:"FBF3EA",align:"center",valign:"top"});
+  var yy=4.5;if(v.preco){sf.addText(String(v.preco),{x:1.5,y:yy,w:3,h:0.5,fontFace:F2,fontSize:16,bold:true,color:"E9CF9B",align:"center"});yy+=0.7}
+  if(v.link){var uu=urlOf(v.link);sf.addText(uu?[{text:String(v.link),options:{hyperlink:{url:uu},color:"FBF3EA",underline:true}}]:String(v.link),{x:0.6,y:yy,w:4.8,h:0.5,fontFace:F2,fontSize:13,color:"FBF3EA",align:"center"});yy+=0.6}
+  sf.addText("@mariana.leaal",{x:0.6,y:6.5,w:4.8,h:0.4,fontFace:F2,fontSize:12,color:"E9CF9B",align:"center"});
+  return await px.write({outputType:"arraybuffer"})}
+document.addEventListener("click",async function(e){var b=e.target.closest&&e.target.closest("[data-prs]");if(!b||b.dataset.prs!=="canva")return;var c=state.cr,z=document.getElementById("prs-msg3"),t0=b.textContent;
+  if(!c||!c.material)return;b.textContent="Montando o arquivo...";
+  try{var buf=await pptxFromMaterial(c);await D.save({filename:crName(c.material)+"-para-canva.pptx",data:buf});b.textContent=t0;
+    if(z)z.innerHTML='Arquivo salvo. Agora abra o Canva, toque em <b>Criar um design</b>, depois em <b>Importar arquivo</b> e escolha o arquivo salvo. Cada fornecedor vira uma página editável e os links já vêm clicáveis. <a href="https://www.canva.com/" target="_blank" rel="noopener">Abrir o Canva</a>'}
+  catch(er){b.textContent=t0;if(z)z.textContent=(er&&er.code==="declined")?"Salvar cancelado.":"Não consegui montar o arquivo agora. Confira a internet e tente de novo."}});
+var _renderCriar65=renderCriar;
+renderCriar=function(){_renderCriar65();var c=state.cr;if(!c||!c.material||c.busy||!isProd(c)||c.view==="ver")return;var st=document.querySelector("#view .stack");if(!st||st.querySelector("#prs-msg3"))return;
+  var d=document.createElement("div");d.className="card";d.innerHTML='<h3>Finalizar no Canva</h3><p class="note">Leva tudo o que você escreveu para o Canva, uma página por item. Lá você ajusta o visual e confere os links.</p><div class="btns"><button class="btn small" data-prs="canva">Baixar para editar no Canva</button></div><p class="note" id="prs-msg3"></p>';
+  var bt=st.lastElementChild;st.insertBefore(d,bt)};
+
 /* ---- Mais ---- */
 function pillsMais(){return '<div class="pills">'+MORE.map(function(m){return '<button class="pill" data-more="'+m[0]+'" aria-pressed="'+(state.more===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>'}
 function renderMais(){
@@ -2943,7 +2988,7 @@ function addHero(){
 /* ============ CRIAR MATERIAL (usa o Claude dentro da página) ============ */
 var S=null,D=null;
 var NOAI="Este recurso usa inteligência artificial, que não está ligada nesta versão. Todo o resto do app funciona normalmente.";
-var TIPOS=[["ebook","eBook"],["catalogo","Catálogo de produtos"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
+var TIPOS=[["ebook","eBook"],["catalogo","Catálogo de produtos"],["fornecedores","Guia de fornecedores"],["checklist","Checklist"],["ficha","Ficha"],["exercicio","Exercício"],["guia","Guia de edição"],["midia","Documento para marcas"],["relatorio","Relatório"],["roteiro","Roteiro de publi"]];
 var RULES="Contexto: Mariana Leal (@mariana.leaal) é influenciadora e dona de uma loja de roupas. O público dela é formado por lojistas iniciantes, muitas sem CNPJ, com pouco conhecimento de gestão. Escreva em português do Brasil, com linguagem simples, direta e humana, sem jargão e sem travessões. REGRAS: não invente fatos, histórias, números, resultados, preços ou depoimentos da Mariana. Use apenas o que ela escreveu e respondeu. Quando faltar informação, escreva [PREENCHER: o que falta]. Exemplos com números só se estiverem claramente marcados como fictícios. Nunca prometa resultado de vendas.";
 function crNew(tp){return {step:0,tipo:tp||"ebook",ideia:"",publico:"",perguntas:[],respostas:[],outline:null,material:null,busy:"",err:""}}
 function saveCr(){try{localStorage.setItem("hoje-cr",JSON.stringify(state.cr))}catch(e){}}
